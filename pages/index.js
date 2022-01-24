@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import BasicTable from './BasicTable';
+import ClaimTokens from './components/ClaimTokens';
 
 export default function Home() {
   return (
@@ -18,7 +18,7 @@ export default function Home() {
         </h1>
 
         <div className={styles.grid}>
-         <BasicTable/>
+         <ClaimTokens/>
   
         </div>
       </main>
