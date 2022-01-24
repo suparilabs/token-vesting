@@ -27,9 +27,30 @@ yarn-error.log*
 # types
 src/types/*
 !src/types/common.ts
-!src/types/Greeter.ts
 
 # factories
 !src/types/factories
 src/types/factories/*
-!src/types/factories/Greeter__factory.ts
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
