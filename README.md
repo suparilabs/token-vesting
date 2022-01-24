@@ -27,7 +27,7 @@ yarn hardhat deploy:privateSaleContract \
 ```
 yarn hardhat action:fundPrivateSaleContract \
 --token <token-address> \
---privateSaleContract <private-sale-contract-address> \
+--private-sale-contract <private-sale-contract-address> \
 --amount <amount> \
 --network localhost
 ```
