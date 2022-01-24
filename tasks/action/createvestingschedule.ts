@@ -2,15 +2,13 @@ import { task } from "hardhat/config";
 import { TaskArguments } from "hardhat/types";
 
 import { PrivateSaleContract } from "../../src/types/PrivateSaleContract";
-import { PrivateSaleContract__factory } from "../../src/types/factories/PrivateSaleContract__factory";
 
-task("deploy:privateSaleContract")
+task("action:createVestingSchedule")
   .addParam("privateSaleContract", "address of the PrivateSaleContract")
   .addParam("beneficiary", "address of the beneficiary to whom vested tokens are transferred")
   .addParam("start", "start time of vesting period")
   .addParam("cliff", "duration in seconds of the cliff in which tokens will begin to vest")
   .addParam("duration", "duration in seconds of the period in which the tokens will vest")
-  .addParam("slicePeriodSeconds", "duration of a slice period for the vesting in seconds")
   .addParam("revocable", "whether the vesting is revocable or not")
   .addParam("amount", "total amount of tokens to be released at the end of the vesting")
   .setAction(async function (taskArguments: TaskArguments, { ethers }) {
@@ -22,7 +20,7 @@ task("deploy:privateSaleContract")
       taskArguments.start,
       taskArguments.cliff,
       taskArguments.duration,
-      taskArguments.slicePeriodSeconds,
+      "1",
       taskArguments.revocable,
       taskArguments.amount,
     );

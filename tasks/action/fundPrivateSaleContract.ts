@@ -12,3 +12,5 @@ task("action:fundPrivateSaleContract")
     await erc20Instance.transfer(taskArguments.privateSaleContract, taskArguments.amount);
     console.log("Balance of privateSaleContract is ", await erc20Instance.balanceOf(taskArguments.privateSaleContract));
   });
+
+10000000;
