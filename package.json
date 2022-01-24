@@ -87,9 +87,25 @@
     "app:lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/core": "^0.8.0",
+    "@chakra-ui/react": "^1.7.4",
+    "@emotion/core": "10.0.28",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@ethersproject/address": "^5.5.0",
+    "@ethersproject/contracts": "^5.5.0",
+    "@ethersproject/units": "^5.5.0",
+    "@metamask/onboarding": "^1.0.1",
     "@openzeppelin/contracts": "^4.4.2",
+    "@uniswap/sdk": "^3.0.3",
+    "@web3-react/core": "^6.1.9",
+    "@web3-react/injected-connector": "^6.0.7",
+    "@web3-react/network-connector": "^6.2.9",
+    "emotion-theming": "10.0.27",
+    "framer-motion": "^5",
     "next": "12.0.8",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "swr": "^1.1.2"
   }
 }
