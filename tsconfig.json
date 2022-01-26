@@ -24,6 +24,7 @@
     "isolatedModules": true,
     "jsx": "preserve"
   },
+<<<<<<< Updated upstream
   "exclude": [
     "node_modules"
   ],
@@ -35,6 +36,11 @@
     "test/**/*",
     "types/**/*"
   ]
+=======
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "./scripts", "./test", "next.config.js", "pages/VestingTable.jsx", "pages/VestingTable.jsx", "pages/VestingDetails.jsx"],
+  "exclude": ["node_modules"],
+  "files": ["./hardhat.config.ts"]
+>>>>>>> Stashed changes
 }
 
 

@@ -1,0 +1,9 @@
+export enum QueryParameters {
+  INPUT = "input",
+  OUTPUT = "output",
+  CHAIN = "chain",
+}
+
+export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
+export const ERC20_ADDRESS = "0xF0be15D0e1fd67ccdA930d8526d9fA5Ac31DA196";
+export const PRIVATE_SALE_ADDRESS = "0xe4181C5d54207b5f726678ACf7AcE6E1eBDD829c";
