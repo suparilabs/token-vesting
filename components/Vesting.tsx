@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, Suspense } from "react";
-import { Button, Box } from "@chakra-ui/core";
+import { Box } from "@chakra-ui/core";
+import { Container, Button, Card, Table } from "react-bootstrap";
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
 import MetaMaskOnboarding from "@metamask/onboarding";
@@ -18,9 +19,65 @@ function ETHBalance(): JSX.Element {
 
   return (
     <div>
-      <p>Account address : {account}</p>
-      <p>Balance : {(data as TokenAmount).toSignificant(4, { groupSeparator: "," })} ETH</p>
-      { <p>Count : {(data1 as Number)} </p>  }
+      <Card>          
+            <Card.Body>
+            <Table striped bordered hover variant="dark">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th colSpan={2}>Vesting Schedules</th>
+                </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>1</th>
+                    <th>Beneficiary</th>
+                    <td>{account}</td>
+                  </tr>
+                  <tr>
+                    <th>2</th>
+                    <th>Start Date</th>
+                    <td>Sunday, December 20th 2015, 9:00:00pm</td>
+                  </tr>
+                  <tr>
+                    <th>3</th>
+                    <th>Cliff</th>
+                    <td>cliff</td>
+                  </tr>
+                  <tr>
+                    <th>4</th>
+                    <th>Duration</th>
+                    <td>duration</td>
+                  </tr>
+                  <tr>
+                    <th>5</th>
+                    <th>Total Vesting</th>
+                    <td>9900 sera</td>
+                  </tr>
+                  <tr>
+                    <th>6</th>
+                    <th>Already Vested</th>
+                    <td>{(data1 as any)}</td>
+                  </tr>
+                  <tr>
+                    <th>7</th>
+                    <th>Already Released</th>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <th>8</th>
+                    <th>Releaseable</th>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <th>9</th>
+                    <th>Revocable</th>
+                    <td>false</td>s
+                  </tr>
+    </tbody>
+  </Table>
+  </Card.Body>
+  </Card>
     </div>
   );
 }
@@ -66,7 +123,7 @@ export default function Vesting(): JSX.Element | null {
               });
             }}
           >
-            {MetaMaskOnboarding.isMetaMaskInstalled() ? "Connect to MetaMask" : "Connect to Wallet"}
+            {MetaMaskOnboarding.isMetaMaskInstalled() ? "Get Vesting Count" : "Get Vesting Count"}
           </Button>
         ) : (
           <Button leftIcon={"metamask" as "edit"} onClick={() => onboarding.current?.startOnboarding()}>
