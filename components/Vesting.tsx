@@ -1,61 +1,38 @@
 import { useState, useEffect, useRef, Suspense } from "react";
-import { Box } from "@chakra-ui/core";
-import { Container, Button, Card } from "react-bootstrap";
+import { Button, Box } from "@chakra-ui/core";
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
 import MetaMaskOnboarding from "@metamask/onboarding";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
-import { TokenAmount } from "@uniswap/sdk";
+import { TokenAmount, Token } from "@uniswap/sdk";
 import { useQueryParameters } from "../hooks/useQueryParameters";
 import { QueryParameters } from "../constants";
 import { injected } from "../connectors";
 import { useETHBalance } from "../hooks/useETHBalance";
-import { useTokenBalance } from "../hooks/useTokenBalance";
+import { usePrivateSale } from "../hooks/usePrivateSale";
 
 function ETHBalance(): JSX.Element {
   const { account } = useWeb3React();
   const { data } = useETHBalance(account, true);
-  const { data:data1 } = useTokenBalance(account, true);
+  const { data:data1 } = usePrivateSale(account, true);
 
   return (
-    <Container>
-      <Card>
-        <Card.Body>
-          <h5> Vesting Beneficiary: {account}</h5>
-          <h5> Balance: {(data as TokenAmount).toSignificant(4, { groupSeparator: "," })} ETH</h5>
-          <h5> Balance: {(data1 as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA</h5>
-        </Card.Body>
-      </Card>
-    </Container>
+    <div>
+      <p>Account address : {account}</p>
+      <p>Balance : {(data as TokenAmount).toSignificant(4, { groupSeparator: "," })} ETH</p>
+      { <p>Count : {(data1 as Number)} </p>  }
+    </div>
   );
 }
 
-export default function Account(/*{
-  triedToEagerConnect,
-}: {
-  triedToEagerConnect: boolean;
-}*/): JSX.Element | null {
+export default function Vesting(): JSX.Element | null {
   const { active, error, activate, account, setError } = useWeb3React<Web3Provider>();
 
-  // initialize metamask onboarding
   const onboarding = useRef<MetaMaskOnboarding>();
 
-  // useLayoutEffect(() => {
-  //     onboarding.current = new MetaMaskOnboarding();
-  // }, [])
-
-  // automatically try connecting network connector where applicable
   const queryParameters = useQueryParameters();
   const requiredChainID = queryParameters[QueryParameters.CHAIN];
 
-  //   useEffect(() => {
-  //     if (triedToEagerConnect && !active && !error) {
-  //       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  //       activate(getNetwork(requiredChainID));
-  //     }
-  //   }, [triedToEagerConnect, active, error, requiredChainID, activate]);
-
-  // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
@@ -68,16 +45,12 @@ export default function Account(/*{
   if (error) {
     return null;
   }
-  //   else if (!triedToEagerConnect) {
-  //     return null;
-  //   }
+
   else if (typeof account !== "string") {
     return (
       <Box>
         {MetaMaskOnboarding.isMetaMaskInstalled() ||
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any)?.ethereum ||
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any)?.web3 ? (
           <Button
             isLoading={connecting}

@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { Card, Container } from "react-bootstrap";
 import Account from "../components/Account";
 import Layout from "../components/Layout";
 import { useEagerConnect } from "../hooks/useEagerConnect";
+import Header from "./Header";
+import VestingDetails from "./VestingDetails";
 
 export default function DAppPage(): JSX.Element {
   // automatically try connecting to the injected connector on pageload
@@ -9,13 +12,21 @@ export default function DAppPage(): JSX.Element {
 
   return (
       <Layout title="About | Next.js + TypeScript Example">
-        <h1>Vesting Dapp</h1>
-        <Account /*triedToEagerConnect={triedToEagerConnect}*/ />
+        <Header/>
+        <Container>
+          <Card>
+          <Card.Body><h3>Vesting</h3></Card.Body>
+          <Card.Body><Account /*triedToEagerConnect={triedToEagerConnect}*/ /></Card.Body>
+          </Card>
+        {/* <VestingDetails/> */}
         <p>
           <Link href="/">
             <a>Go home</a>
-          </Link>
+          </Link> <br></br>
+          
         </p>
+        </Container>
+        
       </Layout>
   );
 }
