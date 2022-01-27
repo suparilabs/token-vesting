@@ -32,21 +32,17 @@ export default function Layout({ children, title = 'This is the default title' }
           </Head>
           <header>
             <nav>
-              <Link href="/">
+              {/* <Link href="/">
                 <a>home</a>
               </Link>{' '}
               |{' '}
               <Link href="/vesting">
                 <a>vesting</a>
-              </Link>
+              </Link> */}
             </nav>
           </header>
           {/* <Account triedToEagerConnect={triedToEagerConnect}ƒ/> */}
           {children}
-          <footer>
-            <hr />
-            <span>I'm here to stay (Footer)</span>
-          </footer>
         </div>
       </ThemeProvider>
     </Web3ReactProvider>

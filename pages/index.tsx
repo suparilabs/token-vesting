@@ -1,14 +1,18 @@
 import Link from "next/link";
-import Layout from "../components/Layout";
+import VestingDetails from "./VestingDetails";
+import Header from "./Header";
+
 const IndexPage = () => (
-  <Layout title="Home | Next.js + TypeScript Example">
-    <h1>Hello Next.js 👋</h1>
+
+  <>
+  <Header/>
     <p>
       <Link href="/vesting">
         <a>Vesting</a>
       </Link>
     </p>
-  </Layout>
+  </>
+
 );
 
 export default IndexPage;
