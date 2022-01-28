@@ -23,8 +23,6 @@ export function useTokenBalance(
   const { chainId } = useWeb3React();
   const contract = useContract(ERC20_ADDRESS, ERC20ABI);
 
-  console.log("hellooo", contract);
-
   const result = useSWR(
     typeof address === "string" && contract ? [address, chainId, ERC20_ADDRESS, DataType.TokenBalance] : null,
     getTokenBalance(contract as Contract, new Token(chainId as ChainId, ERC20_ADDRESS, "18")),
