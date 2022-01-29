@@ -2,6 +2,8 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "hardhat-deploy";
+import "@nomiclabs/hardhat-etherscan";
 
 import "./tasks/accounts";
 import "./tasks/deploy";
@@ -22,6 +24,8 @@ const chainIds = {
   mainnet: 1,
   rinkeby: 4,
   ropsten: 3,
+  bsctestnet: 97,
+  bsc: 56,
 };
 
 // Ensure that we have all the environment variables we need.
@@ -35,8 +39,21 @@ if (!infuraApiKey) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
 }
 
+function getNetworkUrl(network: keyof typeof chainIds): string {
+  switch (network) {
+    case "bsctestnet": {
+      return "https://data-seed-prebsc-1-s1.binance.org:8545";
+    }
+    case "bsc": {
+      return "https://bsc-dataseed.binance.org/";
+    }
+    default:
+      return "https://" + network + ".infura.io/v3/" + infuraApiKey;
+  }
+}
+
 function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
-  const url: string = "https://" + network + ".infura.io/v3/" + infuraApiKey;
+  const url: string = getNetworkUrl(network);
   return {
     accounts: {
       count: 10,
@@ -56,6 +73,9 @@ const config: HardhatUserConfig = {
     excludeContracts: [],
     src: "./contracts",
   },
+  namedAccounts: {
+    deployer: 0,
+  },
   networks: {
     hardhat: {
       accounts: {
@@ -67,6 +87,8 @@ const config: HardhatUserConfig = {
     kovan: getChainConfig("kovan"),
     rinkeby: getChainConfig("rinkeby"),
     ropsten: getChainConfig("ropsten"),
+    bsctestnet: getChainConfig("bsctestnet"),
+    bsc: getChainConfig("bsc"),
   },
   paths: {
     artifacts: "./artifacts",
@@ -93,6 +115,9 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "src/types",
     target: "ethers-v5",
+  },
+  etherscan: {
+    apiKey: process.env.BSCSCAN_API_KEY,
   },
 };
 
