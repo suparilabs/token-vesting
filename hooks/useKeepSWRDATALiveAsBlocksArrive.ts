@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { SWRResponse } from "swr";
-import { useBlockNumber } from "./useBlocknumber";
+import { useBlockNumber } from "./useBlockNumber";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useKeepSWRDATALiveAsBlocksArrive(mutate: SWRResponse<any, any>["mutate"]): void {

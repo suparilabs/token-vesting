@@ -1,14 +1,13 @@
 import useSWR, { SWRResponse } from "swr";
-import { ChainId, Token, TokenAmount } from "@uniswap/sdk";
 import { Contract } from "ethers";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
-import { ADDRESS_ZERO, PRIVATE_SALE_ADDRESS } from "../constants";
+import { PRIVATE_SALE_ADDRESS } from "../constants";
 import { useContract } from "./useContract";
-import { abi as PSABI } from "../artifacts/contracts/PrivateSaleContract.sol/PrivateSaleContract.json";
 import { DataType } from "../utils";
-import { ethers, BigNumber } from "ethers";
+import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import moment from "moment";
+import { PrivateSaleContract__factory } from "../src/types";
 
 function computeStartDate(contract: Contract): (address: string) => Promise<any> {
   return async (address: string): Promise<any> =>
@@ -23,7 +22,7 @@ function computeStartDate(contract: Contract): (address: string) => Promise<any>
 export function useStart(address?: string | null, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
 
-  const contract = useContract(PRIVATE_SALE_ADDRESS, PSABI);
+  const contract = useContract(PRIVATE_SALE_ADDRESS, PrivateSaleContract__factory.abi);
 
   const result: any = useSWR(
     typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,
@@ -32,15 +31,15 @@ export function useStart(address?: string | null, suspense = false): SWRResponse
   );
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   console.log("Result:", result.data);
-  let startdate: any = BigNumber.from(result.data[3]).toNumber();
-  let cliff: any = BigNumber.from(result.data[2]).toNumber();
-  let duration: any = BigNumber.from(result.data[4]).toNumber();
-  let startFormat: any = moment.unix(startdate).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  let cliffFormat: any = moment.unix(cliff).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  let durationFormat: any = moment.unix(duration).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  console.log("start date:", startFormat);
-  console.log("cliff:", cliffFormat);
-  console.log("duration:", durationFormat);
+  // const startdate: number = BigNumber.from(result.data[3]).toNumber();
+  // const cliff: number = BigNumber.from(result.data[2]).toNumber();
+  // const duration: number = BigNumber.from(result.data[4]).toNumber();
+  // const startFormat: string = moment.unix(startdate).format("dddd, MMMM Do, YYYY h:mm:ss A");
+  // const cliffFormat: string = moment.unix(cliff).format("dddd, MMMM Do, YYYY h:mm:ss A");
+  // const durationFormat: string = moment.unix(duration).format("dddd, MMMM Do, YYYY h:mm:ss A");
+  // console.log("start date:", startFormat);
+  // console.log("cliff:", cliffFormat);
+  // console.log("duration:", durationFormat);
 
   return result;
 }

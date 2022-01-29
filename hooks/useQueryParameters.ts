@@ -15,6 +15,10 @@ const chainMappings: { [key: string]: number } = {
   görli: 5,
   goerli: 5,
   "42": 42,
+  "97": 97,
+  bsctestnet: 97,
+  "56": 56,
+  bsc: 56,
   kovan: 42,
 };
 

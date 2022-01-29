@@ -4,10 +4,10 @@ import { Contract } from "ethers";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
 import { ADDRESS_ZERO, PRIVATE_SALE_ADDRESS } from "../constants";
 import { useContract } from "./useContract";
-import { abi as PSABI } from "../artifacts/contracts/PrivateSaleContract.sol/PrivateSaleContract.json";
 import { DataType } from "../utils";
 import { ethers, BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
+import { PrivateSaleContract__factory } from "../src/types";
 
 function getVestingSchedulesCountByBenificiary(contract: Contract): (address: string) => Promise<Number> {
   return async (address: string): Promise<Number> =>
@@ -26,7 +26,7 @@ function getVestingSchedulesCountByBenificiary(contract: Contract): (address: st
 
 export function useVestingScheduleCountBeneficiary(address?: string | null, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
-  const contract = useContract(PRIVATE_SALE_ADDRESS, PSABI);
+  const contract = useContract(PRIVATE_SALE_ADDRESS, PrivateSaleContract__factory.abi);
 
   const result: any = useSWR(
     typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import VestingDetails from "./VestingDetails";
 import Header from "./Header";
 
 const IndexPage = () => (
