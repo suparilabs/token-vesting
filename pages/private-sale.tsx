@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Card, Container } from "react-bootstrap";
 import Account from "../components/Account";
 import Layout from "../components/Layout";
-import Vesting from "../components/Vesting";
+import PrivateSale from "../components/PrivateSale";
 import { useEagerConnect } from "../hooks/useEagerConnect";
 import Header from "./Header";
 
@@ -16,9 +16,9 @@ export default function DAppPage(): JSX.Element {
         <Header/>
         <Container>
           <Card>
-          <Card.Body><h3>Vesting</h3></Card.Body>
+          <Card.Body><h3>Private Sale</h3></Card.Body>
           <Card.Body><Account /*triedToEagerConnect={triedToEagerConnect}*/ /></Card.Body>
-          <Card.Body><Vesting /></Card.Body>
+          <Card.Body><PrivateSale /></Card.Body>
           </Card>
          
 </Container>

@@ -1,82 +1,52 @@
-import { useState, useEffect, useRef, Suspense, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { Box } from "@chakra-ui/core";
-import { Container, Card, Table, Button } from "react-bootstrap";
+import { Container, Button, Card, Table } from "react-bootstrap";
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
 import MetaMaskOnboarding from "@metamask/onboarding";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
-// import { useQueryParameters } from "../hooks/useQueryParameters";
-// import { QueryParameters } from "../constants";
+import { TokenAmount } from "@uniswap/sdk";
+import { useQueryParameters } from "../hooks/useQueryParameters";
+import { QueryParameters } from "../constants";
 import { injected } from "../connectors";
-import { useVestingSchedule } from "../hooks/usePrivateSale";
-import moment from "moment";
+import { useTotalAmount } from "../hooks/usePrivateSale";
 import { ethers } from "ethers";
 
 function ETHBalance(): JSX.Element {
   const { account } = useWeb3React();
-  const { data } = useVestingSchedule(account, true);
-  const detailsArray = data.split(',');
-  const cliff = moment.unix(detailsArray[2]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const start = moment.unix(detailsArray[3]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const duration = moment.unix(detailsArray[4]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const totalAmount = ethers.utils.formatEther(detailsArray[7]);
+  const { data } = useTotalAmount(account, true);
+  const totalTokens = ethers.utils.formatEther(data);
   return (
-    <>
     <Container>
      <Card>          
-            <Card.Body>
+        <Card.Body>
             <Table striped bordered hover variant="dark">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th colSpan={2}>Vesting Schedules</th>
+                  <th colSpan={2}>Private Sale</th>
                 </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <th>1</th>
-                    <th>Beneficiary</th>
-                    <td>{account}</td>
+                    <th>Price</th>
+                    <td>$0.50</td>
                   </tr>
                   <tr>
                     <th>2</th>
-                    <th>Start Date</th>
-                    <td>{start}</td>
-                  </tr>
-                  <tr>
-                    <th>3</th>
-                    <th>Cliff</th>
-                    <td>{cliff}</td>
-                  </tr>
-                  <tr>
-                    <th>4</th>
-                    <th>Duration</th>
-                    <td>{duration}</td>
-                  </tr>
-                  <tr>
-                    <th>6</th>
-                    <th>Already Vested</th>
-                    <td>{totalAmount} sera tokens  <Button> Release</Button></td>
-                  </tr>
-                  <tr>
-                    <th>7</th>
-                    <th>Already Released</th>
-                    <td>{detailsArray[8]} sera tokens</td>
-                  </tr>
-                  <tr>
-                    <th>9</th>
-                    <th>Revocable</th>
-                    <td>{detailsArray[9]}</td>
+                    <th>Tokens</th>
+                    <td>{totalTokens} SERA TOKENS</td>
                   </tr>
     </tbody>
   </Table>
   </Card.Body>
   </Card>
-  </Container>
-  </>
-  )};
+    </Container>
+  );
+}
 
-export default function Vesting(/*{
+export default function PrivateSale(/*{
   triedToEagerConnect,
 }: {
   triedToEagerConnect: boolean;
@@ -84,16 +54,11 @@ export default function Vesting(/*{
   const { active, error, activate, account, setError } = useWeb3React<Web3Provider>();
 
   // initialize metamask onboarding
-  // const onboarding = useRef<MetaMaskOnboarding>();
-
-  // initialize metamask onboarding
   const onboarding = useRef<MetaMaskOnboarding>();
-  useLayoutEffect(() => {
-    onboarding.current = new MetaMaskOnboarding();
-  }, []);
 
-  // const queryParameters = useQueryParameters();
-  // const requiredChainID = queryParameters[QueryParameters.CHAIN];
+  const queryParameters = useQueryParameters();
+  const requiredChainID = queryParameters[QueryParameters.CHAIN];
+
 
   const [connecting, setConnecting] = useState(false);
 
@@ -106,11 +71,16 @@ export default function Vesting(/*{
 
   if (error) {
     return null;
-  } else if (typeof account !== "string") {
+  }
+  
+  else if (typeof account !== "string") {
     return (
       <Box>
-        {typeof window !== "undefined" &&
-        (MetaMaskOnboarding.isMetaMaskInstalled() || (window as any)?.ethereum || (window as any)?.web3) ? (
+        {MetaMaskOnboarding.isMetaMaskInstalled() ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any)?.ethereum ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any)?.web3 ? (
           <Button
             isLoading={connecting}
             leftIcon={MetaMaskOnboarding.isMetaMaskInstalled() ? ("metamask" as "edit") : undefined}
@@ -125,7 +95,7 @@ export default function Vesting(/*{
               });
             }}
           >
-            {MetaMaskOnboarding.isMetaMaskInstalled() ? "Vesting Details" : "Vesting Details"}
+            {MetaMaskOnboarding.isMetaMaskInstalled() ? "Private Sale" : "Private Sale"}
           </Button>
         ) : (
           <Button leftIcon={"metamask" as "edit"} onClick={() => onboarding.current?.startOnboarding()}>

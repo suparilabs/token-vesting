@@ -1,4 +1,5 @@
 import useSWR, { SWRResponse } from "swr";
+import { Web3Provider } from "@ethersproject/providers";
 import { ChainId, Token, TokenAmount } from "@uniswap/sdk";
 import { Contract } from "ethers";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
@@ -9,47 +10,57 @@ import { ethers, BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import { PrivateSaleContract__factory } from "../src/types";
 
-function getVestingSchedulesCountByBenificiary(contract: Contract): (address: string) => Promise<Number> {
-  return async (address: string): Promise<Number> =>
-    contract.getVestingSchedulesCountByBeneficiary(address).then((result: any) => result.toNumber());
+function getVestingDetails(contract: Contract): (address: string) => Promise<any> {
+  return async (address: string): Promise<any> =>
+    contract.getLastVestingScheduleForHolder(address).then((result: any) => result.toString());
 }
 
-// function createVesting(contract: Contract): (address: string, start: Number, cliff: Number, duration: Number, slicePeriod: Number,
-//   revocable: boolean, amount: Number) => Promise<String> {
-//   return async (address: String,
-//     start: Number, cliff: Number,
-//     duration: Number, slicePeriod: Number,
-//     revocable: boolean, amount: Number
-//     ): Promise<String> =>
-//     contract.createVestingSchedule(address, start, cliff, duration, slicePeriod, revocable, amount).then((result: any) => result);
-// }
+function releaseTokens(contract: Contract): (vestingSchedule: string[]) => Promise<any> {
+  return async (vestingSchedule: string[]): Promise<any> =>
+    contract._computeReleasableAmount(vestingSchedule).then((result: any) => result.toString());
+}
 
-export function useVestingScheduleCountBeneficiary(address?: string | null, suspense = false): SWRResponse<any, any> {
+function getTotalAmount(contract: Contract): () => Promise<any> {
+  return async (): Promise<any> => contract.getVestingSchedulesTotalAmount().then((result: any) => result.toString());
+}
+
+export function useVestingSchedule(address?: string | null, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
+  const contract = useContract(PRIVATE_SALE_ADDRESS, PrivateSaleContract__factory.abi);
+  const result: any = useSWR(
+    typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,
+    getVestingDetails(contract as Contract),
+    { suspense },
+  );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
+  return result;
+}
+
+export function useTotalAmount(address?: string | null, suspense = false): SWRResponse<any, any> {
+  const { chainId } = useWeb3React();
+
   const contract = useContract(PRIVATE_SALE_ADDRESS, PrivateSaleContract__factory.abi);
 
   const result: any = useSWR(
     typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,
-    getVestingSchedulesCountByBenificiary(contract as Contract),
+    getTotalAmount(contract as Contract),
     { suspense },
   );
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
-  //let res: any = BigNumber.from(result.data).toNumber();
   return result;
 }
-
-// export function useCreateVestingSchedule(address?: string | null, suspense = false): SWRResponse<any, any> {
+// export function useReleaseTokens(address?: string | null, suspense = false): SWRResponse<any, any> {
 //   const { chainId } = useWeb3React();
+
 //   const contract = useContract(PRIVATE_SALE_ADDRESS, PSABI);
-//   console.log("Private sale:", contract);
 
 //   const result: any = useSWR(
 //     typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,
-//     createVesting(contract as Contract),
+//     getVestingDetails(contract as Contract),
 //     { suspense },
 //   );
-
-//   console.log("Heyyllooo",result.data);
 //   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
+//   console.log("Result:", result.data);
+
 //   return result;
 // }
