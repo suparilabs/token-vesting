@@ -20,7 +20,7 @@ function ETHBalance(): JSX.Element {
   return (
     <Container>
      <Card>          
-            <Card.Body>
+        <Card.Body>
             <Table striped bordered hover variant="dark">
               <thead>
                 <tr>
