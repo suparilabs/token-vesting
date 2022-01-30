@@ -9,18 +9,14 @@ import { TokenAmount } from "@uniswap/sdk";
 import { useQueryParameters } from "../hooks/useQueryParameters";
 import { QueryParameters } from "../constants";
 import { injected } from "../connectors";
-import { useVestingSchedule } from "../hooks/usePrivateSale";
+import { useTotalAmount } from "../hooks/usePrivateSale";
 import moment from "moment";
 import { ethers } from "ethers";
 
 function ETHBalance(): JSX.Element {
   const { account } = useWeb3React();
-  const { data } = useVestingSchedule(account, true);
-  const detailsArray = data.split(',');
-  const cliff = moment.unix(detailsArray[2]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const start = moment.unix(detailsArray[3]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const duration = moment.unix(detailsArray[4]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const totalAmount = ethers.utils.formatEther(detailsArray[7]);
+  const { data } = useTotalAmount(account, true);
+  const totalTokens = ethers.utils.formatEther(data);
   return (
     <Container>
      <Card>          
@@ -29,44 +25,19 @@ function ETHBalance(): JSX.Element {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th colSpan={2}>Vesting Schedules</th>
+                  <th colSpan={2}>Private Sale</th>
                 </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <th>1</th>
-                    <th>Beneficiary</th>
-                    <td>{account}</td>
+                    <th>Price</th>
+                    <td>$0.50</td>
                   </tr>
                   <tr>
                     <th>2</th>
-                    <th>Start Date</th>
-                    <td>{start}</td>
-                  </tr>
-                  <tr>
-                    <th>3</th>
-                    <th>Cliff</th>
-                    <td>{cliff}</td>
-                  </tr>
-                  <tr>
-                    <th>4</th>
-                    <th>Duration</th>
-                    <td>{duration}</td>
-                  </tr>
-                  <tr>
-                    <th>6</th>
-                    <th>Already Vested</th>
-                    <td>{totalAmount} sera tokens  <Button> Release</Button></td>
-                  </tr>
-                  <tr>
-                    <th>7</th>
-                    <th>Already Released</th>
-                    <td>{detailsArray[8]} sera tokens</td>
-                  </tr>
-                  <tr>
-                    <th>9</th>
-                    <th>Revocable</th>
-                    <td>{detailsArray[9]}</td>
+                    <th>Tokens</th>
+                    <td>{totalTokens} SERA TOKENS</td>
                   </tr>
     </tbody>
   </Table>
@@ -76,7 +47,7 @@ function ETHBalance(): JSX.Element {
   );
 }
 
-export default function Vesting(/*{
+export default function PrivateSale(/*{
   triedToEagerConnect,
 }: {
   triedToEagerConnect: boolean;
@@ -125,7 +96,7 @@ export default function Vesting(/*{
               });
             }}
           >
-            {MetaMaskOnboarding.isMetaMaskInstalled() ? "Vesting Details" : "Vesting Details"}
+            {MetaMaskOnboarding.isMetaMaskInstalled() ? "Private Sale" : "Private Sale"}
           </Button>
         ) : (
           <Button leftIcon={"metamask" as "edit"} onClick={() => onboarding.current?.startOnboarding()}>

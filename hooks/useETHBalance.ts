@@ -24,6 +24,5 @@ export function useETHBalance(address?: string | null, suspense = false): SWRRes
     suspense,
   });
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
-
   return result;
 }

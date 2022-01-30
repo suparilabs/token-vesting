@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Vesting from '../components/vesting';
+import Vesting from '../components/Vesting';
 import Layout from "../components/Layout";
 import { useEagerConnect } from "../hooks/useEagerConnect";
 
