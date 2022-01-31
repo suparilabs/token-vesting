@@ -15480,6 +15480,18 @@ fsevents@~2.1.1:
   languageName: node
   linkType: hard
 
+"react-countdown@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "react-countdown@npm:2.3.2"
+  dependencies:
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ">= 15"
+    react-dom: ">= 15"
+  checksum: 670d7f6f355cd2c862fde2039e3fbaf39dae2925d2dea78c0406c04a9a5c35cca61bbd137de04a965ebdbbbaee5d435a06f06c0786a86d7bfc175b4fd9789e19
+  languageName: node
+  linkType: hard
+
 "react-dom@npm:17.0.2":
   version: 17.0.2
   resolution: "react-dom@npm:17.0.2"
@@ -18193,6 +18205,7 @@ resolve@1.1.x:
     react: 17.0.2
     react-bootstrap: ^2.1.1
     react-chartjs-2: ^4.0.1
+    react-countdown: ^2.3.2
     react-dom: 17.0.2
     react-table: ^7.7.0
     shelljs: ^0.8.5
