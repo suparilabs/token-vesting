@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense, useLayoutEffect } from "react";
-import { Box,Button } from "@chakra-ui/core";
+import { Box, Button } from "@chakra-ui/core";
 import { Container, Card, Table } from "react-bootstrap";
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
@@ -8,29 +8,46 @@ import { UserRejectedRequestError } from "@web3-react/injected-connector";
 // import { useQueryParameters } from "../hooks/useQueryParameters";
 // import { QueryParameters } from "../constants";
 import { injected } from "../connectors";
-import { useVestingSchedule } from "../hooks/usePrivateSale";
+import { useVestingSchedule, useVestingScheduleCountByBeneficiary } from "../hooks/usePrivateSale";
 import moment from "moment";
 import { ethers } from "ethers";
 
 function ETHBalance(): JSX.Element {
   const { account } = useWeb3React();
-  const { data } = useVestingSchedule(account, true);
-  const detailsArray = data.split(',');
-  const cliff = moment.unix(detailsArray[2]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const start = moment.unix(detailsArray[3]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const duration = moment.unix(detailsArray[4]).format("dddd, MMMM Do, YYYY h:mm:ss A");
-  const totalAmount = ethers.utils.formatEther(detailsArray[7]);
+  const { data: vestingScheduleCount } = useVestingScheduleCountByBeneficiary(account, true);
+  const { data } = useVestingSchedule(vestingScheduleCount, account, true);
+  console.log(data);
+  const detailsArray = data && data.split(",");
+  const cliff =
+    detailsArray && detailsArray[2]
+      ? moment.unix(detailsArray[2]).format("dddd, MMMM Do, YYYY h:mm:ss A")
+      : "loading cliff time...";
+  const start =
+    detailsArray && detailsArray[3]
+      ? moment.unix(detailsArray[3]).format("dddd, MMMM Do, YYYY h:mm:ss A")
+      : "loading start time...";
+  const duration =
+    detailsArray && detailsArray[4]
+      ? moment.unix(detailsArray[4]).format("dddd, MMMM Do, YYYY h:mm:ss A")
+      : "loading duration...";
+  const totalAmount =
+    detailsArray && detailsArray[7] ? `${ethers.utils.formatEther(detailsArray[7])} SERA` : "loading totalAmount...";
+  const balance =
+    detailsArray && detailsArray[8] ? `${ethers.utils.formatEther(detailsArray[8])} SERA` : "loading balance...";
+  const isRevocable =
+    detailsArray && detailsArray[9] ? ethers.utils.formatEther(detailsArray[9]) : "loading isRevocable...";
   return (
     <>
-    <Container>
-     <Card>          
+      <Container>
+        {data && (
+          <Card>
             <Card.Body>
-            <Table striped bordered hover variant="dark">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th colSpan={2}>Vesting Schedules</th>
-                </tr>
+              <Table striped bordered hover variant="dark">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th colSpan={2}>Vesting Schedules</th>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>
@@ -56,25 +73,31 @@ function ETHBalance(): JSX.Element {
                   <tr>
                     <th>6</th>
                     <th>Already Vested</th>
-                    <td>{totalAmount} sera tokens  <Button> Release</Button></td>
+                    <td>
+                      {totalAmount}
+                      <Button style={{ height: "20px" }}> Release</Button>
+                    </td>
                   </tr>
                   <tr>
                     <th>7</th>
                     <th>Already Released</th>
-                    <td>{detailsArray[8]} sera tokens</td>
+                    <td>{balance}</td>
                   </tr>
                   <tr>
                     <th>9</th>
                     <th>Revocable</th>
-                    <td>{detailsArray[9]}</td>
+                    <td>{isRevocable}</td>
                   </tr>
-    </tbody>
-  </Table>
-  </Card.Body>
-  </Card>
-  </Container>
-  </>
-  )};
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
+        )}{" "}
+        {data == undefined && <div>You do not have vesting schedule</div>}
+      </Container>
+    </>
+  );
+}
 
 export default function Vesting(/*{
   triedToEagerConnect,
@@ -124,11 +147,20 @@ export default function Vesting(/*{
                 }
               });
             }}
+            style={{
+              height: "20px",
+            }}
           >
             {MetaMaskOnboarding.isMetaMaskInstalled() ? "Vesting Details" : "Vesting Details"}
           </Button>
         ) : (
-          <Button leftIcon={"metamask" as "edit"} onClick={() => onboarding.current?.startOnboarding()}>
+          <Button
+            leftIcon={"metamask" as "edit"}
+            onClick={() => onboarding.current?.startOnboarding()}
+            style={{
+              height: "20px",
+            }}
+          >
             Install Metamask
           </Button>
         )}
@@ -149,6 +181,7 @@ export default function Vesting(/*{
             borderTopRightRadius: 0,
             borderBottomRightRadius: 0,
             borderRight: "none",
+            height: "20px",
           }}
         >
           {null}

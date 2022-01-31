@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense, useLayoutEffect } from "react";
-import { Box,Button } from "@chakra-ui/core";
+import { Box, Button } from "@chakra-ui/core";
 import { Container, Card } from "react-bootstrap";
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
@@ -99,11 +99,20 @@ export default function Account(/*{
                 }
               });
             }}
+            style={{
+              height: "20px",
+            }}
           >
             {MetaMaskOnboarding.isMetaMaskInstalled() ? "Connect to MetaMask" : "Connect to Wallet"}
           </Button>
         ) : (
-          <Button leftIcon={"metamask" as "edit"} onClick={() => onboarding.current?.startOnboarding()}>
+          <Button
+            leftIcon={"metamask" as "edit"}
+            onClick={() => onboarding.current?.startOnboarding()}
+            style={{
+              height: "20px",
+            }}
+          >
             Install Metamask
           </Button>
         )}
@@ -124,6 +133,7 @@ export default function Account(/*{
             borderTopRightRadius: 0,
             borderBottomRightRadius: 0,
             borderRight: "none",
+            height: "20px",
           }}
         >
           {null}

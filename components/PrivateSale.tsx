@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense } from "react";
-import { Box,Button } from "@chakra-ui/core";
+import { Box, Button } from "@chakra-ui/core";
 import { Container, Card, Table } from "react-bootstrap";
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
@@ -18,30 +18,30 @@ function ETHBalance(): JSX.Element {
   const totalTokens = ethers.utils.formatEther(data);
   return (
     <Container>
-     <Card>          
+      <Card>
         <Card.Body>
-            <Table striped bordered hover variant="dark">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th colSpan={2}>Private Sale</th>
-                </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th>1</th>
-                    <th>Price</th>
-                    <td>$0.50</td>
-                  </tr>
-                  <tr>
-                    <th>2</th>
-                    <th>Tokens</th>
-                    <td>{totalTokens} SERA TOKENS</td>
-                  </tr>
-    </tbody>
-  </Table>
-  </Card.Body>
-  </Card>
+          <Table striped bordered hover variant="dark">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th colSpan={2}>Private Sale</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>1</th>
+                <th>Price</th>
+                <td>$0.50</td>
+              </tr>
+              <tr>
+                <th>2</th>
+                <th>Tokens</th>
+                <td>{totalTokens} SERA TOKENS</td>
+              </tr>
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
     </Container>
   );
 }
@@ -59,7 +59,6 @@ export default function PrivateSale(/*{
   // const queryParameters = useQueryParameters();
   // const requiredChainID = queryParameters[QueryParameters.CHAIN];
 
-
   const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
@@ -71,16 +70,15 @@ export default function PrivateSale(/*{
 
   if (error) {
     return null;
-  }
-  
-  else if (typeof account !== "string") {
+  } else if (typeof account !== "string") {
     return (
       <Box>
-        {typeof window !== "undefined" && (MetaMaskOnboarding.isMetaMaskInstalled() ||
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any)?.ethereum ||
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any)?.web3) ? (
+        {typeof window !== "undefined" &&
+        (MetaMaskOnboarding.isMetaMaskInstalled() ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (window as any)?.ethereum ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (window as any)?.web3) ? (
           <Button
             isLoading={connecting}
             leftIcon={MetaMaskOnboarding.isMetaMaskInstalled() ? ("metamask" as "edit") : undefined}
@@ -94,11 +92,20 @@ export default function PrivateSale(/*{
                 }
               });
             }}
+            style={{
+              height: "20px",
+            }}
           >
             {MetaMaskOnboarding.isMetaMaskInstalled() ? "Private Sale" : "Private Sale"}
           </Button>
         ) : (
-          <Button leftIcon={"metamask" as "edit"} onClick={() => onboarding.current?.startOnboarding()}>
+          <Button
+            leftIcon={"metamask" as "edit"}
+            onClick={() => onboarding.current?.startOnboarding()}
+            style={{
+              height: "20px",
+            }}
+          >
             Install Metamask
           </Button>
         )}
@@ -119,6 +126,7 @@ export default function PrivateSale(/*{
             borderTopRightRadius: 0,
             borderBottomRightRadius: 0,
             borderRight: "none",
+            height: "20px",
           }}
         >
           {null}
