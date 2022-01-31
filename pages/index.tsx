@@ -4,7 +4,7 @@ import Header from "./Header";
 const IndexPage = () => (
 
   <>
-  {/* <Header/> */}
+  <Header/>
     <p>
       <Link href="/vesting">
         <a>Vesting</a>
