@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, Suspense } from "react";
-import { Box } from "@chakra-ui/core";
-import { Container, Button, Card, Table } from "react-bootstrap";
+import { Box,Button } from "@chakra-ui/core";
+import { Container, Card, Table } from "react-bootstrap";
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
 import MetaMaskOnboarding from "@metamask/onboarding";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
-import { TokenAmount } from "@uniswap/sdk";
-import { useQueryParameters } from "../hooks/useQueryParameters";
-import { QueryParameters } from "../constants";
+// import { TokenAmount } from "@uniswap/sdk";
+// import { useQueryParameters } from "../hooks/useQueryParameters";
+// import { QueryParameters } from "../constants";
 import { injected } from "../connectors";
 import { useTotalAmount } from "../hooks/usePrivateSale";
 import { ethers } from "ethers";
@@ -56,8 +56,8 @@ export default function PrivateSale(/*{
   // initialize metamask onboarding
   const onboarding = useRef<MetaMaskOnboarding>();
 
-  const queryParameters = useQueryParameters();
-  const requiredChainID = queryParameters[QueryParameters.CHAIN];
+  // const queryParameters = useQueryParameters();
+  // const requiredChainID = queryParameters[QueryParameters.CHAIN];
 
 
   const [connecting, setConnecting] = useState(false);
@@ -76,11 +76,11 @@ export default function PrivateSale(/*{
   else if (typeof account !== "string") {
     return (
       <Box>
-        {MetaMaskOnboarding.isMetaMaskInstalled() ||
+        {typeof window !== "undefined" && (MetaMaskOnboarding.isMetaMaskInstalled() ||
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any)?.ethereum ||
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any)?.web3 ? (
+        (window as any)?.web3) ? (
           <Button
             isLoading={connecting}
             leftIcon={MetaMaskOnboarding.isMetaMaskInstalled() ? ("metamask" as "edit") : undefined}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, Suspense, useLayoutEffect } from "react";
-import { Box } from "@chakra-ui/core";
-import { Container, Card, Table, Button } from "react-bootstrap";
+import { Box,Button } from "@chakra-ui/core";
+import { Container, Card, Table } from "react-bootstrap";
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
 import MetaMaskOnboarding from "@metamask/onboarding";

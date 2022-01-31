@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Header from "./Header";
-import { Card, Container , Button} from "react-bootstrap";
+import { Card, Container} from "react-bootstrap";
 
 const IndexPage = () => (
 
