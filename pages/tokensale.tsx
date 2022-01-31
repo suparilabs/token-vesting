@@ -93,23 +93,23 @@ const options: Highcharts.Options = {
 function TokenSale() {
   return (
     <div>
-      <div className="text-center">
-        <div className="text-2xl font-bold">The Best Generation DeFi Protocol</div>
-        <div className="text-green">
+      <div className="text-center pt-6">
+        <div className="text-5xl pb-10 font-bold">The Best Generation DeFi Protocol</div>
+        <div className="text-lg text-green-700 pb-20">
           Stake to earn high passive income without doing anything, safe inflation at %5 annually!
         </div>
-        <div className="md:flex">
-          <div>
+        <div className="grid grid-flow-row-dense grid-cols-2 place-items-center grid-rows-1">
+          <div className="col-span-1">
             <HighchartsReact highcharts={Highcharts} options={options} />
           </div>
-          <div>
+          <div className="col-span-1">
             <p>Total Supply - 25,000,000 SERA</p>
             <p>Liquidity - 500,000(2%)</p>
             <p>SEED ROUND - 2,500,000(10%)</p>
             <p>Public Sale - 375,000(1.5%)</p>
           </div>
         </div>
-        <div>
+        <div className="pt-6">
             Presale Stages
         </div>
       </div>
