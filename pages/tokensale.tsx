@@ -124,7 +124,15 @@ function TokenSale() {
             <p><span className="font-semibold">Total Supply </span>  25,000,000 SERA</p>
             <p><span className="font-semibold">Liquidity  </span> 500,000(2%)</p>
             <p><span className="font-semibold">SEED ROUND </span> 2,500,000(10%)</p>
+            <p><span className="font-semibold">Private Sale </span> 2,500,000(10%)</p>
             <p><span className="font-semibold">Public Sale </span> 375,000(1.5%)</p>
+            <p><span className="font-semibold">Team </span> 4,500,000(18.0%)</p>
+            <p><span className="font-semibold">Marketing </span> 1,875,000(7.5%)</p>
+            <p><span className="font-semibold">Ecosystem </span> 6,250,000(25.0%)</p>
+            <p><span className="font-semibold">Advisors </span> 2,750,000(11.0%)</p>
+            <p><span className="font-semibold">Tresury and Reserve </span> 1,250,000(5.0%)</p>
+            <p><span className="font-semibold">Staking </span> 2,500,000(10.0%)</p>
+            
           </div>
         </div>
         <div className="text-5xl pt-6 pb-8 font-bold">Presale Stages</div>
