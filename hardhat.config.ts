@@ -1,4 +1,5 @@
 import "@nomiclabs/hardhat-waffle";
+import "@nomiclabs/hardhat-ethers";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
@@ -75,6 +76,11 @@ const config: HardhatUserConfig = {
   },
   namedAccounts: {
     deployer: 0,
+    admin: 1,
+    owner: 2,
+    alice: 3,
+    bob: 4,
+    charlie: 5,
   },
   networks: {
     hardhat: {

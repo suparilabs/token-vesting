@@ -2325,7 +2325,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/providers@npm:5.5.2, @ethersproject/providers@npm:^5.4.4, @ethersproject/providers@npm:^5.5.2":
+"@ethersproject/providers@npm:5.5.3":
+  version: 5.5.3
+  resolution: "@ethersproject/providers@npm:5.5.3"
+  dependencies:
+    "@ethersproject/abstract-provider": ^5.5.0
+    "@ethersproject/abstract-signer": ^5.5.0
+    "@ethersproject/address": ^5.5.0
+    "@ethersproject/basex": ^5.5.0
+    "@ethersproject/bignumber": ^5.5.0
+    "@ethersproject/bytes": ^5.5.0
+    "@ethersproject/constants": ^5.5.0
+    "@ethersproject/hash": ^5.5.0
+    "@ethersproject/logger": ^5.5.0
+    "@ethersproject/networks": ^5.5.0
+    "@ethersproject/properties": ^5.5.0
+    "@ethersproject/random": ^5.5.0
+    "@ethersproject/rlp": ^5.5.0
+    "@ethersproject/sha2": ^5.5.0
+    "@ethersproject/strings": ^5.5.0
+    "@ethersproject/transactions": ^5.5.0
+    "@ethersproject/web": ^5.5.0
+    bech32: 1.1.4
+    ws: 7.4.6
+  checksum: abe27d424361b9499926c45f167c62e81eea611bb7b40d22d427ac1bc6501fff530932c3e0d1effd110be3a8a8f48aed9c48c7d3d478db60f6ed245d724e2dcc
+  languageName: node
+  linkType: hard
+
+"@ethersproject/providers@npm:^5.4.4, @ethersproject/providers@npm:^5.5.2":
   version: 5.5.2
   resolution: "@ethersproject/providers@npm:5.5.2"
   dependencies:
@@ -2868,13 +2895,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomiclabs/hardhat-ethers@npm:^2.0.4":
-  version: 2.0.4
-  resolution: "@nomiclabs/hardhat-ethers@npm:2.0.4"
+"@nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers@0.3.0-beta.12":
+  version: 0.3.0-beta.12
+  resolution: "hardhat-deploy-ethers@npm:0.3.0-beta.12"
   peerDependencies:
     ethers: ^5.0.0
     hardhat: ^2.0.0
-  checksum: 46b01edde014f5484c38ab199531e6a742d93a1a5fd60576fed97231a1ce325607c7ead6b6be8fd7b64aff55daa0a388c691b45a69cb63ae28db4087f281f573
+  checksum: 4db85163ee0a58f0aa330a5bf63df33aef6fc99138829f51fd736c68e4058a4c3c70772e603d30d32a183d15f562d8cae32fc442b2184f9b1fcc8c6ad415c11b
   languageName: node
   linkType: hard
 
@@ -9040,9 +9067,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^5.5.3":
-  version: 5.5.3
-  resolution: "ethers@npm:5.5.3"
+"ethers@npm:^5.5.4":
+  version: 5.5.4
+  resolution: "ethers@npm:5.5.4"
   dependencies:
     "@ethersproject/abi": 5.5.0
     "@ethersproject/abstract-provider": 5.5.1
@@ -9062,7 +9089,7 @@ __metadata:
     "@ethersproject/networks": 5.5.2
     "@ethersproject/pbkdf2": 5.5.0
     "@ethersproject/properties": 5.5.0
-    "@ethersproject/providers": 5.5.2
+    "@ethersproject/providers": 5.5.3
     "@ethersproject/random": 5.5.1
     "@ethersproject/rlp": 5.5.0
     "@ethersproject/sha2": 5.5.0
@@ -9074,7 +9101,7 @@ __metadata:
     "@ethersproject/wallet": 5.5.0
     "@ethersproject/web": 5.5.1
     "@ethersproject/wordlists": 5.5.0
-  checksum: 0ac0a9e3d37468894d5f283bb06a60c78a8c82fc43e834004b97046b93df35d2aed83c07e7dc8c4a664fa6b25989a47d303e58ee25e7ad6490b11cc50e74d54a
+  checksum: 5981da616471a35baf0a5919e851cd0e755eaa7d8d7ed5e54da03a50cafc38fe160f6c5e92ab953ab583778c53d8b4132ade9a157bcbb2fc05ace647db802ec3
   languageName: node
   linkType: hard
 
@@ -17822,7 +17849,7 @@ resolve@1.1.x:
     "@ethersproject/providers": ^5.5.2
     "@ethersproject/units": ^5.5.0
     "@metamask/onboarding": ^1.0.1
-    "@nomiclabs/hardhat-ethers": ^2.0.4
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@0.3.0-beta.12"
     "@nomiclabs/hardhat-etherscan": ^3.0.0
     "@nomiclabs/hardhat-waffle": ^2.0.2
     "@openzeppelin/contracts": ^4.4.2
@@ -17851,7 +17878,7 @@ resolve@1.1.x:
     eslint-config-next: 12.0.8
     eslint-config-prettier: ^8.3.0
     ethereum-waffle: ^3.4.0
-    ethers: ^5.5.3
+    ethers: ^5.5.4
     framer-motion: ^5
     fs-extra: ^10.0.0
     hardhat: ^2.8.3
