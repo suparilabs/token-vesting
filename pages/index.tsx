@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Header from "./Header";
+import 'tw-elements';
 
 const IndexPage = () => (
-
   <>
   <Header/>
     <p>
