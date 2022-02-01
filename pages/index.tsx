@@ -2,7 +2,6 @@ import Link from "next/link";
 import Header from "./Header";
 
 const IndexPage = () => (
-
   <>
   <Header/>
     <p>
