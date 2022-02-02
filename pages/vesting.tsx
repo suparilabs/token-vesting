@@ -6,14 +6,14 @@ import Header from "./Header";
 class MainView extends Component {
   state = {
     items: [
-      //   {
-      //   title:"Claim IDO Tokens",
-      //   unlocked:"23.0540000",
-      //   claimable:"0.0000000",
-      //   claimingDate:"2 Jan 2022",
-      //   unlockingDate:"1 Feb 2022",
-      //   splMessage:"Vesting Schedule: 20% TGE then daily linear for 4 months"
-      // },
+        {
+        title:"Claim IDO Tokens",
+        unlocked:"23.0540000",
+        claimable:"0.0000000",
+        claimingDate:"2 Jan 2022",
+        unlockingDate:"1 Feb 2022",
+        splMessage:"Vesting Schedule: 20% TGE then daily linear for 4 months"
+      },
       {
         title: "Claim Private Round Tokens",
         unlocked: "101.0000000",
