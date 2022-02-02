@@ -2726,6 +2726,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@metamask/detect-provider@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@metamask/detect-provider@npm:1.2.0"
+  checksum: 2c152534a8dd15bc1430bb5159cdf58993549a644cff344a1ff43f4ede8f041aad72b909e822747f6545de3ed293a740ecffc86a859daf7a925c4096efd61eb3
+  languageName: node
+  linkType: hard
+
 "@metamask/onboarding@npm:^1.0.1":
   version: 1.0.1
   resolution: "@metamask/onboarding@npm:1.0.1"
@@ -18220,6 +18227,7 @@ resolve@1.1.x:
     "@ethersproject/contracts": ^5.5.0
     "@ethersproject/providers": ^5.5.2
     "@ethersproject/units": ^5.5.0
+    "@metamask/detect-provider": ^1.2.0
     "@metamask/onboarding": ^1.0.1
     "@nomiclabs/hardhat-ethers": ^2.0.4
     "@nomiclabs/hardhat-etherscan": ^3.0.0

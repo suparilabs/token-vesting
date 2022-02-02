@@ -100,6 +100,7 @@
     "@ethersproject/address": "^5.5.0",
     "@ethersproject/contracts": "^5.5.0",
     "@ethersproject/units": "^5.5.0",
+    "@metamask/detect-provider": "^1.2.0",
     "@metamask/onboarding": "^1.0.1",
     "@openzeppelin/contracts": "^4.4.2",
     "@uniswap/sdk": "^3.0.3",
