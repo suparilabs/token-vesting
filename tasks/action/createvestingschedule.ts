@@ -12,9 +12,9 @@ task("action:createVestingSchedule")
   .addParam("revocable", "whether the vesting is revocable or not")
   .addParam("amount", "total amount of tokens to be released at the end of the vesting")
   .setAction(async function (taskArguments: TaskArguments, { ethers }) {
-    const privateSaleContractDeployment = await hre.deployments.get("PrivateSaleContract");
+    // const privateSaleContractDeployment = await hre.deployments.get("PrivateSaleContract");
     const privateSaleContractInstance = <PrivateSaleContract>(
-      await ethers.getContractAt("PrivateSaleContract", privateSaleContractDeployment.address)
+      await ethers.getContractAt("PrivateSaleContract", "0x09557807C515d758ECc5E1D1aCE7D09aA5842F51")
     );
     await privateSaleContractInstance.createVestingSchedule(
       taskArguments.beneficiary,
