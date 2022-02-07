@@ -2,7 +2,7 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import Countdown from "react-countdown";
 import Header from "./Header";
-
+import Footer from "./Footer";
 
 const options: Highcharts.Options = {
   title: {
@@ -214,10 +214,11 @@ function TokenSale() {
         </div>
         <div className="grid grid-flow-row-dense grid-cols-2 place-items-center grid-rows-1">
         <div className="col-span-2 mt-20">
-        <div className="box-border bg-slate-200 w-90 bg-clip-padding p-4 rounded-2xl border-4 ...">
+        <div className="box-border bg-slate-200 mb-20 w-90 bg-clip-padding p-4 rounded-2xl border-4 ...">
           <div className="text-5xl font-sans pt-6 pb-8 font-semibold"> Participate Now in <span className="text-blue-600">Presale</span></div>
           <div className="text-3xl font-sans pt-6 pb-8 font-light"> Early participation is always the best chance to make <span className="font-bold">over x50 </span> easily!</div>
-          <button type="button" className="inline-block px-10 py-3.5 bg-gray-200 text-gray-700 font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400 active:shadow-lg transition duration-150 ease-in-out">Buy SERA Now</button>
+          <button type="button" 
+          className="inline-block px-10 py-3.5 bg-gray-200 text-gray-700 font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400 active:shadow-lg transition duration-150 ease-in-out">Buy SERA Now</button>
           <div className="text-xl pt-6 pb-6 font-medium mt-1">Will live in</div>
           <span className="box-border bg-black h-13 w-70 p-3 ...">
             <Countdown className="text-2xl text-white" date={Date.now() + 5000000000}/>
@@ -225,14 +226,11 @@ function TokenSale() {
        </div>
        </div>
        </div>
-
-       {/* Footer Start from here */}
-       <div className="box-border mt-20 bg-slate-700 w-90 bg-clip-padding p-4 ...">
-        {/* footer content */}
-       </div>
        <div>
        </div>
       </div> 
+       {/* call footer */}
+       <Footer/>
       </div>
       </div>
   );

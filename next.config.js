@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["vesting-bsc.galaxywar.io"],
+    domains: ["vesting-bsc.galaxywar.io", "seraproject.org", "upload.wikimedia.org"],
   },
   async redirects() {
     return [

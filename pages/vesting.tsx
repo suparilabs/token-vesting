@@ -1,8 +1,9 @@
 import Image from "next/image";
 import React, { Component } from "react";
-
+import Footer from "./Footer";
 import ContainerText from "../components/ContainerText";
 import Header from "./Header";
+
 class MainView extends Component {
   state = {
     items: [
@@ -70,7 +71,7 @@ class MainView extends Component {
 
           <div className="flex flex-row flex-wrap space justify-between px-70">{itemList}</div>
 
-          <div className="grid grid-cols-3 text-white py-28 px-60">
+          <div className="grid grid-cols-3 text-white px-60">
             <div className="text-3xl">FOLLOW SERA</div>
             <div></div>
             <div className="flex flex-row space-x-10">
@@ -107,6 +108,7 @@ class MainView extends Component {
             </div>
           </div>
         </div>
+        <Footer/>
       </>
     );
   }

@@ -5,6 +5,7 @@ import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { formatEtherscanLink, shortenHex } from "../utils";
+import Image from "next/image";
 
 type AccountProps = {
   triedToEagerConnect: boolean;
@@ -39,7 +40,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
-            className="bg-yellow-600 px-5 py-2 text-black"
+            className="bg-white px-2 py-1.5 text-black"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
@@ -54,11 +55,11 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
               });
             }}
           >
-            {isMetaMaskInstalled ? "Connect" : "Connect to Wallet"}
+            {isMetaMaskInstalled ?  <button className="text-xl"><Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/220px-MetaMask_Fox.svg.png" className="my-1" alt="Connect" width="25px" height="25px"/>Connect</button> : "Connect to Wallet"}
           </button>
         ) : (
           <button onClick={startOnboarding}>Install Metamask</button>
-        )}
+        )} 
       </div>
     );
   }
