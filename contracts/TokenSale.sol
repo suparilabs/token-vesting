@@ -21,9 +21,8 @@ contract TokenSale is Ownable {
     uint256 public busdPrice;
     uint256 public tokenPrice;
     uint256 public tokensSold;
-    address public alice;
 
-    uint256 public aliceCoinsSold;
+    uint256 public coinsSold;
 
     address public constant USDT = address(0);
     address public constant BUSD = address(0);
@@ -44,7 +43,6 @@ contract TokenSale is Ownable {
         uint256 _exchangePriceBUSD,
         uint256 _tokenPrice
     ) {
-        alice = msg.sender;
         tokenContract = _tokenContract;
         tokenPrice = _tokenPrice;
         exchangePriceUSDT = _exchangePriceUSDT;
@@ -72,7 +70,7 @@ contract TokenSale is Ownable {
         duration = _duration;
     }
 
-    function buyTokens(uint256 numberOfTokens, bool _revocable) public payable {
+    function buyTokens(uint256 numberOfTokens, bool _revocable) external payable {
         require(msg.value == numberOfTokens * tokenPrice);
 
         uint256 scaledAmount = numberOfTokens * uint256(10)**ERC20(address(tokenContract)).decimals();
@@ -84,7 +82,7 @@ contract TokenSale is Ownable {
 
         require(tokenContract.transfer(msg.sender, scaledAmount));
         _PrivateTokenSaleContract.createVestingSchedule(
-            alice,
+            owner(),
             block.timestamp,
             cliff,
             duration,
@@ -98,22 +96,22 @@ contract TokenSale is Ownable {
         uint256 _busdAmount,
         uint256 numberOfTokens,
         bool _revocable
-    ) public payable {
+    ) external payable {
         require(_busdAmount >= 1000);
         require(_busdAmount == numberOfTokens * exchangePriceBUSD);
         require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount));
 
         uint256 scaledAmount = numberOfTokens * (uint256(10)**ERC20(address(tokenContract)).decimals());
 
-        require(tokenContract.allowance(alice, address(this)) >= scaledAmount);
+        require(tokenContract.allowance(owner(), address(this)) >= scaledAmount);
 
         emit Sold(msg.sender, numberOfTokens);
-        aliceCoinsSold += numberOfTokens;
+        coinsSold += numberOfTokens;
 
-        require(tokenContract.transferFrom(alice, address(_PrivateTokenSaleContract), scaledAmount));
+        require(tokenContract.transferFrom(owner(), address(_PrivateTokenSaleContract), scaledAmount));
 
         _PrivateTokenSaleContract.createVestingSchedule(
-            alice,
+            owner(),
             block.timestamp,
             cliff,
             duration,
@@ -127,22 +125,22 @@ contract TokenSale is Ownable {
         uint256 _usdtAmount,
         uint256 numberOfTokens,
         bool _revocable
-    ) public payable {
+    ) external payable {
         require(_usdtAmount >= 1000);
         require(_usdtAmount == numberOfTokens * exchangePriceBUSD);
         require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount));
 
         uint256 scaledAmount = numberOfTokens * (uint256(10)**ERC20(address(tokenContract)).decimals());
 
-        require(tokenContract.allowance(alice, address(this)) >= scaledAmount);
+        require(tokenContract.allowance(owner(), address(this)) >= scaledAmount);
 
         emit Sold(msg.sender, numberOfTokens);
-        aliceCoinsSold += numberOfTokens;
+        coinsSold += numberOfTokens;
 
-        require(tokenContract.transferFrom(alice, address(_PrivateTokenSaleContract), scaledAmount));
+        require(tokenContract.transferFrom(owner(), address(_PrivateTokenSaleContract), scaledAmount));
 
         _PrivateTokenSaleContract.createVestingSchedule(
-            alice,
+            owner(),
             block.timestamp,
             cliff,
             duration,
@@ -152,18 +150,23 @@ contract TokenSale is Ownable {
         );
     }
 
-    function withdrawBUSD() private onlyOwner {
-        IERC20(BUSD).transfer(alice, IERC20(BUSD).balanceOf(address(this)));
+    function withdrawBUSD() external onlyOwner {
+        IERC20(BUSD).transfer(owner(), IERC20(BUSD).balanceOf(address(this)));
     }
 
-    function withdrawUSDT() private onlyOwner {
-        IERC20(USDT).transfer(alice, IERC20(USDT).balanceOf(address(this)));
+    function withdrawUSDT() external onlyOwner {
+        IERC20(USDT).transfer(owner(), IERC20(USDT).balanceOf(address(this)));
     }
 
-    function endSale() public onlyOwner {
-        require(msg.sender == alice);
-        // Send unsold tokens to alice.
-        require(tokenContract.transfer(alice, tokenContract.balanceOf(address(this))));
-        payable(address(_PrivateTokenSaleContract)).transfer(address(this).balance);
+    function withdraw(uint256 _amount) public onlyOwner {
+        _PrivateTokenSaleContract.withdraw(_amount);
+        tokenContract.transfer(owner(), _amount);
+    }
+
+    function endSale() external onlyOwner {
+        // Send unsold tokens to owner.
+        // require(tokenContract.transfer(ow, tokenContract.balanceOf(address(this))));
+        // payable(address(_PrivateTokenSaleContract)).transfer(address(this).balance);
+        withdraw(_PrivateTokenSaleContract.getWithdrawableAmount());
     }
 }
