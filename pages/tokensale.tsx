@@ -62,11 +62,11 @@ const options: Highcharts.Options = {
         },
         {
           name: "Advisors",
-          y: 11,
+          y: 10,
         },
         {
           name: "Treasury and Reserve",
-          y: 5,
+          y: 6,
         },
         {
           name: "Staking",
@@ -239,13 +239,13 @@ function TokenSale() {
                   {" "}
                   Participate Now in <span className="text-blue-600">Presale</span>
                 </div>
-                <div className="text-3xl font-sans pt-6 pb-8 font-light">
+                {/* <div className="text-3xl font-sans pt-6 pb-8 font-light">
                   {" "}
                   Early participation is always the best chance to make <span className="font-bold">
                     over x50{" "}
                   </span>{" "}
                   easily!
-                </div>
+                </div> */}
                 <button
                   type="button"
                   className="inline-block px-10 py-3.5 bg-gray-200 text-gray-700 font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400 active:shadow-lg transition duration-150 ease-in-out"

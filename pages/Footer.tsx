@@ -41,24 +41,29 @@ const Footer = () => {
                   <td className="text-3xl px-4 py-4">Products</td>
                   <td className="text-3xl px-4 py-4">Documents</td>
                   <td className="text-3xl px-4 py-4">Community</td>
-                  <td className="text-3xl px-4 py-4">About</td>
                 </tr>
                 <tr>
-                  <td>Wallet</td>
                   <td>Github</td>
-                  <td>Twitter</td>
+                  <td>
+                    <a href="https://twitter.com/Project_SERA">Twitter</a>
+                  </td>
                   <td>Investors</td>
+                  <td>
+                    <a href="https://www.linkedin.com/company/sera-project/">LinkedIn</a>
+                  </td>
                 </tr>
                 <tr>
                   <td>Token</td>
                   <td>Roadmap</td>
-                  <td>Telegram</td>
+                  <td>
+                    <a href="https://t.me/Sera_Project">Telegram</a>
+                  </td>
                   <td>Jobs</td>
                 </tr>
                 <tr>
                   <td></td>
                   <td>Privacy & Policy</td>
-                  <td>Youtube</td>
+                  <td><a href="https://bit.ly/SERA_Project">Youtube</a></td>
                   <td></td>
                 </tr>
               </tbody>
@@ -66,7 +71,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      <div className="bg-dark text-white text-center"> 2022 Sera.org | All Rights Reserved</div>
+      <div className="bg-dark text-white text-center"> 2022 seraproject.org | All Rights Reserved</div>
       {/* Footer closed */}
     </>
   );
