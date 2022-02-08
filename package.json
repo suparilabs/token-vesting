@@ -88,6 +88,7 @@
     "app:build": "next build",
     "app:start": "next start",
     "app:lint": "next lint",
+    "app:export": "yarn app:build && next export -o _static",
     "deploy:bsctestnet": "hardhat --network bsctestnet deploy",
     "deploy:bsc": "hardhat --network bsc deploy"
   },
