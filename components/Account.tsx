@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
@@ -5,11 +6,17 @@ import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { formatEtherscanLink, shortenHex } from "../utils";
-import Image from "next/image";
+// import Image, { ImageLoader } from "next/image";
 
 type AccountProps = {
   triedToEagerConnect: boolean;
 };
+
+// const myLoader = ({ src, width, quality }) => {
+//   return `https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/${src}?w=${width}&q=${
+//     quality || 75
+//   }`;
+// };
 
 const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
@@ -55,11 +62,31 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
               });
             }}
           >
-            {isMetaMaskInstalled ?  <button className="text-xl"><Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/220px-MetaMask_Fox.svg.png" className="my-1" alt="Connect" width="25px" height="25px"/>Connect</button> : "Connect to Wallet"}
+            {isMetaMaskInstalled ? (
+              <button className="text-xl">
+                {/* <Image
+                  loader={myLoader as ImageLoader}
+                  src="220px-MetaMask_Fox.svg.png"
+                  alt="MetaMask"
+                  width={25}
+                  height={25}
+                /> */}
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/220px-MetaMask_Fox.svg.png"
+                  className="my-1"
+                  alt="Connect"
+                  width="25px"
+                  height="25px"
+                />
+                Connect
+              </button>
+            ) : (
+              "Connect to Wallet"
+            )}
           </button>
         ) : (
           <button onClick={startOnboarding}>Install Metamask</button>
-        )} 
+        )}
       </div>
     );
   }

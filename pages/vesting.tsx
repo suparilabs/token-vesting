@@ -1,19 +1,24 @@
-import Image from "next/image";
+/* eslint-disable @next/next/no-img-element */
+// import Image, { ImageLoader } from "next/image";
 import React, { Component } from "react";
 import Footer from "./Footer";
 import ContainerText from "../components/ContainerText";
 import Header from "./Header";
 
+// const myLoader = ({ src, width, quality }) => {
+//   return `https://vesting-bsc.galaxywar.io/images/${src}?w=${width}&q=${quality || 75}`;
+// };
+
 class MainView extends Component {
   state = {
     items: [
-        {
-        title:"Claim IDO Tokens",
-        unlocked:"23.0540000",
-        claimable:"0.0000000",
-        claimingDate:"2 Jan 2022",
-        unlockingDate:"1 Feb 2022",
-        splMessage:"Vesting Schedule: 20% TGE then daily linear for 4 months"
+      {
+        title: "Claim IDO Tokens",
+        unlocked: "23.0540000",
+        claimable: "0.0000000",
+        claimingDate: "2 Jan 2022",
+        unlockingDate: "1 Feb 2022",
+        splMessage: "Vesting Schedule: 20% TGE then daily linear for 4 months",
       },
       {
         title: "Claim Private Round Tokens",
@@ -53,12 +58,14 @@ class MainView extends Component {
         <Header />
         <div className="bg-lime-100 bg-pack-train h-screen bg-cover">
           <div className="py-20 px-48 flex flex-row">
-            <Image
+            <img
               src="https://vesting-bsc.galaxywar.io/images/ships-charon.png"
               alt="Picture of the author"
               width="350px"
               height="200px"
             />
+            {/* <Image loader={myLoader as ImageLoader} src="logo.png" alt="SERA" width={350} height={200} /> */}
+
             <div className="bg-yellow-500 h-5 w-2"></div>
             <div>
               <div className="text-white px-4">ABOUT VESTING SCHEDULE</div>
@@ -108,7 +115,7 @@ class MainView extends Component {
             </div>
           </div>
         </div>
-        <Footer/>
+        <Footer />
       </>
     );
   }
