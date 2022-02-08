@@ -7,13 +7,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const { deployer } = await getNamedAccounts();
   const token = await hre.deployments.get("Token");
-
-  await deploy("PrivateSaleContract", {
+  //prices are calculated on the basis of ( 1 SERA token = 1 CAD)
+  const exPriceUSDT = 1.25;
+  const exPriceBUSD = 1.27;
+  const tokenPrice = 1;
+  await deploy("TokenSale", {
     from: deployer,
-    args: [token.address],
+    args: [token.address, exPriceUSDT, exPriceBUSD, tokenPrice],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 };
 export default func;
-func.tags = ["PrivateSaleContract"];
+func.tags = ["TokenSale"];

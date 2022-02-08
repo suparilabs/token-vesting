@@ -7,7 +7,7 @@ import { DataType } from "../utils";
 import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import moment from "moment";
-import { PrivateSaleContract__factory } from "../src/types";
+import { Vesting__factory } from "../src/types";
 
 function computeStartDate(contract: Contract): (address: string) => Promise<any> {
   return async (address: string): Promise<any> =>
@@ -22,7 +22,7 @@ function computeStartDate(contract: Contract): (address: string) => Promise<any>
 export function useStart(address?: string | null, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
 
-  const contract = useContract(PRIVATE_SALE_ADDRESS, PrivateSaleContract__factory.abi);
+  const contract = useContract(PRIVATE_SALE_ADDRESS, Vesting__factory.abi);
 
   const result: any = useSWR(
     typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,

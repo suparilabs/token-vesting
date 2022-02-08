@@ -5,4 +5,10 @@ module.exports = {
     extend: {},
   },
   plugins: [tw_plugin],
+  theme: {
+    backgroundImage: {
+      "pack-train": "url('https://vesting-bsc.galaxywar.io/static/media/bodybg.8b61e43f.jpg')",
+    },
+    extend: {},
+  },
 };
