@@ -58,16 +58,16 @@ class MainView extends Component {
         <Header />
         <div className="bg-lime-100 bg-pack-train h-screen bg-cover">
           <div className="py-20 px-48 flex flex-row">
-            <img
+            {/* <img
               src="https://vesting-bsc.galaxywar.io/images/ships-charon.png"
               alt="Picture of the author"
               width="350px"
               height="200px"
-            />
+            /> */}
             {/* <Image loader={myLoader as ImageLoader} src="logo.png" alt="SERA" width={350} height={200} /> */}
 
             <div className="bg-yellow-500 h-5 w-2"></div>
-            <div>
+            <div className="justify-center">
               <div className="text-white px-4">ABOUT VESTING SCHEDULE</div>
               <div className="text-white w-1/2 px-4">
                 Daily linear vesting on a block-by-block basis.Please don’t claim too frequently as you have to pay gas

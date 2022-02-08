@@ -20,11 +20,11 @@ const ContainerText = props => {
 
       <div className="h-full w-full bg-zinc-800 px-5 py-5 text-slate-300">
         <div className="flex flex-row flex-wrap justify-between ">
-          <div>GWT to be unlocked:</div>
+          <div>SERA to be unlocked:</div>
           <div className="text-yellow-300">{props.unlocked}</div>
         </div>
         <div className="flex flex-row flex-wrap justify-between">
-          <div>GWT Claimable:</div>
+          <div>SERA Claimable:</div>
           <div className="text-white">{props.claimable}</div>
         </div>
         <div className="flex flex-wrap justify-end">

@@ -48,4 +48,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 # static folder for DigitalOcean App Platform
-_static
+**/_static

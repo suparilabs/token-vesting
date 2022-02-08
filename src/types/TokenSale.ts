@@ -23,9 +23,7 @@ export interface TokenSaleInterface extends utils.Interface {
   functions: {
     "BUSD()": FunctionFragment;
     "USDT()": FunctionFragment;
-    "_PrivateTokenSaleContract()": FunctionFragment;
     "busdPrice()": FunctionFragment;
-    "buyTokens(uint256,bool)": FunctionFragment;
     "buyTokensUsingBUSD(uint256,uint256,bool)": FunctionFragment;
     "buyTokensUsingUSDT(uint256,uint256,bool)": FunctionFragment;
     "cliff()": FunctionFragment;
@@ -36,15 +34,18 @@ export interface TokenSaleInterface extends utils.Interface {
     "exchangePriceUSDT()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "saleStatus()": FunctionFragment;
     "setCliff(uint256)": FunctionFragment;
     "setDuration(uint256)": FunctionFragment;
     "setExchangePriceBUSD(uint256)": FunctionFragment;
     "setExchangePriceUSDT(uint256)": FunctionFragment;
+    "setSaleStatus(uint8)": FunctionFragment;
     "tokenContract()": FunctionFragment;
     "tokenPrice()": FunctionFragment;
     "tokensSold()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "usdtPrice()": FunctionFragment;
+    "vesting()": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
     "withdrawBUSD()": FunctionFragment;
     "withdrawUSDT()": FunctionFragment;
@@ -52,15 +53,7 @@ export interface TokenSaleInterface extends utils.Interface {
 
   encodeFunctionData(functionFragment: "BUSD", values?: undefined): string;
   encodeFunctionData(functionFragment: "USDT", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "_PrivateTokenSaleContract",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "busdPrice", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "buyTokens",
-    values: [BigNumberish, boolean]
-  ): string;
   encodeFunctionData(
     functionFragment: "buyTokensUsingBUSD",
     values: [BigNumberish, BigNumberish, boolean]
@@ -87,6 +80,10 @@ export interface TokenSaleInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "saleStatus",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "setCliff",
     values: [BigNumberish]
   ): string;
@@ -100,6 +97,10 @@ export interface TokenSaleInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setExchangePriceUSDT",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setSaleStatus",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -119,6 +120,7 @@ export interface TokenSaleInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(functionFragment: "usdtPrice", values?: undefined): string;
+  encodeFunctionData(functionFragment: "vesting", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "withdraw",
     values: [BigNumberish]
@@ -134,12 +136,7 @@ export interface TokenSaleInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "BUSD", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "USDT", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "_PrivateTokenSaleContract",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "busdPrice", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "buyTokens", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "buyTokensUsingBUSD",
     data: BytesLike
@@ -165,6 +162,7 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "saleStatus", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setCliff", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setDuration",
@@ -179,6 +177,10 @@ export interface TokenSaleInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setSaleStatus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "tokenContract",
     data: BytesLike
   ): Result;
@@ -189,6 +191,7 @@ export interface TokenSaleInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "usdtPrice", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "vesting", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawBUSD",
@@ -255,15 +258,7 @@ export interface TokenSale extends BaseContract {
 
     USDT(overrides?: CallOverrides): Promise<[string]>;
 
-    _PrivateTokenSaleContract(overrides?: CallOverrides): Promise<[string]>;
-
     busdPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    buyTokens(
-      numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
@@ -299,6 +294,8 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    saleStatus(overrides?: CallOverrides): Promise<[number]>;
+
     setCliff(
       _cliff: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -319,6 +316,11 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setSaleStatus(
+      _saleStatus: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     tokenContract(overrides?: CallOverrides): Promise<[string]>;
 
     tokenPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -331,6 +333,8 @@ export interface TokenSale extends BaseContract {
     ): Promise<ContractTransaction>;
 
     usdtPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    vesting(overrides?: CallOverrides): Promise<[string]>;
 
     withdraw(
       _amount: BigNumberish,
@@ -350,15 +354,7 @@ export interface TokenSale extends BaseContract {
 
   USDT(overrides?: CallOverrides): Promise<string>;
 
-  _PrivateTokenSaleContract(overrides?: CallOverrides): Promise<string>;
-
   busdPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-  buyTokens(
-    numberOfTokens: BigNumberish,
-    _revocable: boolean,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   buyTokensUsingBUSD(
     _busdAmount: BigNumberish,
@@ -394,6 +390,8 @@ export interface TokenSale extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  saleStatus(overrides?: CallOverrides): Promise<number>;
+
   setCliff(
     _cliff: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -414,6 +412,11 @@ export interface TokenSale extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setSaleStatus(
+    _saleStatus: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   tokenContract(overrides?: CallOverrides): Promise<string>;
 
   tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -426,6 +429,8 @@ export interface TokenSale extends BaseContract {
   ): Promise<ContractTransaction>;
 
   usdtPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+  vesting(overrides?: CallOverrides): Promise<string>;
 
   withdraw(
     _amount: BigNumberish,
@@ -445,15 +450,7 @@ export interface TokenSale extends BaseContract {
 
     USDT(overrides?: CallOverrides): Promise<string>;
 
-    _PrivateTokenSaleContract(overrides?: CallOverrides): Promise<string>;
-
     busdPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-    buyTokens(
-      numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
@@ -485,6 +482,8 @@ export interface TokenSale extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
+    saleStatus(overrides?: CallOverrides): Promise<number>;
+
     setCliff(_cliff: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     setDuration(
@@ -502,6 +501,11 @@ export interface TokenSale extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setSaleStatus(
+      _saleStatus: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     tokenContract(overrides?: CallOverrides): Promise<string>;
 
     tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -514,6 +518,8 @@ export interface TokenSale extends BaseContract {
     ): Promise<void>;
 
     usdtPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    vesting(overrides?: CallOverrides): Promise<string>;
 
     withdraw(_amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -541,15 +547,7 @@ export interface TokenSale extends BaseContract {
 
     USDT(overrides?: CallOverrides): Promise<BigNumber>;
 
-    _PrivateTokenSaleContract(overrides?: CallOverrides): Promise<BigNumber>;
-
     busdPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-    buyTokens(
-      numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
@@ -585,6 +583,8 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    saleStatus(overrides?: CallOverrides): Promise<BigNumber>;
+
     setCliff(
       _cliff: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -605,6 +605,11 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setSaleStatus(
+      _saleStatus: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     tokenContract(overrides?: CallOverrides): Promise<BigNumber>;
 
     tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -617,6 +622,8 @@ export interface TokenSale extends BaseContract {
     ): Promise<BigNumber>;
 
     usdtPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    vesting(overrides?: CallOverrides): Promise<BigNumber>;
 
     withdraw(
       _amount: BigNumberish,
@@ -637,17 +644,7 @@ export interface TokenSale extends BaseContract {
 
     USDT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    _PrivateTokenSaleContract(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     busdPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    buyTokens(
-      numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
@@ -683,6 +680,8 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    saleStatus(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     setCliff(
       _cliff: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -703,6 +702,11 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    setSaleStatus(
+      _saleStatus: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     tokenContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     tokenPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -715,6 +719,8 @@ export interface TokenSale extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     usdtPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    vesting(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     withdraw(
       _amount: BigNumberish,
