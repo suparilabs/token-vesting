@@ -3,6 +3,7 @@ import { task } from "hardhat/config";
 import { TaskArguments } from "hardhat/types";
 
 import { PrivateSaleContract } from "../../src/types/PrivateSaleContract";
+import { Vesting } from "../../src/types/Vesting";
 
 task("action:createVestingSchedule")
   .addParam("beneficiary", "address of the beneficiary to whom vested tokens are transferred")
@@ -13,10 +14,10 @@ task("action:createVestingSchedule")
   .addParam("amount", "total amount of tokens to be released at the end of the vesting")
   .setAction(async function (taskArguments: TaskArguments, { ethers }) {
     // const privateSaleContractDeployment = await hre.deployments.get("PrivateSaleContract");
-    const privateSaleContractInstance = <PrivateSaleContract>(
-      await ethers.getContractAt("PrivateSaleContract", "0x09557807C515d758ECc5E1D1aCE7D09aA5842F51")
+    const vestingInstance = <Vesting>(
+      await ethers.getContractAt("Vesting", "0x09557807C515d758ECc5E1D1aCE7D09aA5842F51")
     );
-    await privateSaleContractInstance.createVestingSchedule(
+    await vestingInstance.createVestingSchedule(
       taskArguments.beneficiary,
       taskArguments.start,
       taskArguments.cliff,
