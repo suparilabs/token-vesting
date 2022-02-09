@@ -1,5 +1,5 @@
 import { default as Token } from "./deployments/bsctestnet/Token.json";
-import { default as PrivateSaleContract } from "./deployments/bsctestnet/TokenSale.json";
+import { default as TokenSale } from "./deployments/bsctestnet/TokenSale.json";
 
 export enum QueryParameters {
   INPUT = "input",
@@ -10,8 +10,8 @@ export enum QueryParameters {
 const TypedToken = Token as {
   address: string;
 };
-const TypedPrivateSaleContract = PrivateSaleContract as { address: string };
+const TypedTokenSale = TokenSale as { address: string };
 
 export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 export const ERC20_ADDRESS = TypedToken.address;
-export const PRIVATE_SALE_ADDRESS = TypedPrivateSaleContract.address;
+export const TOKEN_SALE_ADDRESS = TypedTokenSale.address;
