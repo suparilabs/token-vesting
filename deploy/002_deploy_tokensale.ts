@@ -7,12 +7,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const { deployer } = await getNamedAccounts();
   const chainId = await hre.getChainId();
-  let tokenAddress;
+  const token = await hre.deployments.get("Token");
+  let tokenAddress = token.address;
   if (chainId == "56") {
-    if (process.env.ENV != "prod") {
-      const token = await hre.deployments.get("Token");
-      tokenAddress = token.address;
-    } else {
+    if (process.env.ENV == "prod") {
       tokenAddress = "0x31640330cd2337e57c9591a2a183ac4e8a754e87";
     }
   }
@@ -32,6 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       "97": "0xa0D61133044ACB8Fb72Bc5a0378Fe13786538Dd0",
     },
   };
+  console.log(tokenAddress);
   await deploy("TokenSale", {
     from: deployer,
     args: [tokenAddress, coinAddress.USDT[chainId], coinAddress.BUSD[chainId], exPriceUSDT, exPriceBUSD],

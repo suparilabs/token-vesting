@@ -16,10 +16,8 @@ import "./Vesting.sol";
  */
 
 contract TokenSale is Ownable {
-    IERC20 public tokenContract; // the token being sold
-    uint256 public usdtPrice; // the price, in wei, per token
-    uint256 public busdPrice;
-    uint256 public tokensSold;
+    using SafeMath for uint256;
+    IERC20 public token; // the token being sold
 
     uint256 public coinsSold;
 
@@ -28,12 +26,14 @@ contract TokenSale is Ownable {
 
     event Sold(address buyer, uint256 amount);
 
-    uint256 public exchangePriceUSDT;
-    uint256 public exchangePriceBUSD;
-    uint256 public cliff;
-    uint256 public duration;
+    uint256 public exchangePriceUSDT = 120000000000000000;
+    uint256 public exchangePriceBUSD = 120000000000000000;
+    uint256 public cliff = 3 * 30 days;
+    uint256 public duration = 18 * 30 days;
 
     Vesting public vesting;
+
+    uint256 public availableAtTGE = 200; // percentage basis points
 
     enum SaleStatus {
         Pause,
@@ -43,18 +43,14 @@ contract TokenSale is Ownable {
     SaleStatus public saleStatus;
 
     constructor(
-        IERC20 _tokenContract,
+        IERC20 _token,
         address _usdt,
-        address _busd,
-        uint256 _exchangePriceUSDT,
-        uint256 _exchangePriceBUSD
+        address _busd
     ) {
-        tokenContract = _tokenContract;
+        token = _token;
         USDT = _usdt;
         BUSD = _busd;
-        exchangePriceUSDT = _exchangePriceUSDT;
-        exchangePriceBUSD = _exchangePriceBUSD;
-        vesting = new Vesting(address(_tokenContract));
+        vesting = new Vesting(address(token));
     }
 
     modifier onSale() {
@@ -82,46 +78,82 @@ contract TokenSale is Ownable {
         saleStatus = _saleStatus;
     }
 
-    function buyTokensUsingBUSD(
-        uint256 _busdAmount,
-        uint256 numberOfTokens,
-        bool _revocable
-    ) external payable onSale {
-        require(_busdAmount >= 1000);
+    function setAvailableAtTGE(uint256 _availableAtTGE) external onlyOwner {
+        availableAtTGE = _availableAtTGE;
+    }
+
+    function buyTokensUsingBUSD(uint256 _busdAmount, uint256 numberOfTokens) external payable onSale {
+        require(_busdAmount >= 1000 ether); // BUSD has 18 ethers
         require(_busdAmount == numberOfTokens * exchangePriceBUSD);
         require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount));
 
-        uint256 scaledAmount = numberOfTokens * (uint256(10)**ERC20(address(tokenContract)).decimals());
+        uint256 scaledAmount = numberOfTokens * (uint256(10)**ERC20(address(token)).decimals());
 
-        require(tokenContract.allowance(owner(), address(this)) >= scaledAmount);
+        require(token.allowance(owner(), address(this)) >= scaledAmount);
 
         emit Sold(msg.sender, numberOfTokens);
         coinsSold += numberOfTokens;
+        uint256 _nonVestedTokenAmount = scaledAmount.mul(availableAtTGE).div(10000);
+        uint256 _vestedTokenAmount = scaledAmount.sub(_nonVestedTokenAmount);
+        // send some pct of tokens to buyer right away
+        if (_nonVestedTokenAmount > 0) {
+            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount));
+        } // vest rest of the tokens
+        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount));
 
-        require(tokenContract.transferFrom(owner(), address(vesting), scaledAmount));
-
-        vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, _revocable, scaledAmount);
+        vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
     }
 
-    function buyTokensUsingUSDT(
-        uint256 _usdtAmount,
-        uint256 numberOfTokens,
-        bool _revocable
-    ) external payable onSale {
-        require(_usdtAmount >= 1000);
+    function buyTokensUsingUSDT(uint256 _usdtAmount, uint256 numberOfTokens) external payable onSale {
+        require(_usdtAmount >= 1000 ether); // USDT has 18 decimals
         require(_usdtAmount == numberOfTokens * exchangePriceBUSD);
         require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount));
 
-        uint256 scaledAmount = numberOfTokens * (uint256(10)**ERC20(address(tokenContract)).decimals());
+        uint256 scaledAmount = numberOfTokens * (uint256(10)**ERC20(address(token)).decimals());
 
-        require(tokenContract.allowance(owner(), address(this)) >= scaledAmount);
+        require(token.allowance(owner(), address(this)) >= scaledAmount);
 
         emit Sold(msg.sender, numberOfTokens);
         coinsSold += numberOfTokens;
+        uint256 _nonVestedTokenAmount = scaledAmount.mul(availableAtTGE).div(10000);
+        uint256 _vestedTokenAmount = scaledAmount.sub(_nonVestedTokenAmount);
+        // send some pct of tokens to buyer right away
+        if (_nonVestedTokenAmount > 0) {
+            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount));
+        } // vest rest of the tokens
+        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount));
+        vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
+    }
 
-        require(tokenContract.transferFrom(owner(), address(vesting), scaledAmount));
-
-        vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, _revocable, scaledAmount);
+    function createVestingSchedule(
+        address _beneficiary,
+        uint256 _start,
+        uint256 _cliff,
+        uint256 _duration,
+        uint256 _slicePeriodSeconds,
+        bool _revocable,
+        uint256 _amount,
+        uint256 _availableAtTGE
+    ) external onlyOwner {
+        require(token.allowance(owner(), address(this)) >= _amount);
+        emit Sold(msg.sender, _amount);
+        coinsSold += _amount;
+        uint256 _nonVestedTokenAmount = _amount.mul(_availableAtTGE).div(10000);
+        uint256 _vestedTokenAmount = _amount.sub(_nonVestedTokenAmount);
+        // send some pct of tokens to buyer right away
+        if (_nonVestedTokenAmount > 0) {
+            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount));
+        } // vest rest of the tokens
+        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount));
+        vesting.createVestingSchedule(
+            _beneficiary,
+            _start,
+            _cliff,
+            _duration,
+            _slicePeriodSeconds,
+            _revocable,
+            _vestedTokenAmount
+        );
     }
 
     function withdrawBUSD() external onlyOwner {
@@ -134,7 +166,7 @@ contract TokenSale is Ownable {
 
     function withdraw(uint256 _amount) public onlyOwner {
         vesting.withdraw(_amount);
-        tokenContract.transfer(owner(), _amount);
+        token.transfer(owner(), _amount);
     }
 
     function endSale() external onlyOwner {
