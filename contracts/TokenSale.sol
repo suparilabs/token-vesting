@@ -83,18 +83,20 @@ contract TokenSale is Ownable {
     }
 
     function buyTokensUsingBUSD(uint256 _busdAmount, uint256 numberOfTokens) external onSale {
-        require(_busdAmount >= 1000 ether); // BUSD has 18 ethers
-        require(_busdAmount == numberOfTokens * exchangePriceBUSD);
+        uint256 _balanceBefore = IERC20(BUSD).balanceOf(address(this));
         require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount));
+        uint256 _balanceAfter = IERC20(BUSD).balanceOf(address(this));
+        uint256 _actualBUSDAmount = _balanceAfter.sub(_balanceBefore);
+        require(_actualBUSDAmount >= 1000 ether); // BUSD has 18 ethers
+        uint256 _tokenDecimals = ERC20(address(token)).decimals();
+        require(_actualBUSDAmount == numberOfTokens.mul(exchangePriceBUSD).div(uint256(10)**_tokenDecimals));
 
-        uint256 scaledAmount = numberOfTokens * (uint256(10)**ERC20(address(token)).decimals());
-
-        require(token.allowance(owner(), address(this)) >= scaledAmount);
+        require(token.allowance(owner(), address(this)) >= numberOfTokens);
 
         emit Sold(msg.sender, numberOfTokens);
         coinsSold += numberOfTokens;
-        uint256 _nonVestedTokenAmount = scaledAmount.mul(availableAtTGE).div(10000);
-        uint256 _vestedTokenAmount = scaledAmount.sub(_nonVestedTokenAmount);
+        uint256 _nonVestedTokenAmount = numberOfTokens.mul(availableAtTGE).div(10000);
+        uint256 _vestedTokenAmount = numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
             require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount));
@@ -105,23 +107,26 @@ contract TokenSale is Ownable {
     }
 
     function buyTokensUsingUSDT(uint256 _usdtAmount, uint256 numberOfTokens) external onSale {
-        require(_usdtAmount >= 1000 ether); // USDT has 18 decimals
-        require(_usdtAmount == numberOfTokens * exchangePriceBUSD);
+        uint256 _balanceBefore = IERC20(USDT).balanceOf(address(this));
         require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount));
+        uint256 _balanceAfter = IERC20(USDT).balanceOf(address(this));
+        uint256 _actualUSDTAmount = _balanceAfter.sub(_balanceBefore);
+        require(_actualUSDTAmount >= 1000 ether); // USDT has 18 ethers
+        uint256 _tokenDecimals = ERC20(address(token)).decimals();
+        require(_actualUSDTAmount == numberOfTokens.mul(exchangePriceUSDT).div(uint256(10)**_tokenDecimals));
 
-        uint256 scaledAmount = numberOfTokens * (uint256(10)**ERC20(address(token)).decimals());
-
-        require(token.allowance(owner(), address(this)) >= scaledAmount);
+        require(token.allowance(owner(), address(this)) >= numberOfTokens);
 
         emit Sold(msg.sender, numberOfTokens);
         coinsSold += numberOfTokens;
-        uint256 _nonVestedTokenAmount = scaledAmount.mul(availableAtTGE).div(10000);
-        uint256 _vestedTokenAmount = scaledAmount.sub(_nonVestedTokenAmount);
+        uint256 _nonVestedTokenAmount = numberOfTokens.mul(availableAtTGE).div(10000);
+        uint256 _vestedTokenAmount = numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
             require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount));
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount));
+
         vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
     }
 
@@ -136,13 +141,13 @@ contract TokenSale is Ownable {
         uint256 _availableAtTGE
     ) external onlyOwner {
         require(token.allowance(owner(), address(this)) >= _amount);
-        emit Sold(msg.sender, _amount);
+        emit Sold(_beneficiary, _amount);
         coinsSold += _amount;
         uint256 _nonVestedTokenAmount = _amount.mul(_availableAtTGE).div(10000);
         uint256 _vestedTokenAmount = _amount.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount));
+            require(token.transferFrom(owner(), _beneficiary, _nonVestedTokenAmount));
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount));
         vesting.createVestingSchedule(
