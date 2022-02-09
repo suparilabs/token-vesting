@@ -41,6 +41,7 @@ const Footer = () => {
                   <td className="text-3xl px-4 py-4">Products</td>
                   <td className="text-3xl px-4 py-4">Documents</td>
                   <td className="text-3xl px-4 py-4">Community</td>
+                  <td className="text-3xl px-4 py-4">About</td>
                 </tr>
                 <tr>
                   <td>Github</td>

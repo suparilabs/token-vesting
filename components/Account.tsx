@@ -47,7 +47,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
-            className="bg-white px-2 py-1.5 text-black"
+            className="bg-amber-300 px-2 py-1.5 text-black"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
@@ -71,14 +71,14 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
                   width={25}
                   height={25}
                 /> */}
-                <img
+                {/* <img
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/220px-MetaMask_Fox.svg.png"
-                  className="my-1"
+                  className=""
                   alt="Connect"
                   width="25px"
                   height="25px"
-                />
-                Connect
+                />Connect */}
+                Connect 
               </button>
             ) : (
               "Connect to Wallet"

@@ -57,7 +57,9 @@ class MainView extends Component {
       <>
         <Header />
         <div className="bg-lime-100 bg-pack-train h-screen bg-cover">
-          <div className="py-20 px-48 flex flex-row">
+        <div className="grid grid-flow-row-dense grid-cols-2 place-items-center grid-rows-1">
+        <div className="col-span-1 ml-96">
+          <img src="https://seraproject.org/views/front//images/logo.png" width="100px" height="100px" alt="Logo" />
             {/* <img
               src="https://vesting-bsc.galaxywar.io/images/ships-charon.png"
               alt="Picture of the author"
@@ -65,22 +67,26 @@ class MainView extends Component {
               height="200px"
             /> */}
             {/* <Image loader={myLoader as ImageLoader} src="logo.png" alt="SERA" width={350} height={200} /> */}
-
+  
+          </div>
+          <div className="col-span-1 mr-96">
+          <div className="py-20 px-48 flex flex-row">
             <div className="bg-yellow-500 h-5 w-2"></div>
             <div className="justify-center">
               <div className="text-white px-4">ABOUT VESTING SCHEDULE</div>
-              <div className="text-white w-1/2 px-4">
+              <div className="text-white px-4">
                 Daily linear vesting on a block-by-block basis.Please don’t claim too frequently as you have to pay gas
                 fee every time you claim. BSC:0x552594612f935441c01c6854EDf111F343c1Ca07
               </div>
             </div>
           </div>
-
-          <div className="flex flex-row flex-wrap space justify-between px-70">{itemList}</div>
-
-          <div className="grid grid-cols-3 text-white px-60">
+          </div>
+          </div>
+          
+          
+          <div className="flex flex-row flex-wrap space justify-between px-36 mb-16">{itemList}</div>
+          <div className="grid grid-cols-3 text-white px-16 py-16">
             <div className="text-3xl">FOLLOW SERA</div>
-            <div></div>
             <div className="flex flex-row space-x-10">
               <a href="">
                 <svg
@@ -112,9 +118,9 @@ class MainView extends Component {
                   <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
                 </svg>
               </a>
+              </div>
             </div>
           </div>
-        </div>
         <Footer />
       </>
     );
@@ -122,3 +128,6 @@ class MainView extends Component {
 }
 
 export default MainView;
+
+
+
