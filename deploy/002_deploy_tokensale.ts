@@ -16,8 +16,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   //prices are calculated on the basis of ( 1 SERA token = 1 CAD)
-  const exPriceUSDT = "120000000000000000"; // 0.12, 18 decimals
-  const exPriceBUSD = "120000000000000000"; // 0.12, 18 decimals
+  // const exPriceUSDT = "120000000000000000"; // 0.12, 18 decimals
+  // const exPriceBUSD = "120000000000000000"; // 0.12, 18 decimals
   // const USDT = "0xfd55D5eB19731e79FB600579756dF7f454b2aA08" // bsc testnet
   // const BUSD = "0xa0D61133044ACB8Fb72Bc5a0378Fe13786538Dd0" // bsc testnet
   const coinAddress = {
@@ -30,10 +30,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       "97": "0xa0D61133044ACB8Fb72Bc5a0378Fe13786538Dd0",
     },
   };
-  console.log(tokenAddress);
   await deploy("TokenSale", {
     from: deployer,
-    args: [tokenAddress, coinAddress.USDT[chainId], coinAddress.BUSD[chainId], exPriceUSDT, exPriceBUSD],
+    args: [tokenAddress, coinAddress.USDT[chainId], coinAddress.BUSD[chainId]],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
