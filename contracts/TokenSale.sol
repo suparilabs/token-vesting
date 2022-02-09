@@ -19,7 +19,6 @@ contract TokenSale is Ownable {
     IERC20 public tokenContract; // the token being sold
     uint256 public usdtPrice; // the price, in wei, per token
     uint256 public busdPrice;
-    uint256 public tokenPrice;
     uint256 public tokensSold;
 
     uint256 public coinsSold;
@@ -48,13 +47,11 @@ contract TokenSale is Ownable {
         address _usdt,
         address _busd,
         uint256 _exchangePriceUSDT,
-        uint256 _exchangePriceBUSD,
-        uint256 _tokenPrice
+        uint256 _exchangePriceBUSD
     ) {
         tokenContract = _tokenContract;
         USDT = _usdt;
         BUSD = _busd;
-        tokenPrice = _tokenPrice;
         exchangePriceUSDT = _exchangePriceUSDT;
         exchangePriceBUSD = _exchangePriceBUSD;
         vesting = new Vesting(address(_tokenContract));

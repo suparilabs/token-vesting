@@ -2892,13 +2892,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomiclabs/hardhat-ethers@npm:^2.0.4":
-  version: 2.0.4
-  resolution: "@nomiclabs/hardhat-ethers@npm:2.0.4"
+"@nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers@0.3.0-beta.12":
+  version: 0.3.0-beta.12
+  resolution: "hardhat-deploy-ethers@npm:0.3.0-beta.12"
   peerDependencies:
     ethers: ^5.0.0
     hardhat: ^2.0.0
-  checksum: 46b01edde014f5484c38ab199531e6a742d93a1a5fd60576fed97231a1ce325607c7ead6b6be8fd7b64aff55daa0a388c691b45a69cb63ae28db4087f281f573
+  checksum: 4db85163ee0a58f0aa330a5bf63df33aef6fc99138829f51fd736c68e4058a4c3c70772e603d30d32a183d15f562d8cae32fc442b2184f9b1fcc8c6ad415c11b
   languageName: node
   linkType: hard
 
@@ -10898,6 +10898,16 @@ fsevents@~2.1.1:
   languageName: node
   linkType: hard
 
+"hardhat-deploy-ethers@npm:^0.3.0-beta.13":
+  version: 0.3.0-beta.13
+  resolution: "hardhat-deploy-ethers@npm:0.3.0-beta.13"
+  peerDependencies:
+    ethers: ^5.0.0
+    hardhat: ^2.0.0
+  checksum: 45206bf8d088cda08822ecf79d73e4027d8a4777cc23c3ef94568e316c45b8597130d72826fb2417edd32fe4b3dc54097161bef577663769b5c47b8262b983bb
+  languageName: node
+  linkType: hard
+
 "hardhat-deploy@npm:^0.10.4":
   version: 0.10.4
   resolution: "hardhat-deploy@npm:0.10.4"
@@ -18516,7 +18526,7 @@ resolve@1.1.x:
     "@ethersproject/units": ^5.5.0
     "@metamask/detect-provider": ^1.2.0
     "@metamask/onboarding": ^1.0.1
-    "@nomiclabs/hardhat-ethers": ^2.0.4
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@0.3.0-beta.12"
     "@nomiclabs/hardhat-etherscan": ^3.0.0
     "@nomiclabs/hardhat-waffle": ^2.0.2
     "@openzeppelin/contracts": ^4.4.2
@@ -18552,6 +18562,7 @@ resolve@1.1.x:
     fs-extra: ^10.0.0
     hardhat: ^2.8.3
     hardhat-deploy: ^0.10.4
+    hardhat-deploy-ethers: ^0.3.0-beta.13
     hardhat-gas-reporter: ^1.0.7
     highcharts: ^9.3.2
     highcharts-react-official: ^3.1.0

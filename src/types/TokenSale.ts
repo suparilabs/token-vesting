@@ -41,7 +41,6 @@ export interface TokenSaleInterface extends utils.Interface {
     "setExchangePriceUSDT(uint256)": FunctionFragment;
     "setSaleStatus(uint8)": FunctionFragment;
     "tokenContract()": FunctionFragment;
-    "tokenPrice()": FunctionFragment;
     "tokensSold()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "usdtPrice()": FunctionFragment;
@@ -105,10 +104,6 @@ export interface TokenSaleInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "tokenContract",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "tokenPrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -184,7 +179,6 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "tokenContract",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "tokenPrice", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "tokensSold", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
@@ -323,8 +317,6 @@ export interface TokenSale extends BaseContract {
 
     tokenContract(overrides?: CallOverrides): Promise<[string]>;
 
-    tokenPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     tokensSold(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transferOwnership(
@@ -419,8 +411,6 @@ export interface TokenSale extends BaseContract {
 
   tokenContract(overrides?: CallOverrides): Promise<string>;
 
-  tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
   tokensSold(overrides?: CallOverrides): Promise<BigNumber>;
 
   transferOwnership(
@@ -507,8 +497,6 @@ export interface TokenSale extends BaseContract {
     ): Promise<void>;
 
     tokenContract(overrides?: CallOverrides): Promise<string>;
-
-    tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     tokensSold(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -612,8 +600,6 @@ export interface TokenSale extends BaseContract {
 
     tokenContract(overrides?: CallOverrides): Promise<BigNumber>;
 
-    tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
     tokensSold(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
@@ -708,8 +694,6 @@ export interface TokenSale extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     tokenContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    tokenPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     tokensSold(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
