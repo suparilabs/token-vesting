@@ -9,7 +9,6 @@ import {
   CallOverrides,
   ContractTransaction,
   Overrides,
-  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -278,13 +277,13 @@ export interface TokenSale extends BaseContract {
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     cliff(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -388,13 +387,13 @@ export interface TokenSale extends BaseContract {
   buyTokensUsingBUSD(
     _busdAmount: BigNumberish,
     numberOfTokens: BigNumberish,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
+    overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   buyTokensUsingUSDT(
     _usdtAmount: BigNumberish,
     numberOfTokens: BigNumberish,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
+    overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   cliff(overrides?: CallOverrides): Promise<BigNumber>;
@@ -609,13 +608,13 @@ export interface TokenSale extends BaseContract {
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     cliff(overrides?: CallOverrides): Promise<BigNumber>;
@@ -720,13 +719,13 @@ export interface TokenSale extends BaseContract {
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     cliff(overrides?: CallOverrides): Promise<PopulatedTransaction>;

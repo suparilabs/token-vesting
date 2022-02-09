@@ -82,7 +82,7 @@ contract TokenSale is Ownable {
         availableAtTGE = _availableAtTGE;
     }
 
-    function buyTokensUsingBUSD(uint256 _busdAmount, uint256 numberOfTokens) external payable onSale {
+    function buyTokensUsingBUSD(uint256 _busdAmount, uint256 numberOfTokens) external onSale {
         require(_busdAmount >= 1000 ether); // BUSD has 18 ethers
         require(_busdAmount == numberOfTokens * exchangePriceBUSD);
         require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount));
@@ -104,7 +104,7 @@ contract TokenSale is Ownable {
         vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
     }
 
-    function buyTokensUsingUSDT(uint256 _usdtAmount, uint256 numberOfTokens) external payable onSale {
+    function buyTokensUsingUSDT(uint256 _usdtAmount, uint256 numberOfTokens) external onSale {
         require(_usdtAmount >= 1000 ether); // USDT has 18 decimals
         require(_usdtAmount == numberOfTokens * exchangePriceBUSD);
         require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount));
@@ -156,12 +156,18 @@ contract TokenSale is Ownable {
         );
     }
 
-    function withdrawBUSD() external onlyOwner {
-        IERC20(BUSD).transfer(owner(), IERC20(BUSD).balanceOf(address(this)));
+    function withdrawBUSD() public onlyOwner {
+        uint256 _busdBalance = IERC20(BUSD).balanceOf(address(this));
+        if (_busdBalance > 0) {
+            IERC20(BUSD).transfer(owner(), _busdBalance);
+        }
     }
 
-    function withdrawUSDT() external onlyOwner {
-        IERC20(USDT).transfer(owner(), IERC20(USDT).balanceOf(address(this)));
+    function withdrawUSDT() public onlyOwner {
+        uint256 _usdtBalance = IERC20(USDT).balanceOf(address(this));
+        if (_usdtBalance > 0) {
+            IERC20(USDT).transfer(owner(), _usdtBalance);
+        }
     }
 
     function withdraw(uint256 _amount) public onlyOwner {
@@ -177,7 +183,12 @@ contract TokenSale is Ownable {
         // Send unsold tokens to owner.
         // require(tokenContract.transfer(ow, tokenContract.balanceOf(address(this))));
         // payable(address(vesting)).transfer(address(this).balance);
-        withdraw(vesting.getWithdrawableAmount());
         saleStatus = SaleStatus.Pause;
+        uint256 _withdrawableAmount = vesting.getWithdrawableAmount();
+        if (_withdrawableAmount > 0) {
+            withdraw(vesting.getWithdrawableAmount());
+        }
+        withdrawBUSD();
+        withdrawUSDT();
     }
 }
