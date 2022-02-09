@@ -169,6 +169,10 @@ contract TokenSale is Ownable {
         token.transfer(owner(), _amount);
     }
 
+    function revoke(bytes32 vestingScheduleId) external onlyOwner {
+        vesting.revoke(vestingScheduleId);
+    }
+
     function endSale() external onlyOwner {
         // Send unsold tokens to owner.
         // require(tokenContract.transfer(ow, tokenContract.balanceOf(address(this))));

@@ -35,6 +35,7 @@ export interface TokenSaleInterface extends utils.Interface {
     "exchangePriceUSDT()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "revoke(bytes32)": FunctionFragment;
     "saleStatus()": FunctionFragment;
     "setAvailableAtTGE(uint256)": FunctionFragment;
     "setCliff(uint256)": FunctionFragment;
@@ -94,6 +95,7 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "revoke", values: [BytesLike]): string;
   encodeFunctionData(
     functionFragment: "saleStatus",
     values?: undefined
@@ -176,6 +178,7 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "revoke", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "saleStatus", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setAvailableAtTGE",
@@ -316,6 +319,11 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    revoke(
+      vestingScheduleId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     saleStatus(overrides?: CallOverrides): Promise<[number]>;
 
     setAvailableAtTGE(
@@ -421,6 +429,11 @@ export interface TokenSale extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  revoke(
+    vestingScheduleId: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   saleStatus(overrides?: CallOverrides): Promise<number>;
 
   setAvailableAtTGE(
@@ -521,6 +534,11 @@ export interface TokenSale extends BaseContract {
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    revoke(
+      vestingScheduleId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     saleStatus(overrides?: CallOverrides): Promise<number>;
 
@@ -632,6 +650,11 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    revoke(
+      vestingScheduleId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     saleStatus(overrides?: CallOverrides): Promise<BigNumber>;
 
     setAvailableAtTGE(
@@ -735,6 +758,11 @@ export interface TokenSale extends BaseContract {
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    revoke(
+      vestingScheduleId: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
