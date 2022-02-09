@@ -11,14 +11,16 @@ import { injected } from "../connectors";
 // import { useETHBalance } from "../hooks/useETHBalance";
 // import { useTokenBalance } from "../hooks/useTokenBalance";
 import { useStart } from "../hooks/useScheduleDates";
-import { useVestingScheduleCountBeneficiary } from "../hooks/usePrivateSale";
+import { useVestingScheduleCountBeneficiary } from "../hooks/useVesting";
+import { useVestingContractAddress } from "../hooks/useTokenSale";
 
 function ETHBalance(): JSX.Element {
   const { account } = useWeb3React();
   // const { data } = useETHBalance(account, true);
   // const { data: data1 } = useTokenBalance(account, true);
-  const { data: data2 } = useVestingScheduleCountBeneficiary(account, true);
-  const { data: startDate } = useStart(account, true);
+  const {data:vesting} = useVestingContractAddress();
+  const { data: data2 } = useVestingScheduleCountBeneficiary(vesting,account, true);
+  const { data: startDate } = useStart(vesting,account, true);
   // const { data: data4 } = useCliff(account, true);
   // const { data: data5 } = useDuration(account, true);
 

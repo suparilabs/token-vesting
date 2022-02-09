@@ -9,7 +9,6 @@ import {
   CallOverrides,
   ContractTransaction,
   Overrides,
-  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -23,28 +22,28 @@ export interface TokenSaleInterface extends utils.Interface {
   functions: {
     "BUSD()": FunctionFragment;
     "USDT()": FunctionFragment;
-    "busdPrice()": FunctionFragment;
-    "buyTokensUsingBUSD(uint256,uint256,bool)": FunctionFragment;
-    "buyTokensUsingUSDT(uint256,uint256,bool)": FunctionFragment;
+    "availableAtTGE()": FunctionFragment;
+    "buyTokensUsingBUSD(uint256,uint256)": FunctionFragment;
+    "buyTokensUsingUSDT(uint256,uint256)": FunctionFragment;
     "cliff()": FunctionFragment;
     "coinsSold()": FunctionFragment;
+    "createVestingSchedule(address,uint256,uint256,uint256,uint256,bool,uint256,uint256)": FunctionFragment;
     "duration()": FunctionFragment;
     "endSale()": FunctionFragment;
     "exchangePriceBUSD()": FunctionFragment;
     "exchangePriceUSDT()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "revoke(bytes32)": FunctionFragment;
     "saleStatus()": FunctionFragment;
+    "setAvailableAtTGE(uint256)": FunctionFragment;
     "setCliff(uint256)": FunctionFragment;
     "setDuration(uint256)": FunctionFragment;
     "setExchangePriceBUSD(uint256)": FunctionFragment;
     "setExchangePriceUSDT(uint256)": FunctionFragment;
     "setSaleStatus(uint8)": FunctionFragment;
-    "tokenContract()": FunctionFragment;
-    "tokenPrice()": FunctionFragment;
-    "tokensSold()": FunctionFragment;
+    "token()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "usdtPrice()": FunctionFragment;
     "vesting()": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
     "withdrawBUSD()": FunctionFragment;
@@ -53,17 +52,33 @@ export interface TokenSaleInterface extends utils.Interface {
 
   encodeFunctionData(functionFragment: "BUSD", values?: undefined): string;
   encodeFunctionData(functionFragment: "USDT", values?: undefined): string;
-  encodeFunctionData(functionFragment: "busdPrice", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "availableAtTGE",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "buyTokensUsingBUSD",
-    values: [BigNumberish, BigNumberish, boolean]
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "buyTokensUsingUSDT",
-    values: [BigNumberish, BigNumberish, boolean]
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "cliff", values?: undefined): string;
   encodeFunctionData(functionFragment: "coinsSold", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "createVestingSchedule",
+    values: [
+      string,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      boolean,
+      BigNumberish,
+      BigNumberish
+    ]
+  ): string;
   encodeFunctionData(functionFragment: "duration", values?: undefined): string;
   encodeFunctionData(functionFragment: "endSale", values?: undefined): string;
   encodeFunctionData(
@@ -79,9 +94,14 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "revoke", values: [BytesLike]): string;
   encodeFunctionData(
     functionFragment: "saleStatus",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAvailableAtTGE",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setCliff",
@@ -103,23 +123,11 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "setSaleStatus",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "tokenContract",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "tokenPrice",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "tokensSold",
-    values?: undefined
-  ): string;
+  encodeFunctionData(functionFragment: "token", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "usdtPrice", values?: undefined): string;
   encodeFunctionData(functionFragment: "vesting", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "withdraw",
@@ -136,7 +144,10 @@ export interface TokenSaleInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "BUSD", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "USDT", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "busdPrice", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "availableAtTGE",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "buyTokensUsingBUSD",
     data: BytesLike
@@ -147,6 +158,10 @@ export interface TokenSaleInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "cliff", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "coinsSold", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "createVestingSchedule",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "duration", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "endSale", data: BytesLike): Result;
   decodeFunctionResult(
@@ -162,7 +177,12 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "revoke", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "saleStatus", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setAvailableAtTGE",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "setCliff", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setDuration",
@@ -180,17 +200,11 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "setSaleStatus",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "tokenContract",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "tokenPrice", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "tokensSold", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "token", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "usdtPrice", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "vesting", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
   decodeFunctionResult(
@@ -258,25 +272,35 @@ export interface TokenSale extends BaseContract {
 
     USDT(overrides?: CallOverrides): Promise<[string]>;
 
-    busdPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+    availableAtTGE(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     cliff(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     coinsSold(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    createVestingSchedule(
+      _beneficiary: string,
+      _start: BigNumberish,
+      _cliff: BigNumberish,
+      _duration: BigNumberish,
+      _slicePeriodSeconds: BigNumberish,
+      _revocable: boolean,
+      _amount: BigNumberish,
+      _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     duration(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -294,7 +318,17 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    revoke(
+      vestingScheduleId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     saleStatus(overrides?: CallOverrides): Promise<[number]>;
+
+    setAvailableAtTGE(
+      _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     setCliff(
       _cliff: BigNumberish,
@@ -321,18 +355,12 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    tokenContract(overrides?: CallOverrides): Promise<[string]>;
-
-    tokenPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    tokensSold(overrides?: CallOverrides): Promise<[BigNumber]>;
+    token(overrides?: CallOverrides): Promise<[string]>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    usdtPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     vesting(overrides?: CallOverrides): Promise<[string]>;
 
@@ -354,25 +382,35 @@ export interface TokenSale extends BaseContract {
 
   USDT(overrides?: CallOverrides): Promise<string>;
 
-  busdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+  availableAtTGE(overrides?: CallOverrides): Promise<BigNumber>;
 
   buyTokensUsingBUSD(
     _busdAmount: BigNumberish,
     numberOfTokens: BigNumberish,
-    _revocable: boolean,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
+    overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   buyTokensUsingUSDT(
     _usdtAmount: BigNumberish,
     numberOfTokens: BigNumberish,
-    _revocable: boolean,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
+    overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
   coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
+
+  createVestingSchedule(
+    _beneficiary: string,
+    _start: BigNumberish,
+    _cliff: BigNumberish,
+    _duration: BigNumberish,
+    _slicePeriodSeconds: BigNumberish,
+    _revocable: boolean,
+    _amount: BigNumberish,
+    _availableAtTGE: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   duration(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -390,7 +428,17 @@ export interface TokenSale extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  revoke(
+    vestingScheduleId: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   saleStatus(overrides?: CallOverrides): Promise<number>;
+
+  setAvailableAtTGE(
+    _availableAtTGE: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   setCliff(
     _cliff: BigNumberish,
@@ -417,18 +465,12 @@ export interface TokenSale extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  tokenContract(overrides?: CallOverrides): Promise<string>;
-
-  tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-  tokensSold(overrides?: CallOverrides): Promise<BigNumber>;
+  token(overrides?: CallOverrides): Promise<string>;
 
   transferOwnership(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  usdtPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   vesting(overrides?: CallOverrides): Promise<string>;
 
@@ -450,25 +492,35 @@ export interface TokenSale extends BaseContract {
 
     USDT(overrides?: CallOverrides): Promise<string>;
 
-    busdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+    availableAtTGE(overrides?: CallOverrides): Promise<BigNumber>;
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      _revocable: boolean,
       overrides?: CallOverrides
     ): Promise<void>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      _revocable: boolean,
       overrides?: CallOverrides
     ): Promise<void>;
 
     cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
     coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
+
+    createVestingSchedule(
+      _beneficiary: string,
+      _start: BigNumberish,
+      _cliff: BigNumberish,
+      _duration: BigNumberish,
+      _slicePeriodSeconds: BigNumberish,
+      _revocable: boolean,
+      _amount: BigNumberish,
+      _availableAtTGE: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     duration(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -482,7 +534,17 @@ export interface TokenSale extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
+    revoke(
+      vestingScheduleId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     saleStatus(overrides?: CallOverrides): Promise<number>;
+
+    setAvailableAtTGE(
+      _availableAtTGE: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setCliff(_cliff: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -506,18 +568,12 @@ export interface TokenSale extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    tokenContract(overrides?: CallOverrides): Promise<string>;
-
-    tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-    tokensSold(overrides?: CallOverrides): Promise<BigNumber>;
+    token(overrides?: CallOverrides): Promise<string>;
 
     transferOwnership(
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    usdtPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     vesting(overrides?: CallOverrides): Promise<string>;
 
@@ -547,25 +603,35 @@ export interface TokenSale extends BaseContract {
 
     USDT(overrides?: CallOverrides): Promise<BigNumber>;
 
-    busdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+    availableAtTGE(overrides?: CallOverrides): Promise<BigNumber>;
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
     coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
+
+    createVestingSchedule(
+      _beneficiary: string,
+      _start: BigNumberish,
+      _cliff: BigNumberish,
+      _duration: BigNumberish,
+      _slicePeriodSeconds: BigNumberish,
+      _revocable: boolean,
+      _amount: BigNumberish,
+      _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     duration(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -583,7 +649,17 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    revoke(
+      vestingScheduleId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     saleStatus(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setAvailableAtTGE(
+      _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     setCliff(
       _cliff: BigNumberish,
@@ -610,18 +686,12 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    tokenContract(overrides?: CallOverrides): Promise<BigNumber>;
-
-    tokenPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-    tokensSold(overrides?: CallOverrides): Promise<BigNumber>;
+    token(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    usdtPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     vesting(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -644,25 +714,35 @@ export interface TokenSale extends BaseContract {
 
     USDT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    busdPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    availableAtTGE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
       numberOfTokens: BigNumberish,
-      _revocable: boolean,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     cliff(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     coinsSold(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    createVestingSchedule(
+      _beneficiary: string,
+      _start: BigNumberish,
+      _cliff: BigNumberish,
+      _duration: BigNumberish,
+      _slicePeriodSeconds: BigNumberish,
+      _revocable: boolean,
+      _amount: BigNumberish,
+      _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     duration(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -680,7 +760,17 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    revoke(
+      vestingScheduleId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     saleStatus(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setAvailableAtTGE(
+      _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     setCliff(
       _cliff: BigNumberish,
@@ -707,18 +797,12 @@ export interface TokenSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    tokenContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    tokenPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    tokensSold(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    usdtPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     vesting(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
