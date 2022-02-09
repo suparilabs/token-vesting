@@ -1,5 +1,5 @@
 import { default as Token } from "./deployments/bsctestnet/Token.json";
-import { default as PrivateSaleContract } from "./deployments/bsctestnet/PrivateSaleContract.json";
+import { default as PrivateSaleContract } from "./deployments/bsctestnet/TokenSale.json";
 
 export enum QueryParameters {
   INPUT = "input",
