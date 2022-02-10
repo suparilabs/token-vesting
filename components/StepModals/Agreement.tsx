@@ -1,20 +1,19 @@
-import { boolean } from "hardhat/internal/core/params/argumentTypes";
 import React from "react";
 import  Checkout from "./Checkout";
-import { Modal, Button, Form, Alert } from "react-bootstrap";
+import { Modal, Button, Form } from "react-bootstrap";
 
 function AgreementModal(props) {
-  const [checked, setChecked] = React.useState();
+  const [checked, setChecked] = React.useState(false);
   
-  function handleClick(e) {
-    e.preventDefault();
-    if(checked) {
-      console.log("clickedd...!!!"); 
-      props.onHide();
-    } else {
-      console.log("error"); 
-    }
-    }
+  // function handleClick(e) {
+  //   e.preventDefault();
+  //   if(checked) {
+  //     console.log("clickedd...!!!"); 
+  //     props.onHide();
+  //   } else {
+  //     console.log("error"); 
+  //   }
+  //   }
   
     return (
       <Modal
@@ -29,21 +28,21 @@ function AgreementModal(props) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          
+          <pre>
           Issued By
           BETA GROUP FZE
-          For “SERA TOKEN”
+          For &quot;SERA TOKEN&quot;
           
-          THIS   SIMPLE   AGREEMENT   FOR   FUTURE   TOKENS “SAFT”,   certifies   that   in 
-          exchange for the “Purchase Amount” by the “Investor”,  BETA GROUP FZE  Limited
-          Liability Establishment “Company”, shall issue to the Investor “SERA Tokens” in line with
+          THIS   SIMPLE   AGREEMENT   FOR   FUTURE   TOKENS &quot; SAFT &quot;,   certifies   that   in 
+          exchange for the &quot;Purchase Amount&quot; by the &quot;Investor&quot;,  BETA GROUP FZE  Limited
+          Liability Establishment &quot;Company&quot;, shall issue to the Investor &quot; SERA Tokens &quot; in line with
           the vesting schedule and, subject to the terms set forth below.
           
           1. Events
           a)Investor Deliveries:    Concurrently with the execution of this SAFT, the Investor 
           provides the Company the Purchase Amount by digital transfer in accordance with
           the transfer instructions agreed. If the Company satisfies the Milestone, the Company will deliver the Tokens to 
-          the Investor’s digital wallet in line with the vesting schedule. For the avoidance of
+          the Investor&apos;s digital wallet in line with the vesting schedule. For the avoidance of
           doubt, the digital wallet must be under the direct or indirect control of the Investor
           and shall not be under the direct or indirect control of a third-party.  
           
@@ -53,16 +52,16 @@ function AgreementModal(props) {
           
           2. Definitions
           
-          “The Company” means the parent company BETA GROUP FZE and their respective affiliates.
+          &quot; The Company &quot; means the parent company BETA GROUP FZE and their respective affiliates.
           
-          “Milestone” means the Network is operational with Token functionality as determined by the Company in its sole discretion.
+          &quot; Milestone &quot; means the Network is operational with Token functionality as determined by the Company in its sole discretion.
           
-          “TGE” means the token generation event. 
+          &quot; TGE &quot; means the token generation event. 
           
-          "SAFT" is a contract containing a right to receive Tokens in the future, similar in form and content to this contract, purchased by Investors prior to the Company 
-          completing the Milestone for the purpose of funding the Company's organizational expenses for five years after the date of this contract.
+          &quot; SAFT &quot; is a contract containing a right to receive Tokens in the future, similar in form and content to this contract, purchased by Investors prior to the Company 
+          completing the Milestone for the purpose of funding the Company &apos;s organizational expenses for five years after the date of this contract.
           
-          By checking this box and clicking the “I Agree” button, I agree to comply with and be bound 
+          By checking this box and clicking the &quot; I Agree &quot; button, I agree to comply with and be bound 
           by the Agreement and the Purchase Agreement. I acknowledge and accept that all purchases 
           of interests in Tokens from the Company during the SAFT Offering are final, and there are
           no refunds or cancellations  except as may be required by applicable  law or regulation. I
@@ -70,17 +69,14 @@ function AgreementModal(props) {
           SAFT and Purchase Agreement in its sole discretion prior to the closing Date; provided that 
           if the Company rejects my SAFT and Purchase Agreement, it shall return or cause the return 
           of the Purchase Amount to me.
+          </pre>
           <Form>
-         
-          <div key={`agree`} className="mb-3">
-              <Form.Check 
-              type='checkbox'
+            <Form.Check 
+              type="checkbox"
               id="agree"
               label="I Agree"
               onChange={() => setChecked(!checked)}
-              />
-            </div>
-          
+            />
             </Form>
         </Modal.Body>
         <Modal.Footer>

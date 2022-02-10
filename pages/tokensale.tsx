@@ -3,7 +3,7 @@ import HighchartsReact from "highcharts-react-official";
 import Countdown from "react-countdown";
 import Header from "./Header";
 import Footer from "./Footer";
-import StepModal from "../components/StepModals/StepModal";
+import Agreement from "../components/StepModals/Agreement";
 
 const options: Highcharts.Options = {
   title: {
@@ -247,7 +247,7 @@ function TokenSale() {
                   </span>{" "}
                   easily!
                 </div> */}
-                <StepModal/>
+                <Agreement/>
                 <div className="text-xl pt-6 pb-6 font-medium mt-1">Will live in</div>
                 <span className="box-border bg-black h-13 w-70 p-3 ...">
                   <Countdown className="text-2xl text-white" date={Date.now() + 5000000000} />

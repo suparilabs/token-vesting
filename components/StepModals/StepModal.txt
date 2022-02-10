@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useForm, useStep } from "react-hooks-helper";
 import  Agreement from "./Agreement";
 import  Checkout from "./Checkout";
-import { Modal, Button, Form } from "react-bootstrap";
 
 const defaultData = {
   data: ""

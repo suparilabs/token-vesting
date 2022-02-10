@@ -1,9 +1,7 @@
 import React from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useTokenSaleContract, useVestingContractAddress } from "../../hooks/useTokenSale";
-import { Web3Provider } from "@ethersproject/providers";
-import { useWeb3React } from "@web3-react/core";
-import { attempt } from "lodash";
+// import { useWeb3React } from "@web3-react/core";
 
 const CheckoutForm = ({ onSubmit }) => {
   const [amount, setAmount] = React.useState("");
@@ -27,22 +25,23 @@ const CheckoutForm = ({ onSubmit }) => {
 };
 
 function CheckoutModal(props): JSX.Element {
-  const _busdAmount:Number = 10;
-  const { account } = useWeb3React();
+  const _busdAmount:number = 10;
+  // const { account } = useWeb3React();
+  // console.log(account);
   const { data:vesting } = useVestingContractAddress();
   const { data: data2 } = useTokenSaleContract(vesting, _busdAmount);
   
   console.log('data:', vesting);
   console.log('data:', data2);
 
-  const [show, setShow] = React.useState(false);
+  // const [show, setShow] = React.useState(false);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  // const handleClose = () => setShow(false);
+  // const handleShow = () => setShow(true);
 
   const onFormSubmit = (e) => {
     e.preventDefault();
-    handleClose();
+    //handleClose();
   };
 
     return (
@@ -70,7 +69,7 @@ function CheckoutModal(props): JSX.Element {
     );
   }
   
-  function Checkout(props) {
+  function Checkout() {
   
     const [modalShow, setModalShow] = React.useState(false);
   
