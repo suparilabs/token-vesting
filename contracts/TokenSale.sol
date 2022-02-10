@@ -110,18 +110,16 @@ contract TokenSale is Ownable {
         uint256 _actualUSDTAmount = _balanceAfter.sub(_balanceBefore);
         require(_actualUSDTAmount >= 1000 ether, "3"); // USDT has 18 ethers
         uint256 _numberOfTokens = computeTokensForUSDT(_actualUSDTAmount);
-
-        require(token.allowance(owner(), address(this)) >= _numberOfTokens, "5");
-
+        require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
         emit Sold(msg.sender, _numberOfTokens);
         coinsSold += _numberOfTokens;
         uint256 _nonVestedTokenAmount = _numberOfTokens.mul(availableAtTGE).div(10000);
         uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "6");
+            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
         } // vest rest of the tokens
-        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "7");
+        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
         vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
     }
