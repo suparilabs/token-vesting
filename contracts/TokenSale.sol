@@ -54,7 +54,7 @@ contract TokenSale is Ownable {
     }
 
     modifier onSale() {
-        require(saleStatus == SaleStatus.Start);
+        require(saleStatus == SaleStatus.Start, "1");
         _;
     }
 
@@ -82,52 +82,56 @@ contract TokenSale is Ownable {
         availableAtTGE = _availableAtTGE;
     }
 
-    function buyTokensUsingBUSD(uint256 _busdAmount, uint256 numberOfTokens) external onSale {
+    function buyTokensUsingBUSD(uint256 _busdAmount) external onSale {
         uint256 _balanceBefore = IERC20(BUSD).balanceOf(address(this));
-        require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount));
+        require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount), "2");
         uint256 _balanceAfter = IERC20(BUSD).balanceOf(address(this));
         uint256 _actualBUSDAmount = _balanceAfter.sub(_balanceBefore);
-        require(_actualBUSDAmount >= 1000 ether); // BUSD has 18 ethers
-        uint256 _tokenDecimals = ERC20(address(token)).decimals();
-        require(_actualBUSDAmount == numberOfTokens.mul(exchangePriceBUSD).div(uint256(10)**_tokenDecimals));
-
-        require(token.allowance(owner(), address(this)) >= numberOfTokens);
-
-        emit Sold(msg.sender, numberOfTokens);
-        coinsSold += numberOfTokens;
-        uint256 _nonVestedTokenAmount = numberOfTokens.mul(availableAtTGE).div(10000);
-        uint256 _vestedTokenAmount = numberOfTokens.sub(_nonVestedTokenAmount);
+        require(_actualBUSDAmount >= 1000 ether, "3"); // BUSD has 18 ethers
+        uint256 _numberOfTokens = computeTokensForBUSD(_actualBUSDAmount);
+        require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
+        emit Sold(msg.sender, _numberOfTokens);
+        coinsSold += _numberOfTokens;
+        uint256 _nonVestedTokenAmount = _numberOfTokens.mul(availableAtTGE).div(10000);
+        uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount));
+            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
         } // vest rest of the tokens
-        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount));
+        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
         vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
     }
 
-    function buyTokensUsingUSDT(uint256 _usdtAmount, uint256 numberOfTokens) external onSale {
+    function buyTokensUsingUSDT(uint256 _usdtAmount) external onSale {
         uint256 _balanceBefore = IERC20(USDT).balanceOf(address(this));
-        require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount));
+        require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount), "2");
         uint256 _balanceAfter = IERC20(USDT).balanceOf(address(this));
         uint256 _actualUSDTAmount = _balanceAfter.sub(_balanceBefore);
-        require(_actualUSDTAmount >= 1000 ether); // USDT has 18 ethers
-        uint256 _tokenDecimals = ERC20(address(token)).decimals();
-        require(_actualUSDTAmount == numberOfTokens.mul(exchangePriceUSDT).div(uint256(10)**_tokenDecimals));
-
-        require(token.allowance(owner(), address(this)) >= numberOfTokens);
-
-        emit Sold(msg.sender, numberOfTokens);
-        coinsSold += numberOfTokens;
-        uint256 _nonVestedTokenAmount = numberOfTokens.mul(availableAtTGE).div(10000);
-        uint256 _vestedTokenAmount = numberOfTokens.sub(_nonVestedTokenAmount);
+        require(_actualUSDTAmount >= 1000 ether, "3"); // USDT has 18 ethers
+        uint256 _numberOfTokens = computeTokensForUSDT(_actualUSDTAmount);
+        require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
+        emit Sold(msg.sender, _numberOfTokens);
+        coinsSold += _numberOfTokens;
+        uint256 _nonVestedTokenAmount = _numberOfTokens.mul(availableAtTGE).div(10000);
+        uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount));
+            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
         } // vest rest of the tokens
-        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount));
+        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
         vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
+    }
+
+    function computeTokensForBUSD(uint256 _busdAmount) public view returns (uint256) {
+        uint256 _tokenDecimals = ERC20(address(token)).decimals();
+        return (_busdAmount * 10**_tokenDecimals) / exchangePriceBUSD;
+    }
+
+    function computeTokensForUSDT(uint256 _usdtAmount) public view returns (uint256) {
+        uint256 _tokenDecimals = ERC20(address(token)).decimals();
+        return (_usdtAmount * 10**_tokenDecimals) / exchangePriceUSDT;
     }
 
     function createVestingSchedule(
