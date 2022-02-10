@@ -30,9 +30,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       "97": "0xa0D61133044ACB8Fb72Bc5a0378Fe13786538Dd0",
     },
   };
+  let usdtAddress;
+  let busdAddress;
+  if (!["56", "97"].includes(chainId)) {
+    const erc20Factory = await hre.ethers.getContractFactory("Token");
+    const usdt = await erc20Factory.deploy("Tether", "USDT", "100000000000000000000000");
+    await usdt.deployed();
+    usdtAddress = usdt.address;
+    const busd = await erc20Factory.deploy("Binance Peg USD", "BUSD", "100000000000000000000000");
+    await busd.deployed();
+    busdAddress = busd.address;
+  } else {
+    usdtAddress = coinAddress.USDT[chainId];
+    busdAddress = coinAddress.BUSD[chainId];
+  }
   await deploy("TokenSale", {
     from: deployer,
-    args: [tokenAddress, coinAddress.USDT[chainId], coinAddress.BUSD[chainId]],
+    args: [tokenAddress, usdtAddress, busdAddress],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
