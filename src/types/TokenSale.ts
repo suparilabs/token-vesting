@@ -23,10 +23,12 @@ export interface TokenSaleInterface extends utils.Interface {
     "BUSD()": FunctionFragment;
     "USDT()": FunctionFragment;
     "availableAtTGE()": FunctionFragment;
-    "buyTokensUsingBUSD(uint256,uint256)": FunctionFragment;
-    "buyTokensUsingUSDT(uint256,uint256)": FunctionFragment;
+    "buyTokensUsingBUSD(uint256)": FunctionFragment;
+    "buyTokensUsingUSDT(uint256)": FunctionFragment;
     "cliff()": FunctionFragment;
     "coinsSold()": FunctionFragment;
+    "computeTokensForBUSD(uint256)": FunctionFragment;
+    "computeTokensForUSDT(uint256)": FunctionFragment;
     "createVestingSchedule(address,uint256,uint256,uint256,uint256,bool,uint256,uint256)": FunctionFragment;
     "duration()": FunctionFragment;
     "endSale()": FunctionFragment;
@@ -58,14 +60,22 @@ export interface TokenSaleInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "buyTokensUsingBUSD",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "buyTokensUsingUSDT",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "cliff", values?: undefined): string;
   encodeFunctionData(functionFragment: "coinsSold", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "computeTokensForBUSD",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "computeTokensForUSDT",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "createVestingSchedule",
     values: [
@@ -158,6 +168,14 @@ export interface TokenSaleInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "cliff", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "coinsSold", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "computeTokensForBUSD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "computeTokensForUSDT",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "createVestingSchedule",
     data: BytesLike
@@ -276,19 +294,27 @@ export interface TokenSale extends BaseContract {
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
-      numberOfTokens: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
-      numberOfTokens: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     cliff(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     coinsSold(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    computeTokensForBUSD(
+      _busdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    computeTokensForUSDT(
+      _usdtAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     createVestingSchedule(
       _beneficiary: string,
@@ -386,19 +412,27 @@ export interface TokenSale extends BaseContract {
 
   buyTokensUsingBUSD(
     _busdAmount: BigNumberish,
-    numberOfTokens: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   buyTokensUsingUSDT(
     _usdtAmount: BigNumberish,
-    numberOfTokens: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
   coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
+
+  computeTokensForBUSD(
+    _busdAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  computeTokensForUSDT(
+    _usdtAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   createVestingSchedule(
     _beneficiary: string,
@@ -496,19 +530,27 @@ export interface TokenSale extends BaseContract {
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
-      numberOfTokens: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
-      numberOfTokens: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
     coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
+
+    computeTokensForBUSD(
+      _busdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    computeTokensForUSDT(
+      _usdtAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     createVestingSchedule(
       _beneficiary: string,
@@ -607,19 +649,27 @@ export interface TokenSale extends BaseContract {
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
-      numberOfTokens: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
-      numberOfTokens: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
     coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
+
+    computeTokensForBUSD(
+      _busdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    computeTokensForUSDT(
+      _usdtAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     createVestingSchedule(
       _beneficiary: string,
@@ -718,19 +768,27 @@ export interface TokenSale extends BaseContract {
 
     buyTokensUsingBUSD(
       _busdAmount: BigNumberish,
-      numberOfTokens: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     buyTokensUsingUSDT(
       _usdtAmount: BigNumberish,
-      numberOfTokens: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     cliff(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     coinsSold(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    computeTokensForBUSD(
+      _busdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    computeTokensForUSDT(
+      _usdtAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     createVestingSchedule(
       _beneficiary: string,
