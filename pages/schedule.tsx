@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Vesting from '../components/Vesting';
+import Vesting from '../components/Vesting_old';
 import Layout from "../components/Layout";
 
 export default function DAppPage(): JSX.Element {

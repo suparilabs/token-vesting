@@ -15,7 +15,7 @@ const Header = () => {
       <Navbar collapseOnSelect expand="lg" className="bg-blue-700">
         <Container>
           <Navbar.Brand href="#home">
-            <img src="https://seraproject.org/views/front//images/logo.png" width="60px" height="70px" alt="Logo" />
+            <img src="https://seraproject.org/views/front//images/logo.png" width="50px" height="60px" alt="Logo" />
             {/* <Image loader={myLoader as ImageLoader} src="logo.png" alt="SERA" width={60} height={70} /> */}
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
