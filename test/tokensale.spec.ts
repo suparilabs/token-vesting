@@ -8,6 +8,7 @@ import { getAddress } from "@ethersproject/address";
 import { solidity } from "ethereum-waffle";
 import { ERC20, TokenSale, TokenVesting } from "../src/types";
 import { Signers } from "./types";
+import { BigNumber } from "ethers";
 
 const BUSD_BSC_ADDRESS = getAddress("0xe9e7cea3dedca5984780bafc599bd69add087d56");
 const USDT_BSC_ADDRESS = getAddress("0x55d398326f99059ff775485246999027b3197955");
@@ -87,6 +88,69 @@ describe("TokenSale", function () {
     });
     it("default values for token vesting", async function () {
       expect(await this.tokenVesting.getToken()).to.eq(this.token.address);
+    });
+    it("tokensale setter function protection", async function () {
+      await expect(this.tokenSale.connect(this.signers.charlie).setExchangePriceUSDT("0")).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(this.tokenSale.connect(this.signers.charlie).setExchangePriceBUSD("0")).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(this.tokenSale.connect(this.signers.charlie).setCliff("0")).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(this.tokenSale.connect(this.signers.charlie).setDuration("0")).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(this.tokenSale.connect(this.signers.charlie).setSaleStatus("0")).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(this.tokenSale.connect(this.signers.charlie).setAvailableAtTGE("0")).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(this.tokenSale.connect(this.signers.charlie).withdraw("0")).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(this.tokenSale.connect(this.signers.charlie).withdrawBUSD()).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(this.tokenSale.connect(this.signers.charlie).withdrawUSDT()).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(
+        this.tokenSale
+          .connect(this.signers.charlie)
+          .createVestingSchedule(this.signers.beneficiary.address, 0, 0, 0, 0, false, 0, 0),
+      ).to.revertedWith("Ownable: caller is not the owner");
+    });
+    it("buy function protection when sale is not started", async function () {
+      await expect(this.tokenSale.connect(this.signers.charlie).buyTokensUsingBUSD("0")).to.revertedWith("1");
+      await expect(this.tokenSale.connect(this.signers.charlie).buyTokensUsingUSDT("0")).to.revertedWith("1");
+    });
+    it("owner can start sale", async function () {
+      await this.tokenSale.connect(this.signers.owner).setSaleStatus(1);
+      expect(await this.tokenSale.saleStatus()).to.eq(1);
+    });
+    it("buy token for BUSD when sale starts", async function () {
+      const busdExchangePrice = await this.tokenSale.exchangePriceBUSD();
+      const availableAtTGE = await this.tokenSale.availableAtTGE();
+      await this.busd.connect(this.signers.admin).transfer(this.signers.alice.address, parseEther("2000"));
+      await this.busd.connect(this.signers.alice).approve(this.tokenSale.address, parseEther("2000"));
+      const expectedTokensForBUSD = parseEther("2000").mul(BigNumber.from(10).pow("18")).div(busdExchangePrice);
+      const expectedTokenAtTGE = expectedTokensForBUSD.mul(availableAtTGE).div("10000");
+      expect(await this.tokenSale.computeTokensForBUSD(parseEther("2000"))).to.eq(expectedTokensForBUSD);
+      const seraBalanceOfTokenVestingBefore = await this.token.balanceOf(this.tokenVesting.address);
+      const coinsSoldBefore = await this.tokenSale.coinsSold();
+      await expect(this.tokenSale.connect(this.signers.alice).buyTokensUsingBUSD(parseEther("2000")))
+        .emit(this.tokenSale, "Sold")
+        .withArgs(this.signers.alice.address, expectedTokensForBUSD);
+      expect(await this.token.balanceOf(this.signers.alice.address)).to.eq(expectedTokenAtTGE);
+      const seraBalanceOfTokenVestingAfter = await this.token.balanceOf(this.tokenVesting.address);
+      expect(seraBalanceOfTokenVestingAfter).to.eq(
+        expectedTokensForBUSD.add(seraBalanceOfTokenVestingBefore).sub(expectedTokenAtTGE),
+      );
+      const coinsSoldAfter = await this.tokenSale.coinsSold();
+      expect(coinsSoldAfter).to.eq(coinsSoldBefore.add(expectedTokensForBUSD));
     });
   });
 });
