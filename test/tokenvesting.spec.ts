@@ -1,12 +1,10 @@
 import abi from "ethereumjs-abi";
-import { waffle, ethers, deployments, getNamedAccounts, artifacts } from "hardhat";
+import { waffle, ethers, artifacts } from "hardhat";
 import { expect } from "chai";
 import { Token } from "../src/types";
-import { MockTokenVesting, Vesting } from "../src/types";
-import { Signer } from "ethers";
+import { MockTokenVesting } from "../src/types";
 import { Artifact } from "hardhat/types";
 import { Signers } from "./types";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 
 describe("Vesting", function () {
   before(async function () {
@@ -18,12 +16,6 @@ describe("Vesting", function () {
     this.signers.bob = bob;
     this.signers.charlie = charlie;
     this.signers.beneficiary = beneficiary;
-    // await deployments.fixture("Token");
-    // this.token = <Token>await ethers.getContract("Token");
-    // const mockTokenVestingArtifact: Artifact = await artifacts.readArtifact("MockTokenVesting");
-    // this.mockTokenVesting = <MockTokenVesting>(
-    //   await waffle.deployContract(this.signers.owner, mockTokenVestingArtifact, [this.token.address])
-    // );
   });
   beforeEach(async function () {
     const tokenArtifact: Artifact = await artifacts.readArtifact("Token");
@@ -241,45 +233,24 @@ describe("Vesting", function () {
       ).to.equal(expectedVestingScheduleId);
     });
 
-    // it.skip("Should check input parameters for createVestingSchedule method", async function () {
-    //   const tokenVesting = await TokenVesting.deploy(testToken.address);
-    //   await tokenVesting.deployed();
-    //   await testToken.transfer(tokenVesting.address, 1000);
-    //   const time = Date.now();
-    //   await expect(
-    //     tokenVesting.createVestingSchedule(
-    //       addr1.address,
-    //       time,
-    //       0,
-    //       0,
-    //       1,
-    //       false,
-    //       1
-    //     )
-    //   ).to.be.revertedWith("TokenVesting: duration must be > 0");
-    //   await expect(
-    //     tokenVesting.createVestingSchedule(
-    //       addr1.address,
-    //       time,
-    //       0,
-    //       1,
-    //       0,
-    //       false,
-    //       1
-    //     )
-    //   ).to.be.revertedWith("TokenVesting: slicePeriodSeconds must be >= 1");
-    //   await expect(
-    //     tokenVesting.createVestingSchedule(
-    //       addr1.address,
-    //       time,
-    //       0,
-    //       1,
-    //       1,
-    //       false,
-    //       0
-    //     )
-    //   ).to.be.revertedWith("TokenVesting: amount must be > 0");
-    // });
+    it("Should check input parameters for createVestingSchedule method", async function () {
+      // deploy vesting contract
+      const mockTokenVestingArtifact: Artifact = await artifacts.readArtifact("MockTokenVesting");
+      this.mockTokenVesting = <MockTokenVesting>(
+        await waffle.deployContract(this.signers.owner, mockTokenVestingArtifact, [this.testToken.address])
+      );
+      await this.testToken.transfer(this.mockTokenVesting.address, 1000);
+      const time = Date.now();
+      await expect(
+        this.mockTokenVesting.createVestingSchedule(this.signers.beneficiary.address, time, 0, 0, 1, false, 1),
+      ).to.be.revertedWith("TokenVesting: duration must be > 0");
+      await expect(
+        this.mockTokenVesting.createVestingSchedule(this.signers.beneficiary.address, time, 0, 1, 0, false, 1),
+      ).to.be.revertedWith("TokenVesting: slicePeriodSeconds must be >= 1");
+      await expect(
+        this.mockTokenVesting.createVestingSchedule(this.signers.beneficiary.address, time, 0, 1, 1, false, 0),
+      ).to.be.revertedWith("TokenVesting: amount must be > 0");
+    });
   });
 });
 
