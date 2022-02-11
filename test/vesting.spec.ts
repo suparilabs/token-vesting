@@ -1,3 +1,4 @@
+import abi from "ethereumjs-abi";
 import { waffle, ethers, deployments, getNamedAccounts, artifacts } from "hardhat";
 import { expect } from "chai";
 import { Token } from "../src/types";
@@ -172,75 +173,73 @@ describe("Vesting", function () {
        */
     });
 
-    //     it("Should release vested tokens if revoked", async function () {
-    //         // deploy vesting contract
-    //         const tokenVesting = await TokenVesting.deploy(testToken.address);
-    //         await tokenVesting.deployed();
-    //         expect((await tokenVesting.getToken()).toString()).to.equal(
-    //             testToken.address
-    //         );
-    //         // send tokens to vesting contract
-    //         await expect(testToken.transfer(tokenVesting.address, 1000))
-    //             .to.emit(testToken, "Transfer")
-    //             .withArgs(owner.address, tokenVesting.address, 1000);
+    it("Should release vested tokens if revoked", async function () {
+      // deploy vesting contract
+      const mockTokenVestingArtifact: Artifact = await artifacts.readArtifact("MockTokenVesting");
+      this.mockTokenVesting = <MockTokenVesting>(
+        await waffle.deployContract(this.signers.owner, mockTokenVestingArtifact, [this.testToken.address])
+      );
+      expect((await this.mockTokenVesting.getToken()).toString()).to.equal(this.testToken.address);
+      // send tokens to vesting contract
+      await expect(this.testToken.transfer(this.mockTokenVesting.address, 1000))
+        .to.emit(this.testToken, "Transfer")
+        .withArgs(this.signers.owner.address, this.mockTokenVesting.address, 1000);
 
-    //         const baseTime = 1622551248;
-    //         const beneficiary = addr1;
-    //         const startTime = baseTime;
-    //         const cliff = 0;
-    //         const duration = 1000;
-    //         const slicePeriodSeconds = 1;
-    //         const revokable = true;
-    //         const amount = 100;
+      const baseTime = 1622551248;
+      const startTime = baseTime;
+      const cliff = 0;
+      const duration = 1000;
+      const slicePeriodSeconds = 1;
+      const revokable = true;
+      const amount = 100;
 
-    //         // create new vesting schedule
-    //         await tokenVesting.createVestingSchedule(
-    //             beneficiary.address,
-    //             startTime,
-    //             cliff,
-    //             duration,
-    //             slicePeriodSeconds,
-    //             revokable,
-    //             amount
-    //         );
+      // create new vesting schedule
+      await this.mockTokenVesting.createVestingSchedule(
+        this.signers.beneficiary.address,
+        startTime,
+        cliff,
+        duration,
+        slicePeriodSeconds,
+        revokable,
+        amount,
+      );
 
-    //         // compute vesting schedule id
-    //         const vestingScheduleId =
-    //             await tokenVesting.computeVestingScheduleIdForAddressAndIndex(
-    //                 beneficiary.address,
-    //                 0
-    //             );
+      // compute vesting schedule id
+      const vestingScheduleId = await this.mockTokenVesting.computeVestingScheduleIdForAddressAndIndex(
+        this.signers.beneficiary.address,
+        0,
+      );
 
-    //         // set time to half the vesting period
-    //         const halfTime = baseTime + duration / 2;
-    //         await tokenVesting.setCurrentTime(halfTime);
+      // set time to half the vesting period
+      const halfTime = baseTime + duration / 2;
+      await this.mockTokenVesting.setCurrentTime(halfTime);
 
-    //         await expect(tokenVesting.revoke(vestingScheduleId))
-    //             .to.emit(testToken, "Transfer")
-    //             .withArgs(tokenVesting.address, beneficiary.address, 50);
-    //     });
+      await expect(this.mockTokenVesting.revoke(vestingScheduleId))
+        .to.emit(this.testToken, "Transfer")
+        .withArgs(this.mockTokenVesting.address, this.signers.beneficiary.address, 50);
+    });
 
-    //     it("Should compute vesting schedule index", async function () {
-    //         const tokenVesting = await TokenVesting.deploy(testToken.address);
-    //         await tokenVesting.deployed();
-    //         const expectedVestingScheduleId =
-    //             "0xa279197a1d7a4b7398aa0248e95b8fcc6cdfb43220ade05d01add9c5468ea097";
-    //         expect(
-    //             (
-    //                 await tokenVesting.computeVestingScheduleIdForAddressAndIndex(
-    //                     addr1.address,
-    //                     0
-    //                 )
-    //             ).toString()
-    //         ).to.equal(expectedVestingScheduleId);
-    //         expect(
-    //             (
-    //                 await tokenVesting.computeNextVestingScheduleIdForHolder(
-    //                     addr1.address
-    //                 )
-    //             ).toString()
-    //         ).to.equal(expectedVestingScheduleId);
-    //     });
+    it("Should compute vesting schedule index", async function () {
+      // deploy vesting contract
+      const mockTokenVestingArtifact: Artifact = await artifacts.readArtifact("MockTokenVesting");
+      this.mockTokenVesting = <MockTokenVesting>(
+        await waffle.deployContract(this.signers.owner, mockTokenVestingArtifact, [this.testToken.address])
+      );
+      const expectedVestingScheduleId = getSoliditySHA3Hash(
+        ["address", "uint256"],
+        [this.signers.beneficiary.address, 0],
+      );
+      expect(
+        (
+          await this.mockTokenVesting.computeVestingScheduleIdForAddressAndIndex(this.signers.beneficiary.address, 0)
+        ).toString(),
+      ).to.equal(expectedVestingScheduleId);
+      expect(
+        (
+          await this.mockTokenVesting.computeNextVestingScheduleIdForHolder(this.signers.beneficiary.address)
+        ).toString(),
+      ).to.equal(expectedVestingScheduleId);
+    });
 
     //     it("Should check input parameters for createVestingSchedule method", async function () {
     //         const tokenVesting = await TokenVesting.deploy(testToken.address);
@@ -283,3 +282,8 @@ describe("Vesting", function () {
   });
   // });
 });
+
+export function getSoliditySHA3Hash(argTypes: string[], args: any[]): string {
+  const soliditySHA3Hash = "0x" + abi.soliditySHA3(argTypes, args).toString("hex");
+  return soliditySHA3Hash;
+}
