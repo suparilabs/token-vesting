@@ -190,7 +190,7 @@ describe("TokenSale", function () {
       expect(coinsSoldAfter).to.eq(coinsSoldBefore.add(expectedTokensForUSDT));
     });
     it("endsale", async function () {
-      await this.token.connect(this.signers.owner).transfer(this.tokenSale.address, parseEther("5000"));
+      await this.token.connect(this.signers.owner).transfer(this.tokenVesting.address, parseEther("5000"));
       const expectedBUSD = await this.busd.balanceOf(this.tokenSale.address);
       const expectedUSDT = await this.usdt.balanceOf(this.tokenSale.address);
       const expectedSERA = (await this.token.balanceOf(this.tokenVesting.address)).sub(
@@ -206,6 +206,21 @@ describe("TokenSale", function () {
       expect(busdAfter).to.eq(expectedBUSD.add(busdBefore));
       expect(usdtAfter).to.eq(expectedUSDT.add(usdtBefore));
       expect(seraAfter).to.eq(expectedSERA.add(seraBefore));
+      expect(await this.tokenSale.saleStatus()).to.eq(0);
+    });
+    it("setters", async function () {
+      await this.tokenSale.connect(this.signers.owner).setExchangePriceUSDT("1");
+      await this.tokenSale.connect(this.signers.owner).setExchangePriceBUSD("1");
+      await this.tokenSale.connect(this.signers.owner).setCliff("1");
+      await this.tokenSale.connect(this.signers.owner).setDuration("1");
+      await this.tokenSale.connect(this.signers.owner).setSaleStatus("0");
+      await this.tokenSale.connect(this.signers.owner).setAvailableAtTGE("1");
+
+      expect(await this.tokenSale.exchangePriceUSDT()).to.eq("1");
+      expect(await this.tokenSale.exchangePriceBUSD()).to.eq("1");
+      expect(await this.tokenSale.cliff()).to.eq("1");
+      expect(await this.tokenSale.duration()).to.eq("1");
+      expect(await this.tokenSale.availableAtTGE()).to.eq("1");
       expect(await this.tokenSale.saleStatus()).to.eq(0);
     });
   });
