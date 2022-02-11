@@ -15,7 +15,7 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 /**
  * @title VestingContract
  */
-contract Vesting is Ownable, ReentrancyGuard {
+contract TokenVesting is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     struct VestingSchedule {

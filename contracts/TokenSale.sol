@@ -9,7 +9,7 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./Token.sol";
-import "./Vesting.sol";
+import "./TokenVesting.sol";
 
 /**
  * @title TokenSale Contract
@@ -31,7 +31,7 @@ contract TokenSale is Ownable {
     uint256 public cliff = 3 * 30 days;
     uint256 public duration = 18 * 30 days;
 
-    Vesting public vesting;
+    TokenVesting public vesting;
 
     uint256 public availableAtTGE = 200; // percentage basis points
 
@@ -50,7 +50,7 @@ contract TokenSale is Ownable {
         token = _token;
         USDT = _usdt;
         BUSD = _busd;
-        vesting = new Vesting(address(token));
+        vesting = new TokenVesting(address(token));
     }
 
     modifier onSale() {

@@ -56,8 +56,8 @@ export declare namespace TokenVesting {
   };
 }
 
-export interface MockTokenVestingInterface extends utils.Interface {
-  contractName: "MockTokenVesting";
+export interface TokenVestingInterface extends utils.Interface {
+  contractName: "TokenVesting";
   functions: {
     "computeNextVestingScheduleIdForHolder(address)": FunctionFragment;
     "computeReleasableAmount(bytes32)": FunctionFragment;
@@ -76,7 +76,6 @@ export interface MockTokenVestingInterface extends utils.Interface {
     "release(bytes32,uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "revoke(bytes32)": FunctionFragment;
-    "setCurrentTime(uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
   };
@@ -149,10 +148,6 @@ export interface MockTokenVestingInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "revoke", values: [BytesLike]): string;
   encodeFunctionData(
-    functionFragment: "setCurrentTime",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
@@ -218,10 +213,6 @@ export interface MockTokenVestingInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "revoke", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setCurrentTime",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
@@ -254,13 +245,13 @@ export type RevokedEvent = TypedEvent<[], {}>;
 
 export type RevokedEventFilter = TypedEventFilter<RevokedEvent>;
 
-export interface MockTokenVesting extends BaseContract {
-  contractName: "MockTokenVesting";
+export interface TokenVesting extends BaseContract {
+  contractName: "TokenVesting";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: MockTokenVestingInterface;
+  interface: TokenVestingInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -362,11 +353,6 @@ export interface MockTokenVesting extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setCurrentTime(
-      _time: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -456,11 +442,6 @@ export interface MockTokenVesting extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setCurrentTime(
-    _time: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   transferOwnership(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -547,11 +528,6 @@ export interface MockTokenVesting extends BaseContract {
 
     revoke(
       vestingScheduleId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setCurrentTime(
-      _time: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -661,11 +637,6 @@ export interface MockTokenVesting extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setCurrentTime(
-      _time: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -759,11 +730,6 @@ export interface MockTokenVesting extends BaseContract {
 
     revoke(
       vestingScheduleId: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setCurrentTime(
-      _time: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

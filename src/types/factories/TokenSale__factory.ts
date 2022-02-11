@@ -443,7 +443,7 @@ const _abi = [
     name: "vesting",
     outputs: [
       {
-        internalType: "contract Vesting",
+        internalType: "contract TokenVesting",
         name: "",
         type: "address",
       },
