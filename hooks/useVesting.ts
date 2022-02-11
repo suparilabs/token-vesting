@@ -1,16 +1,13 @@
 import useSWR, { SWRResponse } from "swr";
-import { ChainId, Token, TokenAmount } from "@uniswap/sdk";
 import { Contract } from "ethers";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
-import { ADDRESS_ZERO, PRIVATE_SALE_ADDRESS } from "../constants";
 import { useContract } from "./useContract";
 import { DataType } from "../utils";
-import { ethers, BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
-import { PrivateSaleContract__factory } from "../src/types";
+import { Vesting__factory } from "../src/types";
 
-function getVestingSchedulesCountByBenificiary(contract: Contract): (address: string) => Promise<Number> {
-  return async (address: string): Promise<Number> =>
+function getVestingSchedulesCountByBenificiary(contract: Contract): (address: string) => Promise<number> {
+  return async (address: string): Promise<number> =>
     contract.getVestingSchedulesCountByBeneficiary(address).then((result: any) => result.toNumber());
 }
 
@@ -24,12 +21,16 @@ function getVestingSchedulesCountByBenificiary(contract: Contract): (address: st
 //     contract.createVestingSchedule(address, start, cliff, duration, slicePeriod, revocable, amount).then((result: any) => result);
 // }
 
-export function useVestingScheduleCountBeneficiary(address?: string | null, suspense = false): SWRResponse<any, any> {
+export function useVestingScheduleCountBeneficiary(
+  vesting: string,
+  address?: string | null,
+  suspense = false,
+): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
-  const contract = useContract(PRIVATE_SALE_ADDRESS, PrivateSaleContract__factory.abi);
+  const contract = useContract(vesting, Vesting__factory.abi);
 
   const result: any = useSWR(
-    typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,
+    typeof address === "string" && contract ? [address, chainId, vesting, DataType.TokenBalance] : null,
     getVestingSchedulesCountByBenificiary(contract as Contract),
     { suspense },
   );

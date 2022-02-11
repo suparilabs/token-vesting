@@ -30,7 +30,7 @@ yarn hardhat deploy:erc20 \
 #### Deploy Private Sale Contract
 
 ```
-yarn hardhat deploy:privateSaleContract \
+yarn hardhat deploy:vesting \
 --token <token-address>
 --network localhost
 ```
@@ -60,7 +60,7 @@ yarn hardhat verify \
 #### Fund Private Sale Contract
 
 ```
-yarn hardhat action:fundPrivateSaleContract \
+yarn hardhat action:fundVesting \
 --token <token-address> \
 --private-sale-contract <private-sale-contract-address> \
 --amount <amount> \
@@ -71,7 +71,7 @@ yarn hardhat action:fundPrivateSaleContract \
 
 ```
 yarn hardhat action:createVestingSchedule \
---private-sale-contract <private-sale-contract> \
+--vesting <private-sale-contract> \
 --beneficiary <beneficiary> \
 --start <start time> \
 --cliff <cliff time> \

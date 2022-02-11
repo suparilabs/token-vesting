@@ -2,7 +2,7 @@ import useSWR, { SWRResponse } from "swr";
 import { ChainId, Token, TokenAmount } from "@uniswap/sdk";
 import { Contract } from "ethers";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
-import { ADDRESS_ZERO, ERC20_ADDRESS, PRIVATE_SALE_ADDRESS } from "../constants";
+import { ERC20_ADDRESS } from "../constants";
 import { useContract } from "./useContract";
 import { DataType } from "../utils";
 import { useWeb3React } from "@web3-react/core";

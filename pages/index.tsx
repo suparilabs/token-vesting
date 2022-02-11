@@ -1,15 +1,14 @@
-import Link from "next/link";
+// import Link from "next/link";
 import Header from "./Header";
 
 const IndexPage = () => (
-
   <>
   <Header/>
-    <p>
+    {/* <p>
       <Link href="/vesting">
         <a>Vesting</a>
       </Link>
-    </p>
+    </p> */}
   </>
 
 );

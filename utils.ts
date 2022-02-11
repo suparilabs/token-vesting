@@ -1,4 +1,9 @@
 import { formatUnits } from "@ethersproject/units";
+import { BigNumberish } from "ethers";
+
+export function shortenHex(hex: string, length = 4) {
+  return `${hex.substring(0, length + 2)}…${hex.substring(hex.length - length)}`;
+}
 
 export const CHAIN_ID_NAMES: { [key: number]: string } = {
   1: "Mainnet",
@@ -30,7 +35,15 @@ export const COIN_SYMBOLS: { [key: number]: string } = {
   56: "BNB",
 };
 
-export const parseBalance = (balance: number, decimals = 18, decimalstoDisplay = 3) =>
+const ETHERSCAN_PREFIXES = {
+  1: "",
+  3: "ropsten.",
+  4: "rinkeby.",
+  5: "goerli.",
+  42: "kovan.",
+};
+
+export const parseBalance = (balance: BigNumberish, decimals = 18, decimalstoDisplay = 3) =>
   Number(formatUnits(balance, decimals)).toFixed(decimalstoDisplay);
 
 export enum DataType {
@@ -38,4 +51,17 @@ export enum DataType {
   ETHBalance,
   Address,
   TokenBalance,
+}
+
+export function formatEtherscanLink(type: "Account" | "Transaction", data: [number, string]) {
+  switch (type) {
+    case "Account": {
+      const [chainId, address] = data;
+      return `https://${ETHERSCAN_PREFIXES[chainId]}etherscan.io/address/${address}`;
+    }
+    case "Transaction": {
+      const [chainId, hash] = data;
+      return `https://${ETHERSCAN_PREFIXES[chainId]}etherscan.io/tx/${hash}`;
+    }
+  }
 }
