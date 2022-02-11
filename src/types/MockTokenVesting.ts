@@ -17,7 +17,7 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export declare namespace PrivateSaleContract {
+export declare namespace Vesting {
   export type VestingScheduleStruct = {
     initialized: boolean;
     beneficiary: string;
@@ -312,7 +312,7 @@ export interface MockTokenVesting extends BaseContract {
     getLastVestingScheduleForHolder(
       holder: string,
       overrides?: CallOverrides
-    ): Promise<[PrivateSaleContract.VestingScheduleStructOutput]>;
+    ): Promise<[Vesting.VestingScheduleStructOutput]>;
 
     getToken(overrides?: CallOverrides): Promise<[string]>;
 
@@ -324,13 +324,13 @@ export interface MockTokenVesting extends BaseContract {
     getVestingSchedule(
       vestingScheduleId: BytesLike,
       overrides?: CallOverrides
-    ): Promise<[PrivateSaleContract.VestingScheduleStructOutput]>;
+    ): Promise<[Vesting.VestingScheduleStructOutput]>;
 
     getVestingScheduleByAddressAndIndex(
       holder: string,
       index: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[PrivateSaleContract.VestingScheduleStructOutput]>;
+    ): Promise<[Vesting.VestingScheduleStructOutput]>;
 
     getVestingSchedulesCount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -408,7 +408,7 @@ export interface MockTokenVesting extends BaseContract {
   getLastVestingScheduleForHolder(
     holder: string,
     overrides?: CallOverrides
-  ): Promise<PrivateSaleContract.VestingScheduleStructOutput>;
+  ): Promise<Vesting.VestingScheduleStructOutput>;
 
   getToken(overrides?: CallOverrides): Promise<string>;
 
@@ -420,13 +420,13 @@ export interface MockTokenVesting extends BaseContract {
   getVestingSchedule(
     vestingScheduleId: BytesLike,
     overrides?: CallOverrides
-  ): Promise<PrivateSaleContract.VestingScheduleStructOutput>;
+  ): Promise<Vesting.VestingScheduleStructOutput>;
 
   getVestingScheduleByAddressAndIndex(
     holder: string,
     index: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<PrivateSaleContract.VestingScheduleStructOutput>;
+  ): Promise<Vesting.VestingScheduleStructOutput>;
 
   getVestingSchedulesCount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -502,7 +502,7 @@ export interface MockTokenVesting extends BaseContract {
     getLastVestingScheduleForHolder(
       holder: string,
       overrides?: CallOverrides
-    ): Promise<PrivateSaleContract.VestingScheduleStructOutput>;
+    ): Promise<Vesting.VestingScheduleStructOutput>;
 
     getToken(overrides?: CallOverrides): Promise<string>;
 
@@ -514,13 +514,13 @@ export interface MockTokenVesting extends BaseContract {
     getVestingSchedule(
       vestingScheduleId: BytesLike,
       overrides?: CallOverrides
-    ): Promise<PrivateSaleContract.VestingScheduleStructOutput>;
+    ): Promise<Vesting.VestingScheduleStructOutput>;
 
     getVestingScheduleByAddressAndIndex(
       holder: string,
       index: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PrivateSaleContract.VestingScheduleStructOutput>;
+    ): Promise<Vesting.VestingScheduleStructOutput>;
 
     getVestingSchedulesCount(overrides?: CallOverrides): Promise<BigNumber>;
 

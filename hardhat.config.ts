@@ -76,17 +76,22 @@ const config: HardhatUserConfig = {
     src: "./contracts",
   },
   namedAccounts: {
-    deployer: 0,
-    admin: 1,
-    owner: 2,
+    owner: 0,
+    deployer: 1,
+    admin: 2,
     alice: 3,
     bob: 4,
     charlie: 5,
+    beneficiary: 6,
   },
   networks: {
     hardhat: {
       accounts: {
         mnemonic,
+      },
+      forking: {
+        blockNumber: 15159641,
+        url: process.env.BSCSCAN_ARCHIVE_NODE_URL as string,
       },
       chainId: chainIds.hardhat,
     },

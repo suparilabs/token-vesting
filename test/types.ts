@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import type { Fixture } from "ethereum-waffle";
-import { PrivateSaleContract, Token } from "../src/types";
+import { Vesting, Token } from "../src/types";
 import { MockTokenVesting } from "../src/types/MockTokenVesting";
 
 declare module "mocha" {
@@ -9,7 +9,7 @@ declare module "mocha" {
     signers: Signers;
     token: Token;
     testToken: Token;
-    privateSaleContract: PrivateSaleContract;
+    vesting: Vesting;
     mockTokenVesting: MockTokenVesting;
   }
 }
@@ -20,4 +20,5 @@ export interface Signers {
   alice: SignerWithAddress;
   bob: SignerWithAddress;
   charlie: SignerWithAddress;
+  beneficiary: SignerWithAddress;
 }
