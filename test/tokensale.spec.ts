@@ -122,6 +122,14 @@ describe("TokenSale", function () {
           .connect(this.signers.charlie)
           .createVestingSchedule(this.signers.beneficiary.address, 0, 0, 0, 0, false, 0, 0),
       ).to.revertedWith("Ownable: caller is not the owner");
+      await expect(this.tokenSale.connect(this.signers.charlie).endSale()).to.revertedWith(
+        "Ownable: caller is not the owner",
+      );
+      await expect(
+        this.tokenSale
+          .connect(this.signers.charlie)
+          .revoke("0xabcd1234abcd1234abcd1234abcd1234abcde12341a2b3c4d5e6f12345fdecba"),
+      ).to.revertedWith("Ownable: caller is not the owner");
     });
     it("buy function protection when sale is not started", async function () {
       await expect(this.tokenSale.connect(this.signers.charlie).buyTokensUsingBUSD("0")).to.revertedWith("1");
@@ -131,11 +139,16 @@ describe("TokenSale", function () {
       await this.tokenSale.connect(this.signers.owner).setSaleStatus(1);
       expect(await this.tokenSale.saleStatus()).to.eq(1);
     });
+    it("fail if no minimum amount BUSD", async function () {
+      await this.busd.connect(this.signers.admin).transfer(this.signers.alice.address, parseEther("2000"));
+      await this.busd.connect(this.signers.alice).approve(this.tokenSale.address, parseEther("2000"));
+      await expect(this.tokenSale.connect(this.signers.alice).buyTokensUsingBUSD(parseEther("200"))).to.revertedWith(
+        "3",
+      );
+    });
     it("buy token for BUSD when sale starts", async function () {
       const busdExchangePrice = await this.tokenSale.exchangePriceBUSD();
       const availableAtTGE = await this.tokenSale.availableAtTGE();
-      await this.busd.connect(this.signers.admin).transfer(this.signers.alice.address, parseEther("2000"));
-      await this.busd.connect(this.signers.alice).approve(this.tokenSale.address, parseEther("2000"));
       const expectedTokensForBUSD = parseEther("2000").mul(BigNumber.from(10).pow("18")).div(busdExchangePrice);
       const expectedTokenAtTGE = expectedTokensForBUSD.mul(availableAtTGE).div("10000");
       expect(await this.tokenSale.computeTokensForBUSD(parseEther("2000"))).to.eq(expectedTokensForBUSD);
@@ -151,6 +164,49 @@ describe("TokenSale", function () {
       );
       const coinsSoldAfter = await this.tokenSale.coinsSold();
       expect(coinsSoldAfter).to.eq(coinsSoldBefore.add(expectedTokensForBUSD));
+    });
+    it("fail if no minimum amount USDT", async function () {
+      await this.usdt.connect(this.signers.admin).transfer(this.signers.bob.address, parseEther("2000"));
+      await this.usdt.connect(this.signers.bob).approve(this.tokenSale.address, parseEther("2000"));
+      await expect(this.tokenSale.connect(this.signers.bob).buyTokensUsingUSDT(parseEther("200"))).to.revertedWith("3");
+    });
+    it("buy token for USDT when sale starts", async function () {
+      const usdtExchangePrice = await this.tokenSale.exchangePriceUSDT();
+      const availableAtTGE = await this.tokenSale.availableAtTGE();
+      const expectedTokensForUSDT = parseEther("2000").mul(BigNumber.from(10).pow("18")).div(usdtExchangePrice);
+      const expectedTokenAtTGE = expectedTokensForUSDT.mul(availableAtTGE).div("10000");
+      expect(await this.tokenSale.computeTokensForUSDT(parseEther("2000"))).to.eq(expectedTokensForUSDT);
+      const seraBalanceOfTokenVestingBefore = await this.token.balanceOf(this.tokenVesting.address);
+      const coinsSoldBefore = await this.tokenSale.coinsSold();
+      await expect(this.tokenSale.connect(this.signers.bob).buyTokensUsingUSDT(parseEther("2000")))
+        .emit(this.tokenSale, "Sold")
+        .withArgs(this.signers.bob.address, expectedTokensForUSDT);
+      expect(await this.token.balanceOf(this.signers.bob.address)).to.eq(expectedTokenAtTGE);
+      const seraBalanceOfTokenVestingAfter = await this.token.balanceOf(this.tokenVesting.address);
+      expect(seraBalanceOfTokenVestingAfter).to.eq(
+        expectedTokensForUSDT.add(seraBalanceOfTokenVestingBefore).sub(expectedTokenAtTGE),
+      );
+      const coinsSoldAfter = await this.tokenSale.coinsSold();
+      expect(coinsSoldAfter).to.eq(coinsSoldBefore.add(expectedTokensForUSDT));
+    });
+    it("endsale", async function () {
+      await this.token.connect(this.signers.owner).transfer(this.tokenSale.address, parseEther("5000"));
+      const expectedBUSD = await this.busd.balanceOf(this.tokenSale.address);
+      const expectedUSDT = await this.usdt.balanceOf(this.tokenSale.address);
+      const expectedSERA = (await this.token.balanceOf(this.tokenVesting.address)).sub(
+        await this.tokenVesting.getVestingSchedulesTotalAmount(),
+      );
+      const busdBefore = await this.busd.balanceOf(this.signers.owner.address);
+      const usdtBefore = await this.usdt.balanceOf(this.signers.owner.address);
+      const seraBefore = await this.token.balanceOf(this.signers.owner.address);
+      await this.tokenSale.connect(this.signers.owner).endSale();
+      const busdAfter = await this.busd.balanceOf(this.signers.owner.address);
+      const usdtAfter = await this.usdt.balanceOf(this.signers.owner.address);
+      const seraAfter = await this.token.balanceOf(this.signers.owner.address);
+      expect(busdAfter).to.eq(expectedBUSD.add(busdBefore));
+      expect(usdtAfter).to.eq(expectedUSDT.add(usdtBefore));
+      expect(seraAfter).to.eq(expectedSERA.add(seraBefore));
+      expect(await this.tokenSale.saleStatus()).to.eq(0);
     });
   });
 });
