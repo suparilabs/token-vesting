@@ -1,6 +1,6 @@
 ## token-vesting
 
-Vesting Contract + UI
+Token Vesting + Sale Contract & UI
 
 ## Installation
 
@@ -30,7 +30,7 @@ yarn hardhat deploy:erc20 \
 #### Deploy Private Sale Contract
 
 ```
-yarn hardhat deploy:vesting \
+yarn hardhat deploy:tokenvesting \
 --token <token-address>
 --network localhost
 ```
@@ -46,7 +46,7 @@ yarn hardhat verify \
 0x8bD3317Ac7a8cF2441D4D2121CCed8Cc9D5b8881 SERA SERA 250000000000000000000000000
 ```
 
-### Verify PrivateSaleContract
+### Verify TokenVesting
 
 ```
 ➜ yarn hardhat verify \
@@ -57,12 +57,12 @@ yarn hardhat verify \
 
 ## Contract Actions
 
-#### Fund Private Sale Contract
+#### Fund Token Vesting Contract
 
 ```
-yarn hardhat action:fundVesting \
+yarn hardhat action:fundTokenVesting \
 --token <token-address> \
---private-sale-contract <private-sale-contract-address> \
+--token-vesting <token-vesting-contract-address> \
 --amount <amount> \
 --network localhost
 ```
@@ -71,7 +71,7 @@ yarn hardhat action:fundVesting \
 
 ```
 yarn hardhat action:createVestingSchedule \
---vesting <private-sale-contract> \
+--token-vesting <token-vesting-contract> \
 --beneficiary <beneficiary> \
 --start <start time> \
 --cliff <cliff time> \
@@ -88,5 +88,5 @@ yarn hardhat action:createVestingSchedule \
 #### How to get the claim tokens via vesting schedule Id given the account address
 
 - \_beneficiary = MetaMask address
-- vesting schedule id = `PrivateSaleContract.computeVestingScheduleIdForAddressAndIndex(_beneficiary,0)`
-- `PrivateSaleContract.release(vestingScheduleId)`
+- vesting schedule id = `TokenVesting.computeVestingScheduleIdForAddressAndIndex(_beneficiary,0)`
+- `TokenVesting.release(vestingScheduleId)`

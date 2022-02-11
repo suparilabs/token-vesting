@@ -17,7 +17,7 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export declare namespace Vesting {
+export declare namespace TokenVesting {
   export type VestingScheduleStruct = {
     initialized: boolean;
     beneficiary: string;
@@ -56,8 +56,8 @@ export declare namespace Vesting {
   };
 }
 
-export interface VestingInterface extends utils.Interface {
-  contractName: "Vesting";
+export interface MockTokenVestingInterface extends utils.Interface {
+  contractName: "MockTokenVesting";
   functions: {
     "computeNextVestingScheduleIdForHolder(address)": FunctionFragment;
     "computeReleasableAmount(bytes32)": FunctionFragment;
@@ -76,6 +76,7 @@ export interface VestingInterface extends utils.Interface {
     "release(bytes32,uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "revoke(bytes32)": FunctionFragment;
+    "setCurrentTime(uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
   };
@@ -148,6 +149,10 @@ export interface VestingInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "revoke", values: [BytesLike]): string;
   encodeFunctionData(
+    functionFragment: "setCurrentTime",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
@@ -213,6 +218,10 @@ export interface VestingInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "revoke", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "setCurrentTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
@@ -245,13 +254,13 @@ export type RevokedEvent = TypedEvent<[], {}>;
 
 export type RevokedEventFilter = TypedEventFilter<RevokedEvent>;
 
-export interface Vesting extends BaseContract {
-  contractName: "Vesting";
+export interface MockTokenVesting extends BaseContract {
+  contractName: "MockTokenVesting";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: VestingInterface;
+  interface: MockTokenVestingInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -303,7 +312,7 @@ export interface Vesting extends BaseContract {
     getLastVestingScheduleForHolder(
       holder: string,
       overrides?: CallOverrides
-    ): Promise<[Vesting.VestingScheduleStructOutput]>;
+    ): Promise<[TokenVesting.VestingScheduleStructOutput]>;
 
     getToken(overrides?: CallOverrides): Promise<[string]>;
 
@@ -315,13 +324,13 @@ export interface Vesting extends BaseContract {
     getVestingSchedule(
       vestingScheduleId: BytesLike,
       overrides?: CallOverrides
-    ): Promise<[Vesting.VestingScheduleStructOutput]>;
+    ): Promise<[TokenVesting.VestingScheduleStructOutput]>;
 
     getVestingScheduleByAddressAndIndex(
       holder: string,
       index: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[Vesting.VestingScheduleStructOutput]>;
+    ): Promise<[TokenVesting.VestingScheduleStructOutput]>;
 
     getVestingSchedulesCount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -350,6 +359,11 @@ export interface Vesting extends BaseContract {
 
     revoke(
       vestingScheduleId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setCurrentTime(
+      _time: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -394,7 +408,7 @@ export interface Vesting extends BaseContract {
   getLastVestingScheduleForHolder(
     holder: string,
     overrides?: CallOverrides
-  ): Promise<Vesting.VestingScheduleStructOutput>;
+  ): Promise<TokenVesting.VestingScheduleStructOutput>;
 
   getToken(overrides?: CallOverrides): Promise<string>;
 
@@ -406,13 +420,13 @@ export interface Vesting extends BaseContract {
   getVestingSchedule(
     vestingScheduleId: BytesLike,
     overrides?: CallOverrides
-  ): Promise<Vesting.VestingScheduleStructOutput>;
+  ): Promise<TokenVesting.VestingScheduleStructOutput>;
 
   getVestingScheduleByAddressAndIndex(
     holder: string,
     index: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<Vesting.VestingScheduleStructOutput>;
+  ): Promise<TokenVesting.VestingScheduleStructOutput>;
 
   getVestingSchedulesCount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -439,6 +453,11 @@ export interface Vesting extends BaseContract {
 
   revoke(
     vestingScheduleId: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setCurrentTime(
+    _time: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -483,7 +502,7 @@ export interface Vesting extends BaseContract {
     getLastVestingScheduleForHolder(
       holder: string,
       overrides?: CallOverrides
-    ): Promise<Vesting.VestingScheduleStructOutput>;
+    ): Promise<TokenVesting.VestingScheduleStructOutput>;
 
     getToken(overrides?: CallOverrides): Promise<string>;
 
@@ -495,13 +514,13 @@ export interface Vesting extends BaseContract {
     getVestingSchedule(
       vestingScheduleId: BytesLike,
       overrides?: CallOverrides
-    ): Promise<Vesting.VestingScheduleStructOutput>;
+    ): Promise<TokenVesting.VestingScheduleStructOutput>;
 
     getVestingScheduleByAddressAndIndex(
       holder: string,
       index: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<Vesting.VestingScheduleStructOutput>;
+    ): Promise<TokenVesting.VestingScheduleStructOutput>;
 
     getVestingSchedulesCount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -528,6 +547,11 @@ export interface Vesting extends BaseContract {
 
     revoke(
       vestingScheduleId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setCurrentTime(
+      _time: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -637,6 +661,11 @@ export interface Vesting extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setCurrentTime(
+      _time: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -730,6 +759,11 @@ export interface Vesting extends BaseContract {
 
     revoke(
       vestingScheduleId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setCurrentTime(
+      _time: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

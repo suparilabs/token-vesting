@@ -4,7 +4,7 @@ import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksAr
 import { useContract } from "./useContract";
 import { DataType } from "../utils";
 import { useWeb3React } from "@web3-react/core";
-import { Vesting__factory } from "../src/types";
+import { TokenVesting__factory } from "../src/types";
 
 function getVestingSchedulesCountByBenificiary(contract: Contract): (address: string) => Promise<number> {
   return async (address: string): Promise<number> =>
@@ -27,7 +27,7 @@ export function useVestingScheduleCountBeneficiary(
   suspense = false,
 ): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
-  const contract = useContract(vesting, Vesting__factory.abi);
+  const contract = useContract(vesting, TokenVesting__factory.abi);
 
   const result: any = useSWR(
     typeof address === "string" && contract ? [address, chainId, vesting, DataType.TokenBalance] : null,
