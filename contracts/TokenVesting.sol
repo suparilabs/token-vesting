@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2021-12-24
- */
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
@@ -13,7 +9,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /**
- * @title VestingContract
+ * @title Token vesting Contract
  */
 contract TokenVesting is Ownable, ReentrancyGuard {
     using SafeMath for uint256;

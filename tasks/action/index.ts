@@ -1,3 +1,3 @@
 import "./createvestingschedule";
-import "./fundVesting";
+import "./fundTokenVesting";
 import "./timestamp";
