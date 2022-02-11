@@ -28,7 +28,7 @@ function AgreementModal(props) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <pre>
+          
           Issued By
           BETA GROUP FZE
           For &quot;SERA TOKEN&quot;
@@ -69,7 +69,7 @@ function AgreementModal(props) {
           SAFT and Purchase Agreement in its sole discretion prior to the closing Date; provided that 
           if the Company rejects my SAFT and Purchase Agreement, it shall return or cause the return 
           of the Purchase Amount to me.
-          </pre>
+    
           <Form>
             <Form.Check 
               type="checkbox"

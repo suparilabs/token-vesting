@@ -1,48 +1,36 @@
 import React from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { useTokenSaleContract, useVestingContractAddress } from "../../hooks/useTokenSale";
-// import { useWeb3React } from "@web3-react/core";
-
-const CheckoutForm = ({ onSubmit }) => {
-  const [amount, setAmount] = React.useState("");
- 
-  return (
-    <Form onSubmit={onSubmit}>
-      <Form.Group controlId="formBasicEmail">
-        <Form.Label>USDT Amount</Form.Label>
-        <Form.Control
-          type="amount"
-          placeholder="Enter USDT amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
-      </Form.Group>
-      <Button variant="primary" type="submit">
-        Confirm
-      </Button>
-    </Form>
-  );
-};
+import { useTokenAllowance, useBuyTokensWithBusd, useTxApprove, useBuyTokensWithUsdt } from "../../hooks/useTokenSale";
+import { useWeb3React } from "@web3-react/core";
 
 function CheckoutModal(props): JSX.Element {
-  const _busdAmount:number = 10;
-  // const { account } = useWeb3React();
-  // console.log(account);
-  const { data:vesting } = useVestingContractAddress();
-  const { data: data2 } = useTokenSaleContract(vesting, _busdAmount);
+  const [amount, setAmount] = React.useState();
+  const { account } = useWeb3React();
+  const {data: data1} = useTokenAllowance(account as string); //check allowance
+  const approveToken = useTxApprove(account as string, amount as any); // send amount from user
+  const buyTokensWithBusd = useBuyTokensWithBusd(amount as any);
+  const buyTokensWithUsdt = useBuyTokensWithUsdt(amount as any);
   
-  console.log('data:', vesting);
-  console.log('data:', data2);
+  console.log('allowance:', data1);
+  console.log('approve:', approveToken);
 
-  // const [show, setShow] = React.useState(false);
+  const handleBuyTokenUsingBusd = async (amount) => {
+    if(data1 > amount) {   
+      await buyTokensWithBusd(); 
+    } else { 
+      await approveToken(); 
+      await buyTokensWithBusd();
+    };
+  }
 
-  // const handleClose = () => setShow(false);
-  // const handleShow = () => setShow(true);
-
-  const onFormSubmit = (e) => {
-    e.preventDefault();
-    //handleClose();
-  };
+  const handleBuyTokensUsingUsdt = async (amount) => {
+    if(data1 > amount) {   
+      await buyTokensWithUsdt(); 
+    } else { 
+      await approveToken(); 
+      await buyTokensWithUsdt();
+    };
+  }
 
     return (
       <Modal
@@ -57,10 +45,31 @@ function CheckoutModal(props): JSX.Element {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Button>Buy Tokens with USDT</Button>
-          {/* <Button>Buy Tokens with BUSD</Button> */}
+          <Form>
+            <Form.Group controlId="form_one">
+              <Form.Label>BUSD Amount</Form.Label>
+              <Form.Control 
+              type="amount"
+              placeholder="Enter BUSD amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              />
+              <Button onClick={handleBuyTokenUsingBusd({amount})}>Buy Tokens with BUSD</Button>
+            </Form.Group>
+            <Form.Group controlId="form_two">
+              <Form.Label>USDT Amount</Form.Label>
+              <Form.Control 
+              type="amount"
+              placeholder="Enter USDT amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              />
+              <Button onClick={handleBuyTokensUsingUsdt({amount})}>Buy Tokens with USDT</Button>
+            </Form.Group>
+            </Form> 
+          <hr/>
           
-        <CheckoutForm onSubmit={onFormSubmit} />
+          {/* <Button>Buy Tokens with BUSD</Button> */}
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={props.onHide}>Close</Button>
