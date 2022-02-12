@@ -82,7 +82,7 @@ function AgreementModal(props) {
         <Modal.Footer>
         {/* <Button onClick={handleClick}>Continue</Button> */}
         <Checkout/>
-        <Button onClick={props.onHide}>Close</Button>
+        <Button variant="primary" onClick={props.onHide}>Close</Button>
         </Modal.Footer>
       </Modal>
     );
