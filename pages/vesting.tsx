@@ -4,11 +4,20 @@ import React from "react";
 import Footer from "./Footer";
 import ContainerText from "../components/ContainerText";
 import Header from "./Header";
+import { useVestingContractAddress } from "../hooks/useTokenSale";
+import { useWeb3React } from "@web3-react/core";
+import { useVestingScheduleByAddressAndIndex, useVestingScheduleCountBeneficiary } from "../hooks/useVesting";
+import moment from "moment";
 // const myLoader = ({ src, width, quality }) => {
 //   return `https://vesting-bsc.galaxywar.io/images/${src}?w=${width}&q=${quality || 75}`;
 // };
 
 function Vesting(): JSX.Element {
+  const { account, chainId } = useWeb3React();
+  const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
+  const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress);
+  const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, "0");
+  console.log(vestingSchedule && vestingSchedule);
   const items = [
     // {
     //   title: "Claim IDO Tokens",
@@ -22,9 +31,9 @@ function Vesting(): JSX.Element {
       title: "Claim Private Round Tokens",
       unlocked: "101.0000000",
       claimable: "10.0000000",
-      claimingDate: "2 Jan 2022",
+      claimingDate: vestingSchedule && vestingSchedule.length ? moment.unix(vestingSchedule[3]).toLocaleString() : "-",
       unlockingDate: "1 Feb 2022",
-      splMessage: "Vesting Schedule: 10% TGE then daily linear for 1 year",
+      splMessage: "Vesting Schedule: 2% TGE then daily linear for 18 months",
     },
     // {
     //   title: "Claim Seed Round Tokens",
@@ -50,6 +59,14 @@ function Vesting(): JSX.Element {
     );
   });
 
+  const aaa = (count: number) => {
+    for (let i = 0; i < count; i++) {
+      {
+        itemList;
+      }
+    }
+  };
+
   return (
     <>
       <Header />
@@ -66,8 +83,8 @@ function Vesting(): JSX.Element {
                 <div className="justify-center">
                   <div className="text-white px-4">ABOUT VESTING SCHEDULE</div>
                   <div className="text-white px-4">
-                    Daily linear vesting on a block-by-block basis.Please don’t claim too frequently as you have to pay
-                    gas fee every time you claim. BSC:0x552594612f935441c01c6854EDf111F343c1Ca07
+                    {`Daily linear vesting on a block-by-block basis.Please don’t claim too frequently as you have to pay
+                    gas fee every time you claim. BSC:${vestingContractAddress}`}
                   </div>
                 </div>
               </div>
@@ -76,7 +93,8 @@ function Vesting(): JSX.Element {
 
           <div className="flex justify-center mb-40">
             {/* ITEMLIST DISPLAY */}
-            {itemList}
+            {vestingSchedule && itemList}
+            {/* {aaa(parseInt(vestingScheduleCount))} */}
           </div>
           <div className="grid grid-cols-2 text-white px-16 py-16">
             <div className="text-3xl">FOLLOW SERA</div>

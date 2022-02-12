@@ -47,7 +47,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
-            className="bg-amber-300 px-2 py-1.5 text-black"
+            className="bg-yellow-500 px-2 py-1.5 text-black"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
@@ -63,7 +63,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
             }}
           >
             {isMetaMaskInstalled ? (
-              <button className="text-xl">
+              <button className="text-lg">
                 {/* <Image
                   loader={myLoader as ImageLoader}
                   src="220px-MetaMask_Fox.svg.png"
