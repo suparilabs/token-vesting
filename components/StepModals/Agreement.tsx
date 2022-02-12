@@ -80,7 +80,7 @@ function AgreementModal(props) {
             </Form>
         </Modal.Body>
         <Modal.Footer>
-        <Button onClick={handleClick}>Continue</Button>
+        <Button onClick={() => handleClick()}>Continue</Button>
         <Checkout />
         <Button onClick={props.onHide}>Close</Button>
         </Modal.Footer>

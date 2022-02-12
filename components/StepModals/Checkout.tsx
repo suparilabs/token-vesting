@@ -24,7 +24,6 @@ function CheckoutModal(props): JSX.Element {
   const buyTokensWithBusd = useBuyTokensWithBusd(busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")));
   const buyTokensWithUsdt = useBuyTokensWithUsdt(usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")));
   
-
   const handleBuyTokenUsingBusd = async amount => {
     if (BigNumber.from(busdAllowance).gte(BigNumber.from(amount).mul(BigNumber.from("10").pow("18")))) {
       console.log("hello ", BigNumber.from(busdAllowance).toString())

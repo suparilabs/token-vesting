@@ -3,22 +3,21 @@ import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
 import { injected } from "../connectors";
-import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
-import { formatEtherscanLink, shortenHex } from "../utils";
-// import Image, { ImageLoader } from "next/image";
+import { useSeraUnlocked } from "../hooks/useVesting";
 
 type AccountProps = {
   triedToEagerConnect: boolean;
 };
 
-
 const AccountK = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
-
   const { isMetaMaskInstalled, isWeb3Available, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
-
   const [connecting, setConnecting] = useState(false);
+  const { data: data1 } = useSeraUnlocked();
+
+  console.log("SERA:", data1);
+  
   useEffect(() => {
     if (active || error) {
       setConnecting(false);
@@ -33,6 +32,7 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
   if (!triedToEagerConnect) {
     return null;
   }
+
 
   if (typeof account !== "string") {
     return (
@@ -55,20 +55,6 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
           >
             {isMetaMaskInstalled ? (
               <button className="text-xl">
-                {/* <Image
-                  loader={myLoader as ImageLoader}
-                  src="220px-MetaMask_Fox.svg.png"
-                  alt="MetaMask"
-                  width={25}
-                  height={25}
-                /> */}
-                {/* <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/220px-MetaMask_Fox.svg.png"
-                  className=""
-                  alt="Connect"
-                  width="25px"
-                  height="25px"
-                />Connect */}
                 Connect 
               </button>
             ) : (

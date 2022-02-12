@@ -2,13 +2,31 @@ import useSWR, { SWRResponse } from "swr";
 import { Contract } from "ethers";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
 import { useContract } from "./useContract";
+import { TokenSale__factory } from "../src/types";
 import { DataType } from "../utils";
 import { useWeb3React } from "@web3-react/core";
+import { TOKEN_SALE_ADDRESS } from "../constants";
 import { Vesting__factory } from "../src/types";
 
 function getVestingSchedulesCountByBenificiary(contract: Contract): (address: string) => Promise<number> {
   return async (address: string): Promise<number> =>
     contract.getVestingSchedulesCountByBeneficiary(address).then((result: any) => result.toNumber());
+}
+//sera to be unlocked
+function getVestingAddress(contract: Contract): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.vesting().then((result: string) => result);
+}
+
+export function useSeraUnlocked(suspense = false): SWRResponse<any, any> {
+  const { chainId } = useWeb3React();
+  const contract = useContract(TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    getVestingAddress(contract as Contract),
+    { suspense },
+  );
+  //let res: any = BigNumber.from(result.data).toNumber();
+  return result;
 }
 
 // function createVesting(contract: Contract): (address: string, start: Number, cliff: Number, duration: Number, slicePeriod: Number,

@@ -29,7 +29,7 @@ const Header = () => {
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
-          <div className="bg-yellow-500 px-2 py-1">
+          <div className="bg-yellow-500 px-2 py-1 text-xl">
             <Account triedToEagerConnect={triedToEagerConnect} />
           </div>
         </Container>
