@@ -16,7 +16,7 @@ import { COIN_SYMBOLS } from "../utils";
 function ETHBalance(): JSX.Element {
   const { account, chainId } = useWeb3React();
   const { data } = useETHBalance(account, true);
-  const { data: data1 } = useTokenBalance(account, true);
+  const { data: data1 } = useTokenBalance(chainId as number, account, null, true);
   const currencyUnit = chainId && COIN_SYMBOLS[chainId];
 
   return (

@@ -33,16 +33,20 @@ function AgreementModal(props) {
   const approveBusdToken = useTxApprove(
     props.busd,
     busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")),
+    props.chainId,
   ); // send amount from user
   const approveUsdtToken = useTxApprove(
     props.usdt,
     usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")),
+    props.chainId,
   ); // send amount from user
   const buyTokensWithBusd = useBuyTokensWithBusd(
     busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")),
+    props.chainId !== undefined ? props.chainId : 56,
   );
   const buyTokensWithUsdt = useBuyTokensWithUsdt(
     usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")),
+    props.chainId !== undefined ? props.chainId : 56,
   );
   const handleBuyTokenUsingBusd = async amount => {
     try {
@@ -61,8 +65,8 @@ function AgreementModal(props) {
         setMining(false);
         setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
       }
-    } catch (e) {
-      setTxStatusMessage(e.message as string);
+    } catch (e: any) {
+      setTxStatusMessage(e?.message as string);
       setMining(false);
     }
   };
@@ -84,8 +88,8 @@ function AgreementModal(props) {
         setMining(false);
         setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
       }
-    } catch (e) {
-      setTxStatusMessage(e.message);
+    } catch (e: any) {
+      setTxStatusMessage(e?.message);
       setMining(false);
     }
   };
@@ -186,12 +190,12 @@ function AgreementModal(props) {
 }
 
 function Agreement() {
-  const { account } = useWeb3React();
-  const { data: busd } = useBUSD();
-  const { data: usdt } = useUSDT();
+  const { account, chainId } = useWeb3React();
+  const { data: busd } = useBUSD(chainId == undefined ? 56 : (chainId as number));
+  const { data: usdt } = useUSDT(chainId == undefined ? 56 : (chainId as number));
   const [modalShow, setModalShow] = React.useState(false);
-  const { data: busdBalance } = useTokenBalance(account, busd as string);
-  const { data: usdtBalance } = useTokenBalance(account, usdt as string);
+  const { data: busdBalance } = useTokenBalance(chainId as number, account, busd as string);
+  const { data: usdtBalance } = useTokenBalance(chainId as number, account, usdt as string);
   const { data: ethBalance } = useETHBalance(account);
   const [enoughBusd, setEnoughBusd] = React.useState<boolean>(false);
   const [enoughUsdt, setEnoughUsdt] = React.useState<boolean>(false);
@@ -216,6 +220,7 @@ function Agreement() {
       <AgreementModal
         show={modalShow}
         onHide={() => setModalShow(false)}
+        chainId={chainId}
         account={account}
         busd={busd}
         usdt={usdt}
