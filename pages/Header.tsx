@@ -1,7 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
+import { useWeb3React } from "@web3-react/core";
 import { Navbar, Container, Nav } from "react-bootstrap";
 import Account from "../components/Account";
 import { useEagerConnect } from "../hooks/useEagerConnect";
+import { useTokenBalance } from "../hooks/useTokenBalance";
+import { TokenAmount } from "@uniswap/sdk";
 // import Image, { ImageLoader } from "next/image";
 
 // const myLoader = ({ src, width, quality }) => {
@@ -10,6 +13,9 @@ import { useEagerConnect } from "../hooks/useEagerConnect";
 
 const Header = () => {
   const triedToEagerConnect = useEagerConnect();
+  const { account, chainId } = useWeb3React();
+  const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
+
   return (
     <>
       <Navbar collapseOnSelect expand="lg" className="bg-blue-700">
@@ -32,6 +38,11 @@ const Header = () => {
           <div className="bg-yellow-500 px-2 py-1 text-xl">
             <Account triedToEagerConnect={triedToEagerConnect} />
           </div>
+          {account && chainId && balance && (
+            <div className="ml-2 text-white text-xl">
+              | {(balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA
+            </div>
+          )}
         </Container>
       </Navbar>
     </>
