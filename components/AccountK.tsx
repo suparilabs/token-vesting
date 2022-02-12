@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { injected } from "../connectors";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { useSeraUnlocked } from "../hooks/useVesting";
+import { useTokenBalance } from "../hooks/useTokenBalance";
+import { TokenAmount } from "@uniswap/sdk";
 
 type AccountProps = {
   triedToEagerConnect: boolean;
@@ -14,10 +16,8 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
   const { isMetaMaskInstalled, isWeb3Available, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
   const [connecting, setConnecting] = useState(false);
-  const { data: data1 } = useSeraUnlocked();
-
-  console.log("SERA:", data1);
-  
+  const {data: data1} = useTokenBalance(account,true);
+  console.log("SERA:", (data1 as any));
   useEffect(() => {
     if (active || error) {
       setConnecting(false);
@@ -69,10 +69,13 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   return (
+      <div>
     <div className="text-lg flex flex-wrap justify-end">
         <div className="bg-yellow-500 px-2 py-1">
             <button className="text-black">Claim</button>
         </div>
+    </div>
+    <h5> Balance: {(data1 as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA</h5>
     </div>
 
   );

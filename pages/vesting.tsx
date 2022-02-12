@@ -12,6 +12,7 @@ import { useEagerConnect } from "../hooks/useEagerConnect";
 
 function Vesting(props): JSX.Element {
   const triedToEagerConnect = useEagerConnect();
+  
   const items = [{
     title: "Claim IDO Tokens",
     unlocked: "23.0540000",
@@ -53,6 +54,7 @@ function Vesting(props): JSX.Element {
   return (
     <>
       <Header />
+      {/* <AccountK triedToEagerConnect={triedToEagerConnect} /> */}
       <div className="text-center">
       <div className="bg-lime-100 bg-pack-train h-screen bg-cover">
       <div className="grid grid-flow-row-dense grid-cols-2 place-items-center grid-rows-1">
@@ -72,6 +74,8 @@ function Vesting(props): JSX.Element {
         </div>
         </div>
         </div>
+        
+        
         <div className="flex flex-row flex-wrap space justify-between px-36 mb-16">
            {/* ITEMLIST DISPLAY */}
            {itemList}
@@ -117,6 +121,7 @@ function Vesting(props): JSX.Element {
     </>
   );
 }
+
 
 export default Vesting;
 

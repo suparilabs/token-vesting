@@ -5,8 +5,8 @@ import { useContract } from "./useContract";
 import { TokenSale__factory } from "../src/types";
 import { DataType } from "../utils";
 import { useWeb3React } from "@web3-react/core";
-import { TOKEN_SALE_ADDRESS } from "../constants";
-import { Vesting__factory } from "../src/types";
+import { TOKEN_SALE_ADDRESS, ERC20_ADDRESS } from "../constants";
+import { Vesting__factory, ERC20__factory } from "../src/types";
 
 function getVestingSchedulesCountByBenificiary(contract: Contract): (address: string) => Promise<number> {
   return async (address: string): Promise<number> =>
@@ -17,27 +17,20 @@ function getVestingAddress(contract: Contract): (address: string) => Promise<str
   return async (): Promise<string> => contract.vesting().then((result: string) => result);
 }
 
-export function useSeraUnlocked(suspense = false): SWRResponse<any, any> {
-  const { chainId } = useWeb3React();
-  const contract = useContract(TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
-  const result: any = useSWR(
-    contract ? [chainId, TOKEN_SALE_ADDRESS, DataType.Address] : null,
-    getVestingAddress(contract as Contract),
-    { suspense },
-  );
-  //let res: any = BigNumber.from(result.data).toNumber();
-  return result;
+function getUnlockedTokens(contract: Contract): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.totalSupply().then((result: any) => result.toNumber());
 }
 
-// function createVesting(contract: Contract): (address: string, start: Number, cliff: Number, duration: Number, slicePeriod: Number,
-//   revocable: boolean, amount: Number) => Promise<String> {
-//   return async (address: String,
-//     start: Number, cliff: Number,
-//     duration: Number, slicePeriod: Number,
-//     revocable: boolean, amount: Number
-//     ): Promise<String> =>
-//     contract.createVestingSchedule(address, start, cliff, duration, slicePeriod, revocable, amount).then((result: any) => result);
-// }
+export function useSeraUnlocked(suspense = false): SWRResponse<any, any> {
+  const { chainId } = useWeb3React();
+  const contract = useContract(ERC20_ADDRESS, ERC20__factory.abi, true);
+  const result: any = useSWR(
+    contract ? [chainId, ERC20_ADDRESS, DataType.Address] : null,
+    getUnlockedTokens(contract as Contract),
+    { suspense },
+  );
+  return result;
+}
 
 export function useVestingScheduleCountBeneficiary(
   vesting: string,
@@ -56,19 +49,3 @@ export function useVestingScheduleCountBeneficiary(
   //let res: any = BigNumber.from(result.data).toNumber();
   return result;
 }
-
-// export function useCreateVestingSchedule(address?: string | null, suspense = false): SWRResponse<any, any> {
-//   const { chainId } = useWeb3React();
-//   const contract = useContract(PRIVATE_SALE_ADDRESS, PSABI);
-//   console.log("Private sale:", contract);
-
-//   const result: any = useSWR(
-//     typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,
-//     createVesting(contract as Contract),
-//     { suspense },
-//   );
-
-//   console.log("Heyyllooo",result.data);
-//   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
-//   return result;
-// }
