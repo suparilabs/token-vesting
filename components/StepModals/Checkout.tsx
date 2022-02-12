@@ -1,33 +1,45 @@
 import React from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { useTokenAllowance, useBuyTokensWithBusd, useTxApprove, useBuyTokensWithUsdt } from "../../hooks/useTokenSale";
+import {
+  useTokenAllowance,
+  useBuyTokensWithBusd,
+  useTxApprove,
+  useBuyTokensWithUsdt,
+  useBUSD,
+  useUSDT,
+} from "../../hooks/useTokenSale";
 import { useWeb3React } from "@web3-react/core";
+import { BigNumber } from "ethers";
 
 function CheckoutModal(props): JSX.Element {
-  const [amount, setAmount] = React.useState<string>("");
+  const [busdAmount, setBusdAmount] = React.useState<string>("");
+  const [usdtAmount, setUsdtAmount] = React.useState<string>("");
   const { account } = useWeb3React();
-  const { data: data1 } = useTokenAllowance(account as string); //check allowance
-  const approveToken = useTxApprove(account as string, amount as any); // send amount from user
-  const buyTokensWithBusd = useBuyTokensWithBusd(amount as any);
-  const buyTokensWithUsdt = useBuyTokensWithUsdt(amount as any);
-
-  console.log("allowance:", data1);
-  console.log("approve:", approveToken);
-
+  const { data: busd } = useBUSD();
+  const {data:usdt} = useUSDT();
+  const { data: busdAllowance } = useTokenAllowance(account as string, busd); //check allowance
+  const { data: usdtAllowance } = useTokenAllowance(account as string, usdt); //check allowance
+  const approveBusdToken = useTxApprove(busd, busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18"))); // send amount from user
+  const approveUsdtToken = useTxApprove(usdt, usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18"))); // send amount from user
+  const buyTokensWithBusd = useBuyTokensWithBusd(busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")));
+  const buyTokensWithUsdt = useBuyTokensWithUsdt(usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")));
+console.log(busd,usdt)
   const handleBuyTokenUsingBusd = async amount => {
-    if (data1 > amount) {
+    if (BigNumber.from(busdAllowance).gte(BigNumber.from(amount).mul(BigNumber.from("10").pow("18")))) {
+      console.log("hello 111", BigNumber.from(busdAllowance).toString())
       await buyTokensWithBusd();
     } else {
-      await approveToken();
+      console.log("hello 222")
+      await approveBusdToken();
       await buyTokensWithBusd();
     }
   };
 
   const handleBuyTokensUsingUsdt = async amount => {
-    if (data1 > amount) {
+    if (BigNumber.from(usdtAllowance).gte(BigNumber.from(amount).mul(BigNumber.from("10").pow("18")))) {
       await buyTokensWithUsdt();
     } else {
-      await approveToken();
+      await approveUsdtToken();
       await buyTokensWithUsdt();
     }
   };
@@ -42,22 +54,22 @@ function CheckoutModal(props): JSX.Element {
           <Form.Group controlId="form_one">
             <Form.Label>BUSD Amount</Form.Label>
             <Form.Control
-              type="amount"
+              type="number"
               placeholder="Enter BUSD amount"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
+              value={busdAmount}
+              onChange={e => setBusdAmount(e.target.value)}
             />
-            <Button onClick={() => handleBuyTokenUsingBusd({ amount })}>Buy Tokens with BUSD</Button>
+            <Button onClick={() => handleBuyTokenUsingBusd(busdAmount)}>Buy Tokens with BUSD</Button>
           </Form.Group>
           <Form.Group controlId="form_two">
             <Form.Label>USDT Amount</Form.Label>
             <Form.Control
-              type="amount"
+              type="number"
               placeholder="Enter USDT amount"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
+              value={usdtAmount}
+              onChange={e => setUsdtAmount(e.target.value)}
             />
-            <Button onClick={() => handleBuyTokensUsingUsdt({ amount })}>Buy Tokens with USDT</Button>
+            <Button onClick={() => handleBuyTokensUsingUsdt(usdtAmount)}>Buy Tokens with USDT</Button>
           </Form.Group>
         </Form>
         <hr />
