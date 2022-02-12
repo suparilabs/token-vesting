@@ -100,7 +100,7 @@ contract TokenSale is Ownable {
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
-        vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
+        vesting.createVestingSchedule(msg.sender, block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
     }
 
     function buyTokensUsingUSDT(uint256 _usdtAmount) external onSale {
@@ -121,7 +121,7 @@ contract TokenSale is Ownable {
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
-        vesting.createVestingSchedule(owner(), block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
+        vesting.createVestingSchedule(msg.sender, block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
     }
 
     function computeTokensForBUSD(uint256 _busdAmount) public view returns (uint256) {
