@@ -1,9 +1,8 @@
 import React from "react";
-import Account from "../components/AccountK";
-import { useEagerConnect } from "../hooks/useEagerConnect";
+// import { useEagerConnect } from "../hooks/useEagerConnect";
 
 const ContainerText = props => {
-  const triedToEagerConnect = useEagerConnect();
+  // const triedToEagerConnect = useEagerConnect();
   // function connect() {
   //   console.log('clicked')
   // }
