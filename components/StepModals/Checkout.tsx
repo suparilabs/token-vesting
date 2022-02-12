@@ -15,20 +15,35 @@ function CheckoutModal(props): JSX.Element {
   const [busdAmount, setBusdAmount] = React.useState<string>("");
   const [usdtAmount, setUsdtAmount] = React.useState<string>("");
   const { account } = useWeb3React();
-  const { data: busd } = useBUSD();
-  const { data: usdt } = useUSDT();
+  const { data: busd } = useBUSD(props.chainId == undefined ? 56 : (props.chainId as number));
+  const { data: usdt } = useUSDT(props.chainId == undefined ? 56 : (props.chainId as number));
   const { data: busdAllowance } = useTokenAllowance(account as string, busd); //check allowance
   const { data: usdtAllowance } = useTokenAllowance(account as string, usdt); //check allowance
-  const approveBusdToken = useTxApprove(busd, busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18"))); // send amount from user
-  const approveUsdtToken = useTxApprove(usdt, usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18"))); // send amount from user
-  const buyTokensWithBusd = useBuyTokensWithBusd(busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")));
-  const buyTokensWithUsdt = useBuyTokensWithUsdt(usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")));
-  
+  const approveBusdToken = useTxApprove(
+    busd,
+    busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")),
+    props.chainId,
+  ); // send amount from user
+  const approveUsdtToken = useTxApprove(
+    usdt,
+    usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")),
+    props.chainId,
+  ); // send amount from user
+  const buyTokensWithBusd = useBuyTokensWithBusd(
+    busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")),
+    props.chainId,
+  );
+  const buyTokensWithUsdt = useBuyTokensWithUsdt(
+    usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")),
+    props.chainId,
+  );
+  console.log(busd, usdt);
   const handleBuyTokenUsingBusd = async amount => {
     if (BigNumber.from(busdAllowance).gte(BigNumber.from(amount).mul(BigNumber.from("10").pow("18")))) {
-      console.log("hello ", BigNumber.from(busdAllowance).toString())
+      console.log("hello 111", BigNumber.from(busdAllowance).toString());
       await buyTokensWithBusd();
     } else {
+      console.log("hello 222");
       await approveBusdToken();
       await buyTokensWithBusd();
     }
@@ -83,12 +98,14 @@ function CheckoutModal(props): JSX.Element {
 }
 
 function Checkout() {
+  const { chainId } = useWeb3React();
   const [modalShow, setModalShow] = React.useState(false);
 
   return (
     <>
       <Button onClick={() => setModalShow(true)}>Continue</Button>
-      <CheckoutModal show={modalShow} onHide={() => setModalShow(false)} />
+
+      <CheckoutModal chainId={chainId} show={modalShow} onHide={() => setModalShow(false)} />
     </>
   );
 }

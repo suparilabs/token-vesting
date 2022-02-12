@@ -5,8 +5,7 @@ import { useContract } from "./useContract";
 import { TokenSale__factory } from "../src/types";
 import { DataType } from "../utils";
 import { useWeb3React } from "@web3-react/core";
-import { TOKEN_SALE_ADDRESS, ERC20_ADDRESS } from "../constants";
-import { Vesting__factory, ERC20__factory } from "../src/types";
+import { TokenVesting__factory } from "../src/types";
 
 function getVestingScheduleByBenificiary(
   account: string,
@@ -23,7 +22,7 @@ function getVestingAddress(contract: Contract): (address: string) => Promise<str
 
 export function useVestingScheduleBeneficiary(account: string, token: string, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
-  const contract = useContract(token, Vesting__factory.abi, true);
+  const contract = useContract(token, TokenVesting__factory.abi, true);
   console.log("vesting contract", contract);
   const result: any = useSWR(
     contract ? [chainId, token, DataType.Address] : null,

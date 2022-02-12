@@ -1,36 +1,34 @@
 import { useWeb3React } from "@web3-react/core";
 import { BigNumber, Contract } from "ethers";
 import useSWR, { SWRResponse } from "swr";
-import { TOKEN_SALE_ADDRESS } from "../constants";
-import { ERC20_ADDRESS } from "../constants";
+import { addresses } from "../constants";
 import { TokenSale__factory, ERC20__factory } from "../src/types";
 import { DataType } from "../utils";
 import { useContract } from "./useContract";
-import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
 
 function getERC20TokenOwner(contract: Contract): (address: string) => Promise<string> {
   return async (): Promise<string> => contract.owner().then((result: string) => result);
 }
 
-export function useBuyTokensWithBusd(amount: any): any {
-  const contract = useContract(TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+export function useBuyTokensWithBusd(amount: any, chainId: number): any {
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
   return async () => {
     return (contract as Contract).buyTokensUsingBUSD(amount);
   };
 }
 
-export function useBuyTokensWithUsdt(amount: any): any {
-  const contract = useContract(TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+export function useBuyTokensWithUsdt(amount: any, chainId: number): any {
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
   return async () => {
     return (contract as Contract).buyTokensUsingUSDT(amount);
   };
 }
 
 //Allowance
-function getTokenAllowance(account: string, contract: Contract): (address: string) => Promise<string> {
+function getTokenAllowance(account: string, contract: Contract, chainId: number): (address: string) => Promise<string> {
   return async (): Promise<string> =>
     contract
-      .allowance("0x541dA4c3E9B46b813794239a04130345D8d74FB2", TOKEN_SALE_ADDRESS)
+      .allowance(account, addresses[chainId as number].TOKEN_SALE_ADDRESS)
       .then((result: string) => result.toString());
 }
 
@@ -39,7 +37,7 @@ export function useTokenAllowance(account: string, token: string, suspense = fal
   const contract = useContract(token, ERC20__factory.abi, true);
   const result: any = useSWR(
     contract ? [chainId, token, DataType.Address] : null,
-    getTokenAllowance(account as string, contract as Contract),
+    getTokenAllowance(account as string, contract as Contract, chainId as number),
     { suspense },
   );
   // useKeepSWRDATALiveAsBlocksArrive(result.mutate);
@@ -51,11 +49,11 @@ function getBUSD(contract: Contract): (address: string) => Promise<string> {
   return async (): Promise<string> => contract.BUSD().then((result: string) => result.toString());
 }
 
-export function useBUSD(suspense = false): SWRResponse<any, any> {
-  const { chainId } = useWeb3React();
-  const contract = useContract(TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
+export function useBUSD(chainId: number, suspense = false): SWRResponse<any, any> {
+  // const { chainId } = useWeb3React();
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    contract ? [chainId, "busd", addresses[chainId as number].TOKEN_SALE_ADDRESS, DataType.Address] : null,
     getBUSD(contract as Contract),
     { suspense },
   );
@@ -67,22 +65,23 @@ function getUSDT(contract: Contract): (address: string) => Promise<string> {
   return async (): Promise<string> => contract.USDT().then((result: string) => result.toString());
 }
 
-export function useUSDT(suspense = false): SWRResponse<any, any> {
-  const { chainId } = useWeb3React();
-  const contract = useContract(TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
+export function useUSDT(chainId: number, suspense = false): SWRResponse<any, any> {
+  // const { chainId } = useWeb3React();
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    contract ? [chainId, "usdt", addresses[chainId as number].TOKEN_SALE_ADDRESS, DataType.Address] : null,
     getUSDT(contract as Contract),
     { suspense },
   );
+  //let res: any = BigNumber.from(result.data).toNumber();
   return result;
 }
 
-//Approve
-
-export function useTxApprove(token: string, amount: BigNumber): any {
+export function useTxApprove(token: string, amount: BigNumber, chainId: number): any {
   const contract = useContract(token, ERC20__factory.abi, true);
   return async () => {
-    return (contract as Contract).approve(TOKEN_SALE_ADDRESS, amount).then((result: boolean) => result);
+    return (contract as Contract)
+      .approve(addresses[chainId as number].TOKEN_SALE_ADDRESS, amount)
+      .then((result: boolean) => result);
   };
 }

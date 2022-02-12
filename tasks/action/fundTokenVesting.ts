@@ -3,14 +3,12 @@ import { TaskArguments } from "hardhat/types";
 
 import { Token } from "../../src/types/Token";
 
-task("action:fundVesting")
+task("action:fundTokenVesting")
   .addParam("token", "token address")
-  .addParam("vesting", "Vesting contract address")
+  .addParam("tokenVesting", "Vesting contract address")
   .addParam("amount", "amount in tokens")
   .setAction(async function (taskArguments: TaskArguments, { ethers }) {
     const erc20Instance = <Token>await ethers.getContractAt("Token", taskArguments.token);
-    await erc20Instance.transfer(taskArguments.privateSaleContract, taskArguments.amount);
-    console.log("Balance of vesting contract is ", await erc20Instance.balanceOf(taskArguments.vesting));
+    await erc20Instance.transfer(taskArguments.tokenVesting, taskArguments.amount);
+    console.log("Balance of vesting contract is ", await erc20Instance.balanceOf(taskArguments.tokenVesting));
   });
-
-10000000;
