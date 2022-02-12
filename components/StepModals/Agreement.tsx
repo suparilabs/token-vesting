@@ -3,17 +3,17 @@ import  Checkout from "./Checkout";
 import { Modal, Button, Form } from "react-bootstrap";
 
 function AgreementModal(props) {
-  const [checked, setChecked] = React.useState(false);
-  
-  // function handleClick(e) {
-  //   e.preventDefault();
-  //   if(checked) {
-  //     console.log("clickedd...!!!"); 
-  //     props.onHide();
-  //   } else {
-  //     console.log("error"); 
-  //   }
-  //   }
+  const [checked, setChecked] = React.useState(true);
+
+  function handleClick(e) {
+    e.preventDefault();
+    if(checked) {
+      console.log("error"); 
+    } else {
+      console.log("clickedd...!!!"); 
+      props.onHide();
+    }
+    }
   
     return (
       <Modal
@@ -80,8 +80,8 @@ function AgreementModal(props) {
             </Form>
         </Modal.Body>
         <Modal.Footer>
-        {/* <Button onClick={handleClick}>Continue</Button> */}
-        <Checkout/>
+        <Button onClick={handleClick}>Continue</Button>
+        <Checkout />
         <Button onClick={props.onHide}>Close</Button>
         </Modal.Footer>
       </Modal>

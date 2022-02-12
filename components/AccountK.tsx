@@ -12,18 +12,12 @@ type AccountProps = {
   triedToEagerConnect: boolean;
 };
 
-// const myLoader = ({ src, width, quality }) => {
-//   return `https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/${src}?w=${width}&q=${
-//     quality || 75
-//   }`;
-// };
 
-const Account = ({ triedToEagerConnect }: AccountProps) => {
+const AccountK = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
 
   const { isMetaMaskInstalled, isWeb3Available, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
 
-  // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
   useEffect(() => {
     if (active || error) {
@@ -31,8 +25,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       stopOnboarding();
     }
   }, [active, error, stopOnboarding]);
-
-  const ENSName = useENSName(account as string);
 
   if (error) {
     return null;
@@ -47,13 +39,12 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
-            className="bg-yellow-500 px-2 py-1 text-black"
+            className="bg-amber-300 px-2 py-1.5 text-black"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
 
               activate(injected, undefined, true).catch(error => {
-                // ignore the error if it's a user rejected request
                 if (error instanceof UserRejectedRequestError) {
                   setConnecting(false);
                 } else {
@@ -63,7 +54,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
             }}
           >
             {isMetaMaskInstalled ? (
-              <button className="text-lg">
+              <button className="text-xl">
                 {/* <Image
                   loader={myLoader as ImageLoader}
                   src="220px-MetaMask_Fox.svg.png"
@@ -92,16 +83,13 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   return (
-    <a
-      {...{
-        href: formatEtherscanLink("Account", [chainId as number, account]),
-        target: "_blank",
-        rel: "noopener noreferrer",
-      }}
-    >
-      {ENSName || `${shortenHex(account, 4)}`}
-    </a>
+    <div className="text-lg flex flex-wrap justify-end">
+        <div className="bg-yellow-500 px-2 py-1">
+            <button className="text-black">Claim</button>
+        </div>
+    </div>
+
   );
 };
 
-export default Account;
+export default AccountK;

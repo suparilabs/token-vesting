@@ -1,10 +1,10 @@
 // import { useWeb3React } from '@web3-react/core';
 import React from "react";
-// import useEagerConnect from '../../hooks/useEagerConnect';
-// import Account from '../Account';
-// import AccountW from '../AccountW';
+import Account from "../components/AccountK";
+import { useEagerConnect } from "../hooks/useEagerConnect";
 
 const ContainerText = props => {
+  const triedToEagerConnect = useEagerConnect();
   // function connect() {
   //   console.log('clicked')
   // }
@@ -28,7 +28,11 @@ const ContainerText = props => {
           <div className="text-white">{props.claimable}</div>
         </div>
         <div className="flex flex-wrap justify-end">
-          <button className="bg-yellow-500">Claim</button>
+          <div className="bg-yellow-500">
+          <button className="text-white">
+            <Account triedToEagerConnect={triedToEagerConnect} />
+          </button>
+          </div>
         </div>
         <div className="text-white text-xs py-5">{props.splMessage}</div>
         <div className="text-xs">

@@ -5,11 +5,13 @@ import Footer from "./Footer";
 import ContainerText from "../components/ContainerText";
 import Header from "./Header";
 
+
 // const myLoader = ({ src, width, quality }) => {
 //   return `https://vesting-bsc.galaxywar.io/images/${src}?w=${width}&q=${quality || 75}`;
 // };
 
 class MainView extends Component {
+ 
   state = {
     items: [
       {
@@ -56,6 +58,7 @@ class MainView extends Component {
     return (
       <>
         <Header />
+        <div className="text-center">
         <div className="bg-lime-100 bg-pack-train h-screen bg-cover">
         <div className="grid grid-flow-row-dense grid-cols-2 place-items-center grid-rows-1">
         <div className="col-span-1 ml-96">
@@ -120,6 +123,7 @@ class MainView extends Component {
               </a>
               </div>
             </div>
+          </div>
           </div>
         <Footer />
       </>

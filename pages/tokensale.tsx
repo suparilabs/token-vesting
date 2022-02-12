@@ -247,6 +247,16 @@ function TokenSale() {
                   </span>{" "}
                   easily!
                 </div> */}
+                {/* <button
+                  type="button"
+                  // onClick={() => {
+                  //   setModalOpen(true);
+                  // }}
+                  // className="openModalBtn"
+                  className="inline-block px-10 py-3.5 bg-gray-200 text-gray-700 font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400 active:shadow-lg transition duration-150 ease-in-out"
+                >
+                  Buy SERA Now
+                </button> */}
                 <Agreement/>
                 <div className="text-xl pt-6 pb-6 font-medium mt-1">Will live in</div>
                 <span className="box-border bg-black h-13 w-70 p-3 ...">
