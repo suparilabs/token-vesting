@@ -33,9 +33,7 @@ function getVestingContractAddress(_amount: any, contract: Contract): (address: 
 //Allowance
 function getTokenAllowance(account: string, contract: Contract): (address: string) => Promise<string> {
   return async (): Promise<string> =>
-    contract
-      .allowance("0x541dA4c3E9B46b813794239a04130345D8d74FB2", TOKEN_SALE_ADDRESS)
-      .then((result: string) => result.toString());
+    contract.allowance(account, TOKEN_SALE_ADDRESS).then((result: string) => result.toString());
 }
 
 export function useTokenAllowance(account: string, token: string, suspense = false): SWRResponse<any, any> {
@@ -59,7 +57,7 @@ export function useBUSD(suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
   const contract = useContract(TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    contract ? [chainId, "busd", TOKEN_SALE_ADDRESS, DataType.Address] : null,
     getBUSD(contract as Contract),
     { suspense },
   );
@@ -75,7 +73,7 @@ export function useUSDT(suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
   const contract = useContract(TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    contract ? [chainId, "usdt", TOKEN_SALE_ADDRESS, DataType.Address] : null,
     getUSDT(contract as Contract),
     { suspense },
   );
