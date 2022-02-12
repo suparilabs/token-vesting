@@ -17,7 +17,7 @@ const ContainerText = props => {
         <div className="py-2 px-10">{props.title_}</div>
       </div>
 
-      <div className="h-full w-full bg-zinc-800 px-5 py-5 text-slate-300">
+      <div className="h-60 w-full bg-zinc-800 px-3 py-3 text-slate-300">
         <div className="flex flex-row flex-wrap justify-between ">
           <div>SERA to be unlocked:</div>
           <div className="text-yellow-300">{props.unlocked}</div>
@@ -33,14 +33,18 @@ const ContainerText = props => {
             </button>
           </div>
         </div>
-        <div className="text-white text-xs py-5">{props.splMessage}</div>
-        <div className="text-xs">
-          Claiming Date:
-          {props.claimingDate}
-        </div>
-        <div className="text-xs">
-          Unlocking Date:
-          {props.unlockingDate}
+        <div className="text-left	text-white text-xs py-5">
+          <div className="mb-2">
+          {props.splMessage}
+          </div>
+          <div className="text-xs">
+            Claiming Date:{'   '}
+            {props.claimingDate}
+          </div>
+          <div className="text-xs">
+            Unlocking Date:{'  '}
+            {props.unlockingDate}
+          </div>
         </div>
       </div>
     </div>

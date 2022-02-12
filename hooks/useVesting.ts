@@ -1,6 +1,6 @@
 import useSWR, { SWRResponse } from "swr";
 import { Contract } from "ethers";
-import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
+// import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
 import { useContract } from "./useContract";
 import { DataType } from "../utils";
 import { useWeb3React } from "@web3-react/core";
@@ -24,7 +24,7 @@ export function useVestingScheduleCountBeneficiary(
     getVestingSchedulesCountByBeneficiary(contract as Contract),
     { suspense },
   );
-  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
+  // useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   //let res: any = BigNumber.from(result.data).toNumber();
   return result;
 }
@@ -35,7 +35,7 @@ function getVestingScheduleByBeneficiary(
   contract: Contract,
 ): (address: string) => Promise<number> {
   return async (): Promise<number> =>
-    contract.getLastVestingScheduleForHolder(account).then((result: string) => result.amountTotal);
+    contract.getLastVestingScheduleForHolder(account).then((result: string) => result.toString());
 }
 
 export function useVestingScheduleBeneficiary(account: string, token: string, suspense = false): SWRResponse<any, any> {
@@ -47,8 +47,7 @@ export function useVestingScheduleBeneficiary(account: string, token: string, su
     getVestingScheduleByBeneficiary(account as string, token as string, contract as Contract),
     { suspense },
   );
-  console.log("result:", result);
-  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
+  // useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   //let res: any = BigNumber.from(result.data).toNumber();
   return result;
 }
@@ -75,4 +74,54 @@ export function useVestingScheduleByAddressAndIndex(
     { suspense },
   );
   return result && result.data && result.data.split(",");
+}
+
+function getComputeVestingScheduleIdForAddressAndIndex(
+  account: string,
+  index: string,
+  contract: Contract,
+): (address: string) => Promise<string> {
+  return async (): Promise<string> =>
+    contract.computeVestingScheduleIdForAddressAndIndex(account, index).then((result: string) => result.toString());
+}
+
+export function useComputeVestingScheduleIdForAddressAndIndex(
+  account: string,
+  vesting: string,
+  index: string,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = useContract(vesting, TokenVesting__factory.abi, true);
+  const result: any = useSWR(
+    contract ? [vesting, index, DataType.Address] : null,
+    getComputeVestingScheduleIdForAddressAndIndex(account, index, contract as Contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getComputeReleasableAmount(scheduleId: string, contract: Contract): (address: string) => Promise<string> {
+  return async (): Promise<string> =>
+    contract.computeReleasableAmount(scheduleId).then((result: string) => result.toString());
+}
+
+export function useComputeReleasableAmount(
+  vesting: string,
+  vestingScheduleId: string,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = useContract(vesting, TokenVesting__factory.abi, true);
+  const result: any = useSWR(
+    contract ? [vesting, vestingScheduleId, DataType.Address] : null,
+    getComputeReleasableAmount(vestingScheduleId, contract as Contract),
+    { suspense },
+  );
+  return result;
+}
+
+export function useRelease(vesting: string, scheduleId: string, amount: string): any {
+  const contract = useContract(vesting, TokenVesting__factory.abi, true);
+  return async () => {
+    return (contract as Contract).release(scheduleId, amount).then((result: boolean) => result);
+  };
 }

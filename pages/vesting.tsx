@@ -1,13 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 // import Image, { ImageLoader } from "next/image";
 import React from "react";
+import { BigNumber } from "ethers";
 import Footer from "./Footer";
 import ContainerText from "../components/ContainerText";
 import Header from "./Header";
 import { useVestingContractAddress } from "../hooks/useTokenSale";
 import { useWeb3React } from "@web3-react/core";
-import { useVestingScheduleByAddressAndIndex, useVestingScheduleCountBeneficiary } from "../hooks/useVesting";
+import {
+  useComputeReleasableAmount,
+  useComputeVestingScheduleIdForAddressAndIndex,
+  useVestingScheduleByAddressAndIndex,
+  // useVestingScheduleCountBeneficiary,
+} from "../hooks/useVesting";
 import moment from "moment";
+import { formatEther } from "@ethersproject/units";
 // const myLoader = ({ src, width, quality }) => {
 //   return `https://vesting-bsc.galaxywar.io/images/${src}?w=${width}&q=${quality || 75}`;
 // };
@@ -15,9 +22,15 @@ import moment from "moment";
 function Vesting(): JSX.Element {
   const { account, chainId } = useWeb3React();
   const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
-  const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress);
+  // const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress);
   const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, "0");
-  console.log(vestingSchedule && vestingSchedule);
+  const { data: vestingScheduleId } = useComputeVestingScheduleIdForAddressAndIndex(
+    account as string,
+    vestingContractAddress,
+    "0",
+  );
+  const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
+  console.log(vestingSchedule && parseInt(vestingSchedule[4])+parseInt(vestingSchedule[3]) );
   const items = [
     // {
     //   title: "Claim IDO Tokens",
@@ -29,10 +42,15 @@ function Vesting(): JSX.Element {
     // },
     {
       title: "Claim Private Round Tokens",
-      unlocked: "101.0000000",
-      claimable: "10.0000000",
-      claimingDate: vestingSchedule && vestingSchedule.length ? moment.unix(vestingSchedule[3]).toLocaleString() : "-",
-      unlockingDate: "1 Feb 2022",
+      unlocked:
+        vestingSchedule !== undefined
+          ? parseFloat(formatEther(BigNumber.from(vestingSchedule[7]).sub(BigNumber.from(vestingSchedule[8])))).toFixed(
+              4,
+            )
+          : "0",
+      claimable: releasableAmount ? parseFloat(formatEther(BigNumber.from(releasableAmount))).toFixed(4) : "0",
+      claimingDate: vestingSchedule != undefined ? moment.unix(vestingSchedule[2]).toLocaleString() : "-",
+      unlockingDate: vestingSchedule != undefined ? moment.unix(parseInt(vestingSchedule[4])+parseInt(vestingSchedule[3])).toLocaleString() : "-",
       splMessage: "Vesting Schedule: 2% TGE then daily linear for 18 months",
     },
     // {
@@ -59,14 +77,6 @@ function Vesting(): JSX.Element {
     );
   });
 
-  const aaa = (count: number) => {
-    for (let i = 0; i < count; i++) {
-      {
-        itemList;
-      }
-    }
-  };
-
   return (
     <>
       <Header />
@@ -84,7 +94,7 @@ function Vesting(): JSX.Element {
                   <div className="text-white px-4">ABOUT VESTING SCHEDULE</div>
                   <div className="text-white px-4">
                     {`Daily linear vesting on a block-by-block basis.Please don’t claim too frequently as you have to pay
-                    gas fee every time you claim. BSC:${vestingContractAddress}`}
+                    gas fee every time you claim. BSC:${vestingContractAddress ? vestingContractAddress : ""}`}
                   </div>
                 </div>
               </div>
