@@ -27,22 +27,21 @@ const ContainerText = props => {
           <div className="text-white">{props.claimable}</div>
         </div>
         <div className="flex flex-wrap justify-end">
-          <div className="bg-yellow-500">
-            <button className="text-white">
-              <Account triedToEagerConnect={triedToEagerConnect} />
+          <div className="bg-yellow-500 w-16">
+            <button className="text-white" onClick={props.claim} disabled={props.claimButtonDisable}>
+              {/* <Account triedToEagerConnect={triedToEagerConnect} /> */}
+              Claim
             </button>
           </div>
         </div>
         <div className="text-left	text-white text-xs py-5">
-          <div className="mb-2">
-          {props.splMessage}
-          </div>
+          <div className="mb-2">{props.splMessage}</div>
           <div className="text-xs">
-            Claiming Date:{'   '}
+            Claiming Date:{"   "}
             {props.claimingDate}
           </div>
           <div className="text-xs">
-            Unlocking Date:{'  '}
+            Unlocking Date:{"  "}
             {props.unlockingDate}
           </div>
         </div>

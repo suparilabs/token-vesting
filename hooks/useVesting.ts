@@ -5,6 +5,7 @@ import { useContract } from "./useContract";
 import { DataType } from "../utils";
 import { useWeb3React } from "@web3-react/core";
 import { TokenVesting__factory } from "../src/types";
+import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
 
 function getVestingSchedulesCountByBeneficiary(contract: Contract): (address: string) => Promise<number> {
   return async (address: string): Promise<number> =>
@@ -73,6 +74,7 @@ export function useVestingScheduleByAddressAndIndex(
     getVestingScheduleByAddressAndIndex(account as string, index, contract as Contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result && result.data && result.data.split(",");
 }
 
@@ -116,6 +118,7 @@ export function useComputeReleasableAmount(
     getComputeReleasableAmount(vestingScheduleId, contract as Contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 

@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 // import Image, { ImageLoader } from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import { BigNumber } from "ethers";
 import Footer from "./Footer";
 import ContainerText from "../components/ContainerText";
@@ -10,6 +10,7 @@ import { useWeb3React } from "@web3-react/core";
 import {
   useComputeReleasableAmount,
   useComputeVestingScheduleIdForAddressAndIndex,
+  useRelease,
   useVestingScheduleByAddressAndIndex,
   // useVestingScheduleCountBeneficiary,
 } from "../hooks/useVesting";
@@ -20,6 +21,7 @@ import { formatEther } from "@ethersproject/units";
 // };
 
 function Vesting(): JSX.Element {
+  const [claimButtonDisable, setClaimButtonDisable] = useState<boolean>(false);
   const { account, chainId } = useWeb3React();
   const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
   // const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress);
@@ -30,7 +32,7 @@ function Vesting(): JSX.Element {
     "0",
   );
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
-  console.log(vestingSchedule && parseInt(vestingSchedule[4])+parseInt(vestingSchedule[3]) );
+  const claim = useRelease(vestingContractAddress, vestingScheduleId, releasableAmount);
   const items = [
     // {
     //   title: "Claim IDO Tokens",
@@ -43,14 +45,19 @@ function Vesting(): JSX.Element {
     {
       title: "Claim Private Round Tokens",
       unlocked:
-        vestingSchedule !== undefined
-          ? parseFloat(formatEther(BigNumber.from(vestingSchedule[7]).sub(BigNumber.from(vestingSchedule[8])))).toFixed(
-              4,
-            )
+        vestingSchedule !== undefined && releasableAmount
+          ? parseFloat(
+              formatEther(
+                BigNumber.from(vestingSchedule[7]).sub(BigNumber.from(vestingSchedule[8])).sub(releasableAmount),
+              ),
+            ).toFixed(4)
           : "0",
       claimable: releasableAmount ? parseFloat(formatEther(BigNumber.from(releasableAmount))).toFixed(4) : "0",
       claimingDate: vestingSchedule != undefined ? moment.unix(vestingSchedule[2]).toLocaleString() : "-",
-      unlockingDate: vestingSchedule != undefined ? moment.unix(parseInt(vestingSchedule[4])+parseInt(vestingSchedule[3])).toLocaleString() : "-",
+      unlockingDate:
+        vestingSchedule != undefined
+          ? moment.unix(parseInt(vestingSchedule[4]) + parseInt(vestingSchedule[3])).toLocaleString()
+          : "-",
       splMessage: "Vesting Schedule: 2% TGE then daily linear for 18 months",
     },
     // {
@@ -63,6 +70,14 @@ function Vesting(): JSX.Element {
     // },
   ];
 
+  const handleClaim = async e => {
+    e.preventDefault();
+    setClaimButtonDisable(true);
+    const tx = await claim();
+    await tx.wait();
+    setClaimButtonDisable(false);
+  };
+
   const itemList = items.map((item, index) => {
     return (
       <ContainerText
@@ -73,6 +88,8 @@ function Vesting(): JSX.Element {
         splMessage={item.splMessage}
         claimingDate={item.claimingDate}
         unlockingDate={item.unlockingDate}
+        claim={e => handleClaim(e)}
+        claimButtonDisable={(releasableAmount !== undefined && !BigNumber.from(releasableAmount).gt("0")) || claimButtonDisable}
       />
     );
   });
