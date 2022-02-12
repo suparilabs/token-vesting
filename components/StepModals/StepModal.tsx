@@ -16,7 +16,7 @@ const steps:any = [
 function OutputStepModels(props) {
   const [show, setShow] = useState(false);
   const [formData, setForm] = useForm(defaultData);
-  const { step, navigation } = useStep ({
+  const {  navigation } = useStep ({
     steps, 
     initialStep:0
   });
