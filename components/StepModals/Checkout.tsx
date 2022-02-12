@@ -16,7 +16,7 @@ function CheckoutModal(props): JSX.Element {
   const [usdtAmount, setUsdtAmount] = React.useState<string>("");
   const { account } = useWeb3React();
   const { data: busd } = useBUSD();
-  const { data:usdt } = useUSDT();
+  const { data: usdt } = useUSDT();
   const { data: busdAllowance } = useTokenAllowance(account as string, busd); //check allowance
   const { data: usdtAllowance } = useTokenAllowance(account as string, usdt); //check allowance
   const approveBusdToken = useTxApprove(busd, busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18"))); // send amount from user

@@ -8,43 +8,29 @@ import { useWeb3React } from "@web3-react/core";
 import { TOKEN_SALE_ADDRESS, ERC20_ADDRESS } from "../constants";
 import { Vesting__factory, ERC20__factory } from "../src/types";
 
-function getVestingSchedulesCountByBenificiary(contract: Contract): (address: string) => Promise<number> {
+function getVestingScheduleByBenificiary(
+  account: string,
+  token: string,
+  contract: Contract,
+): (address: string) => Promise<number> {
   return async (address: string): Promise<number> =>
-    contract.getVestingSchedulesCountByBeneficiary(address).then((result: any) => result.toNumber());
+    contract.getLastVestingScheduleForHolder(account).then((result: any) => result.amountTotal);
 }
 //sera to be unlocked
 function getVestingAddress(contract: Contract): (address: string) => Promise<string> {
   return async (): Promise<string> => contract.vesting().then((result: string) => result);
 }
 
-function getUnlockedTokens(contract: Contract): (address: string) => Promise<any> {
-  return async (): Promise<any> => contract.totalSupply().then((result: any) => result.toNumber());
-}
-
-export function useSeraUnlocked(suspense = false): SWRResponse<any, any> {
+export function useVestingScheduleBeneficiary(account: string, token: string, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
-  const contract = useContract(ERC20_ADDRESS, ERC20__factory.abi, true);
+  const contract = useContract(token, Vesting__factory.abi, true);
+  console.log("vesting contract", contract);
   const result: any = useSWR(
-    contract ? [chainId, ERC20_ADDRESS, DataType.Address] : null,
-    getUnlockedTokens(contract as Contract),
+    contract ? [chainId, token, DataType.Address] : null,
+    getVestingScheduleByBenificiary(account as string, token as string, contract as Contract),
     { suspense },
   );
-  return result;
-}
-
-export function useVestingScheduleCountBeneficiary(
-  vesting: string,
-  address?: string | null,
-  suspense = false,
-): SWRResponse<any, any> {
-  const { chainId } = useWeb3React();
-  const contract = useContract(vesting, Vesting__factory.abi);
-
-  const result: any = useSWR(
-    typeof address === "string" && contract ? [address, chainId, vesting, DataType.TokenBalance] : null,
-    getVestingSchedulesCountByBenificiary(contract as Contract),
-    { suspense },
-  );
+  console.log("result:", result);
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   //let res: any = BigNumber.from(result.data).toNumber();
   return result;

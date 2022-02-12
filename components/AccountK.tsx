@@ -4,7 +4,7 @@ import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
 import { injected } from "../connectors";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
-import { useSeraUnlocked } from "../hooks/useVesting";
+import { useVestingScheduleBeneficiary } from "../hooks/useVesting";
 import { useTokenBalance } from "../hooks/useTokenBalance";
 import { TokenAmount } from "@uniswap/sdk";
 
@@ -16,8 +16,11 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
   const { isMetaMaskInstalled, isWeb3Available, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
   const [connecting, setConnecting] = useState(false);
-  const {data: data1} = useTokenBalance(account,true);
-  console.log("SERA:", (data1 as any));
+//   const {data} = useTokenBalance(account,true);
+//   const {data: claimable} = useVestingScheduleBeneficiary(account as string);
+//   console.log("SERA:", (data as any));
+//   console.log("Claimable:", (claimable as any));
+
   useEffect(() => {
     if (active || error) {
       setConnecting(false);
@@ -69,13 +72,13 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   return (
-      <div>
+    <div>
     <div className="text-lg flex flex-wrap justify-end">
         <div className="bg-yellow-500 px-2 py-1">
-            <button className="text-black">Claim</button>
+            <button className="text-black" onClick={(e) => handleClick(e)}>Claim</button>
         </div>
+        {/* <h5> SERA to be Unlocked: {(data as TokenAmount).toSignificant(4, { groupSeparator: "," })}</h5> */}
     </div>
-    <h5> Balance: {(data1 as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA</h5>
     </div>
 
   );

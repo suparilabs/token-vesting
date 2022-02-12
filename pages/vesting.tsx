@@ -1,18 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 // import Image, { ImageLoader } from "next/image";
 import React, { Component, useEffect, useState } from "react";
+import { useWeb3React } from "@web3-react/core";
 import Footer from "./Footer";
 import ContainerText from "../components/ContainerText";
 import Header from "./Header";
 import AccountK from "../components/AccountK";
 import { useEagerConnect } from "../hooks/useEagerConnect";
+import { useTokenBalance } from "../hooks/useTokenBalance";
 // const myLoader = ({ src, width, quality }) => {
 //   return `https://vesting-bsc.galaxywar.io/images/${src}?w=${width}&q=${quality || 75}`;
 // };
 
 function Vesting(props): JSX.Element {
+  const { account } = useWeb3React();
   const triedToEagerConnect = useEagerConnect();
-  
   const items = [{
     title: "Claim IDO Tokens",
     unlocked: "23.0540000",
