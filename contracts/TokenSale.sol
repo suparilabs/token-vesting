@@ -30,6 +30,10 @@ contract TokenSale is Ownable {
     uint256 public exchangePriceBUSD = 120000000000000000;
     uint256 public cliff = 3 * 30 days;
     uint256 public duration = 18 * 30 days;
+    uint256 public minBuyAmountUSDT = 1 * 10 * 18;
+    uint256 public maxBuyAmountUSDT = type(uint256).max;
+    uint256 public minBuyAmountBUSD = 1 * 10 * 18;
+    uint256 public maxBuyAmountBUSD = type(uint256).max;
 
     TokenVesting public vesting;
 
@@ -82,12 +86,22 @@ contract TokenSale is Ownable {
         availableAtTGE = _availableAtTGE;
     }
 
+    function setBuyAmountRangeBUSD(uint256 _min, uint256 _max) external onlyOwner {
+        minBuyAmountBUSD = _min;
+        maxBuyAmountBUSD = _max;
+    }
+
+    function setBuyAmountRangeUSDT(uint256 _min, uint256 _max) external onlyOwner {
+        minBuyAmountUSDT = _min;
+        maxBuyAmountUSDT = _max;
+    }
+
     function buyTokensUsingBUSD(uint256 _busdAmount) external onSale {
         uint256 _balanceBefore = IERC20(BUSD).balanceOf(address(this));
         require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount), "2");
         uint256 _balanceAfter = IERC20(BUSD).balanceOf(address(this));
         uint256 _actualBUSDAmount = _balanceAfter.sub(_balanceBefore);
-        require(_actualBUSDAmount >= 1000 ether, "3"); // BUSD has 18 ethers
+        require(_actualBUSDAmount >= minBuyAmountBUSD && _actualBUSDAmount <= maxBuyAmountBUSD, "3");
         uint256 _numberOfTokens = computeTokensForBUSD(_actualBUSDAmount);
         require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
         emit Sold(msg.sender, _numberOfTokens);
@@ -108,7 +122,7 @@ contract TokenSale is Ownable {
         require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount), "2");
         uint256 _balanceAfter = IERC20(USDT).balanceOf(address(this));
         uint256 _actualUSDTAmount = _balanceAfter.sub(_balanceBefore);
-        require(_actualUSDTAmount >= 1000 ether, "3"); // USDT has 18 ethers
+        require(_actualUSDTAmount >= minBuyAmountUSDT && _actualUSDTAmount <= maxBuyAmountUSDT, "3"); // BUSD has 18 ethers
         uint256 _numberOfTokens = computeTokensForUSDT(_actualUSDTAmount);
         require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
         emit Sold(msg.sender, _numberOfTokens);

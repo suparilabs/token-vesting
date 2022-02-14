@@ -15,9 +15,10 @@ import {
   useComputeVestingScheduleIdForAddressAndIndex,
   useRelease,
   useVestingScheduleByAddressAndIndex,
-  // useVestingScheduleCountBeneficiary,
+  useVestingScheduleCountBeneficiary,
 } from "../hooks/useVesting";
 import { secondsToDhms } from "../utils";
+import ClaimToken from "../components/ClaimToken";
 
 // const myLoader = ({ src, width, quality }) => {
 //   return `https://vesting-bsc.galaxywar.io/images/${src}?w=${width}&q=${quality || 75}`;
@@ -27,7 +28,7 @@ function Vesting(): JSX.Element {
   const [claimButtonDisable, setClaimButtonDisable] = useState<boolean>(false);
   const { account, chainId } = useWeb3React();
   const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
-  // const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress);
+  const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress, account as string);
   const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, "0");
   const { data: vestingScheduleId } = useComputeVestingScheduleIdForAddressAndIndex(
     account as string,
@@ -37,6 +38,7 @@ function Vesting(): JSX.Element {
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
   const { data: tge } = useAvailableAtTGE(chainId == undefined ? 56 : (chainId as number));
   const claim = useRelease(vestingContractAddress, vestingScheduleId, releasableAmount);
+  console.log(vestingScheduleCount);
   const items = [
     // {
     //   title: "Claim IDO Tokens",
@@ -84,23 +86,25 @@ function Vesting(): JSX.Element {
     setClaimButtonDisable(false);
   };
 
-  const itemList = items.map((item, index) => {
-    return (
-      <ContainerText
-        key={index}
-        unlocked={item.unlocked}
-        title_={item.title}
-        claimable={item.claimable}
-        splMessage={item.splMessage}
-        claimingDate={item.claimingDate}
-        unlockingDate={item.unlockingDate}
-        claim={e => handleClaim(e)}
-        claimButtonDisable={
-          (releasableAmount !== undefined && !BigNumber.from(releasableAmount).gt("0")) || claimButtonDisable
-        }
-      />
-    );
-  });
+  const itemList = vestingScheduleIndex =>
+    items.map((item, index) => {
+      return (
+        <ContainerText
+          key={index}
+          unlocked={item.unlocked}
+          title_={item.title}
+          claimable={item.claimable}
+          splMessage={item.splMessage}
+          claimingDate={item.claimingDate}
+          unlockingDate={item.unlockingDate}
+          claim={e => handleClaim(e)}
+          claimButtonDisable={
+            (releasableAmount !== undefined && !BigNumber.from(releasableAmount).gt("0")) || claimButtonDisable
+          }
+          vestingScheduleIndex={vestingScheduleIndex}
+        />
+      );
+    });
 
   return (
     <>
@@ -128,7 +132,7 @@ function Vesting(): JSX.Element {
 
           <div className="flex justify-center mb-40">
             {/* ITEMLIST DISPLAY */}
-            {vestingSchedule &&
+            {/* {vestingSchedule &&
               releasableAmount &&
               (BigNumber.from(releasableAmount).gt(0) ||
                 BigNumber.from(vestingSchedule[7])
@@ -145,8 +149,17 @@ function Vesting(): JSX.Element {
               <div className="text-white px-4">
                 {`You do not have any vesting schedule or you already claimed all the tokens`}
               </div>
-            )}
-            {/* {aaa(parseInt(vestingScheduleCount))} */}
+            )} */}
+            {Array.from(Array(vestingScheduleCount as number), (_, _index) => _index).map(_vestingScheduleIndex => {
+              return (
+                <ClaimToken
+                  key={_vestingScheduleIndex}
+                  title_="Claim Private Round Tokens"
+                  claim={e => handleClaim(e)}
+                  vestingScheduleIndex={_vestingScheduleIndex}
+                />
+              );
+            })}
           </div>
           {/* <div className="grid grid-cols-2 text-white px-16 py-16">
             <div className="text-3xl">FOLLOW SERA</div>
