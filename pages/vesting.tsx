@@ -2,10 +2,13 @@
 // import Image, { ImageLoader } from "next/image";
 import React, { useState } from "react";
 import { BigNumber } from "ethers";
+import moment from "moment";
+import { formatEther } from "@ethersproject/units";
+import BN from "bignumber.js";
 import Footer from "./Footer";
 import ContainerText from "../components/ContainerText";
 import Header from "./Header";
-import { useVestingContractAddress } from "../hooks/useTokenSale";
+import { useAvailableAtTGE, useVestingContractAddress } from "../hooks/useTokenSale";
 import { useWeb3React } from "@web3-react/core";
 import {
   useComputeReleasableAmount,
@@ -14,8 +17,8 @@ import {
   useVestingScheduleByAddressAndIndex,
   // useVestingScheduleCountBeneficiary,
 } from "../hooks/useVesting";
-import moment from "moment";
-import { formatEther } from "@ethersproject/units";
+import { secondsToDhms } from "../utils";
+
 // const myLoader = ({ src, width, quality }) => {
 //   return `https://vesting-bsc.galaxywar.io/images/${src}?w=${width}&q=${quality || 75}`;
 // };
@@ -32,6 +35,7 @@ function Vesting(): JSX.Element {
     "0",
   );
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
+  const { data: tge } = useAvailableAtTGE(chainId == undefined ? 56 : (chainId as number));
   const claim = useRelease(vestingContractAddress, vestingScheduleId, releasableAmount);
   const items = [
     // {
@@ -58,7 +62,9 @@ function Vesting(): JSX.Element {
         vestingSchedule != undefined
           ? moment.unix(parseInt(vestingSchedule[4]) + parseInt(vestingSchedule[3])).toLocaleString()
           : "-",
-      splMessage: "Vesting Schedule: 2% TGE then daily linear for 18 months",
+      splMessage: `Vesting Schedule: ${tge ? new BN(tge).div("100") : "-"}% TGE then daily linear for ${
+        vestingSchedule && (vestingSchedule[4] as number) > 0 ? secondsToDhms(vestingSchedule[4] as number) : "-"
+      }`,
     },
     // {
     //   title: "Claim Seed Round Tokens",
@@ -89,7 +95,9 @@ function Vesting(): JSX.Element {
         claimingDate={item.claimingDate}
         unlockingDate={item.unlockingDate}
         claim={e => handleClaim(e)}
-        claimButtonDisable={(releasableAmount !== undefined && !BigNumber.from(releasableAmount).gt("0")) || claimButtonDisable}
+        claimButtonDisable={
+          (releasableAmount !== undefined && !BigNumber.from(releasableAmount).gt("0")) || claimButtonDisable
+        }
       />
     );
   });
@@ -120,10 +128,27 @@ function Vesting(): JSX.Element {
 
           <div className="flex justify-center mb-40">
             {/* ITEMLIST DISPLAY */}
-            {vestingSchedule && itemList}
+            {vestingSchedule &&
+              releasableAmount &&
+              (BigNumber.from(releasableAmount).gt(0) ||
+                BigNumber.from(vestingSchedule[7])
+                  .sub(BigNumber.from(vestingSchedule[8]))
+                  .sub(releasableAmount)
+                  .gt(0)) &&
+              itemList}
+            {!(
+              vestingSchedule &&
+              releasableAmount &&
+              (BigNumber.from(releasableAmount).gt(0) ||
+                BigNumber.from(vestingSchedule[7]).sub(BigNumber.from(vestingSchedule[8])).sub(releasableAmount).gt(0))
+            ) && (
+              <div className="text-white px-4">
+                {`You do not have any vesting schedule or you already claimed all the tokens`}
+              </div>
+            )}
             {/* {aaa(parseInt(vestingScheduleCount))} */}
           </div>
-          <div className="grid grid-cols-2 text-white px-16 py-16">
+          {/* <div className="grid grid-cols-2 text-white px-16 py-16">
             <div className="text-3xl">FOLLOW SERA</div>
             <div className="flex flex-row space-x-10">
               <a href="https://twitter.com/Project_SERA">
@@ -157,7 +182,7 @@ function Vesting(): JSX.Element {
                 </svg>
               </a>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
       <Footer />

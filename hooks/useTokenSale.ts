@@ -89,6 +89,21 @@ export function useUSDT(chainId: number, suspense = false): SWRResponse<any, any
   return result;
 }
 
+function getAvailableAtTGE(contract: Contract): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.availableAtTGE().then((result: string) => result.toString());
+}
+
+export function useAvailableAtTGE(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "tge", addresses[chainId as number].TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    getAvailableAtTGE(contract as Contract),
+    { suspense },
+  );
+  //let res: any = BigNumber.from(result.data).toNumber();
+  return result;
+}
+
 export function useTxApprove(token: string, amount: BigNumber, chainId: number): any {
   const contract = useContract(token, ERC20__factory.abi, true);
   return async () => {
