@@ -9,6 +9,7 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./Token.sol";
+import "./TokenTimelock.sol";
 import "./TokenVesting.sol";
 
 /**
@@ -36,6 +37,7 @@ contract TokenSale is Ownable {
     uint256 public maxBuyAmountBUSD;
 
     TokenVesting public vesting;
+    TokenTimelock public timelock;
 
     uint256 public availableAtTGE = 200; // percentage basis points
 
@@ -55,6 +57,7 @@ contract TokenSale is Ownable {
         USDT = _usdt;
         BUSD = _busd;
         vesting = new TokenVesting(address(token));
+        timelock = new TokenTimelock(address(token));
     }
 
     modifier onSale() {
@@ -112,7 +115,8 @@ contract TokenSale is Ownable {
         uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
+            //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
+            timelock.depositTokensBUSD(msg.sender, _nonVestedTokenAmount);
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
@@ -135,7 +139,8 @@ contract TokenSale is Ownable {
         uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
+            //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
+            timelock.depositTokensUSDT(msg.sender, _nonVestedTokenAmount);
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
