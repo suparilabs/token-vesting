@@ -6,28 +6,16 @@ import Footer from "./Footer";
 import Agreement from "../components/StepModals/Agreement";
 
 const options: Highcharts.Options = {
-  title: {
-    text: "Token Distribution",
-  },
-  tooltip: {
-    pointFormat: "{series.name}: <b>{point.percentage:.1f}%</b>",
-  },
-  accessibility: {
-    point: {
-      valueSuffix: "%",
+    title: {
+        text: 'Token Distribution'
     },
-  },
-  plotOptions: {
-    pie: {
-      allowPointSelect: true,
-      cursor: "pointer",
-      dataLabels: {
-        enabled: true,
-        format: "<b>{point.name}</b>: {point.percentage:.1f} %",
-      },
+    plotOptions: {
+        pie: {
+            innerSize: 160,
+            depth: 45
+        }
     },
-  },
-  series: [
+   series: [
     {
       name: "Tokenomics",
       colorByPoint: true,
@@ -76,9 +64,6 @@ const options: Highcharts.Options = {
       ],
     },
   ],
-  credits: {
-    enabled: false,
-  },
 };
 
 // "rgb(10, 3, 255)",
