@@ -15,57 +15,18 @@ const Footer = () => {
             <table className="table-auto">
               <tbody className="text-white">
                 <tr>
-                  <td rowSpan={5}>
-                    <img
-                      src="https://seraproject.org/views/front//images/logo.png"
-                      width="100px"
-                      height="120px"
-                      alt="Logo"
-                    />
+                  <td colSpan={5} className="text-5xl font-semibold">
+                   JOIN SERA COMMUNITY
                     {/* <Image loader={myLoader as ImageLoader} src="logo.png" alt="SERA" width={100} height={120} /> */}
                   </td>
-                  <td>
-                    <div className="box-border bg-white h-0.5 ..."></div>
-                  </td>
-                  <td>
-                    <div className="box-border bg-white h-0.5 ..."></div>
-                  </td>
-                  <td>
-                    <div className="box-border bg-white h-0.5 ..."></div>
-                  </td>
-                  <td>
-                    <div className="box-border bg-white h-0.5 ..."></div>
-                  </td>
+                  
                 </tr>
                 <tr>
-                  <td className="text-3xl px-4 py-4">Products</td>
-                  <td className="text-3xl px-4 py-4">Documents</td>
-                  <td className="text-3xl px-4 py-4">Community</td>
-                  <td className="text-3xl px-4 py-4">About</td>
-                </tr>
-                <tr>
-                  <td>Github</td>
-                  <td>
-                    <a href="https://twitter.com/Project_SERA">Twitter</a>
-                  </td>
-                  <td>Investors</td>
-                  <td>
-                    <a href="https://www.linkedin.com/company/sera-project/">LinkedIn</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Token</td>
-                  <td>Roadmap</td>
-                  <td>
-                    <a href="https://t.me/Sera_Project">Telegram</a>
-                  </td>
-                  <td>Jobs</td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td>Privacy & Policy</td>
-                  <td><a href="https://bit.ly/SERA_Project">Youtube</a></td>
-                  <td></td>
+                  <td className="text-3xl px-4 py-4"><a href="https://twitter.com/Project_SERA">Twitter</a></td>
+                  <td className="text-3xl px-4 py-4"><a href="https://t.me/Sera_Project">Telegram</a></td>
+                  <td className="text-3xl px-4 py-4"><a href="https://bit.ly/SERA_Project">Youtube</a></td>
+                  <td className="text-3xl px-4 py-4"><a href="https://t.me/Sera_Project">Telegram</a></td>
+                  <td className="text-3xl px-4 py-4"><a href="https://www.linkedin.com/company/sera-project/">LinkedIn</a></td>
                 </tr>
               </tbody>
             </table>

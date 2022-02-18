@@ -33,6 +33,9 @@ const Header = () => {
               <Nav.Link href="/vesting" className="text-white text-2xl">
                 Vesting
               </Nav.Link>
+              <Nav.Link href="/presale" className="text-white text-2xl">
+                Pre Sale
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
           <div className="bg-yellow-500 px-2 py-1 text-xl">
