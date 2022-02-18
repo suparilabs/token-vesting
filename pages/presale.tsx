@@ -7,7 +7,7 @@ import Agreement from "../components/StepModals/Agreement";
 
 const options: Highcharts.Options = {
     title: {
-        text: 'Token Distribution'
+        text: ''
     },
     plotOptions: {
         pie: {
@@ -132,6 +132,7 @@ function TokenSale() {
               </div>
             </div>
           </div>
+          <div className="text-3xl font-bold mb-1 text-blue-700">Token Distribution</div>
           <HighchartsReact highcharts={Highcharts} options={options} />
         {/* call footer */}
         <Footer />
