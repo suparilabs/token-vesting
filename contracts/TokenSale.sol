@@ -31,11 +31,10 @@ contract TokenSale is Ownable {
     uint256 public exchangePriceBUSD = 120000000000000000;
     uint256 public cliff = 3 * 30 days;
     uint256 public duration = 18 * 30 days;
-    uint256 public minBuyAmountUSDT;
-    uint256 public maxBuyAmountUSDT;
-    uint256 public minBuyAmountBUSD;
-    uint256 public maxBuyAmountBUSD;
-
+    uint256 public minBuyAmountUSDT = 10000000000000000000;
+    uint256 public maxBuyAmountUSDT = 10000000000000000000000;
+    uint256 public minBuyAmountBUSD = 10000000000000000000;
+    uint256 public maxBuyAmountBUSD = 10000000000000000000000;
     TokenVesting public vesting;
     TokenTimelock public timelock;
 
@@ -104,8 +103,6 @@ contract TokenSale is Ownable {
         require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount), "2");
         uint256 _balanceAfter = IERC20(BUSD).balanceOf(address(this));
         uint256 _actualBUSDAmount = _balanceAfter.sub(_balanceBefore);
-        require(minBuyAmountBUSD > 0, "Please set the minimum BUSD amount");
-        require(maxBuyAmountBUSD > 0, "Please set the maximum BUSD amount");
         require(_actualBUSDAmount >= minBuyAmountBUSD && _actualBUSDAmount <= maxBuyAmountBUSD, "3");
         uint256 _numberOfTokens = computeTokensForBUSD(_actualBUSDAmount);
         require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
@@ -116,7 +113,7 @@ contract TokenSale is Ownable {
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
             //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
-            timelock.depositTokensBUSD(msg.sender, _nonVestedTokenAmount);
+            require(token.transferFrom(owner(), timelock, _nonVestedTokenAmount));
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
@@ -128,8 +125,6 @@ contract TokenSale is Ownable {
         require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount), "2");
         uint256 _balanceAfter = IERC20(USDT).balanceOf(address(this));
         uint256 _actualUSDTAmount = _balanceAfter.sub(_balanceBefore);
-        require(minBuyAmountUSDT > 0, "Please set the minimum USDT amount");
-        require(maxBuyAmountUSDT > 0, "Please set the maximum USDT amount");
         require(_actualUSDTAmount >= minBuyAmountUSDT && _actualUSDTAmount <= maxBuyAmountUSDT, "3"); // BUSD has 18 ethers
         uint256 _numberOfTokens = computeTokensForUSDT(_actualUSDTAmount);
         require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
@@ -140,7 +135,7 @@ contract TokenSale is Ownable {
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
             //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
-            timelock.depositTokensUSDT(msg.sender, _nonVestedTokenAmount);
+            require(token.transferFrom(owner(), timelock, _nonVestedTokenAmount));
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 

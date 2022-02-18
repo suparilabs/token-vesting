@@ -116,21 +116,7 @@ contract TokenTimelock is Ownable {
     /// @dev Allows the contract owner to allocate official ERC20 tokens to each future recipient (only one at a time).
     /// @param recipient, address of recipient.
     /// @param amount to allocate to recipient.
-    function depositTokensBUSD(address recipient, uint256 amount)
-        public
-        onlyOwner
-        timestampIsSet
-        incomingDepositsStillAllowed
-    {
-        require(recipient != address(0), "ERC20: transfer to the zero address");
-        balances[recipient] = balances[recipient].add(amount);
-        emit AllocationPerformed(recipient, amount);
-    }
-
-    /// @dev Allows the contract owner to allocate official ERC20 tokens to each future recipient (only one at a time).
-    /// @param recipient, address of recipient.
-    /// @param amount to allocate to recipient.
-    function depositTokensUSDT(address recipient, uint256 amount)
+    function depositTokens(address recipient, uint256 amount)
         public
         onlyOwner
         timestampIsSet
@@ -144,27 +130,7 @@ contract TokenTimelock is Ownable {
     /// @dev Allows the contract owner to allocate official ERC20 tokens to multiple future recipient in bulk.
     /// @param recipients, an array of addresses of the many recipient.
     /// @param amounts to allocate to each of the many recipient.
-    function bulkDepositTokensUSDT(address[] calldata recipients, uint256[] calldata amounts)
-        external
-        onlyOwner
-        timestampIsSet
-        incomingDepositsStillAllowed
-    {
-        require(
-            recipients.length == amounts.length,
-            "The recipients and amounts arrays must be the same size in length"
-        );
-        for (uint256 i = 0; i < recipients.length; i++) {
-            require(recipients[i] != address(0), "ERC20: transfer to the zero address");
-            balances[recipients[i]] = balances[recipients[i]].add(amounts[i]);
-            emit AllocationPerformed(recipients[i], amounts[i]);
-        }
-    }
-
-    /// @dev Allows the contract owner to allocate official ERC20 tokens to multiple future recipient in bulk.
-    /// @param recipients, an array of addresses of the many recipient.
-    /// @param amounts to allocate to each of the many recipient.
-    function bulkDepositTokensBUSD(address[] calldata recipients, uint256[] calldata amounts)
+    function bulkDepositTokens(address[] calldata recipients, uint256[] calldata amounts)
         external
         onlyOwner
         timestampIsSet
