@@ -27,14 +27,17 @@ const Header = () => {
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link href="/tokensale" className="text-white text-2xl">
+              <Nav.Link href="/tokensale" className="text-white text-2xl hover:text-lime-600">
                 Token Sale
               </Nav.Link>
-              <Nav.Link href="/vesting" className="text-white text-2xl">
+              <Nav.Link href="/vesting" className="text-white text-2xl hover:text-lime-600">
                 Vesting
               </Nav.Link>
-              <Nav.Link href="/presale" className="text-white text-2xl">
+              <Nav.Link href="/presale" className="text-white text-2xl hover:text-lime-600">
                 Pre Sale
+              </Nav.Link>
+              <Nav.Link href="/dashboard" className="text-white text-2xl hover:text-lime-600">
+                Dashboard
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
