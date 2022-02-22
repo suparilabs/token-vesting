@@ -1,97 +1,59 @@
-import { useState, useEffect, useRef, Suspense, useLayoutEffect } from "react";
-import { Box, Button } from "@chakra-ui/core";
-import { Container, Card } from "react-bootstrap";
-import { Web3Provider } from "@ethersproject/providers";
+/* eslint-disable @next/next/no-img-element */
 import { useWeb3React } from "@web3-react/core";
-import MetaMaskOnboarding from "@metamask/onboarding";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
-import { TokenAmount } from "@uniswap/sdk";
-// import { useQueryParameters } from "../hooks/useQueryParameters";
-// import { QueryParameters } from "../constants";
+import { useEffect, useState } from "react";
 import { injected } from "../connectors";
-import { useETHBalance } from "../hooks/useETHBalance";
-import { useTokenBalance } from "../hooks/useTokenBalance";
-import { COIN_SYMBOLS } from "../utils";
+import useENSName from "../hooks/useENSName";
+import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
+import { formatEtherscanLink, shortenHex } from "../utils";
+// import Image, { ImageLoader } from "next/image";
 
-function ETHBalance(): JSX.Element {
-  const { account, chainId } = useWeb3React();
-  const { data } = useETHBalance(account, true);
-  const { data: data1 } = useTokenBalance(account, true);
-  const currencyUnit = chainId && COIN_SYMBOLS[chainId];
-
-  return (
-    <Container>
-      <Card>
-        <Card.Body>
-          <h5> Vesting Beneficiary: {account}</h5>
-          <h5>
-            {" "}
-            Balance: {(data as TokenAmount).toSignificant(4, { groupSeparator: "," })} {currencyUnit}
-          </h5>
-          <h5> Balance: {(data1 as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA</h5>
-        </Card.Body>
-      </Card>
-    </Container>
-  );
-}
-
-export default function Account(/*{
-  triedToEagerConnect,
-}: {
+type AccountProps = {
   triedToEagerConnect: boolean;
-}*/): JSX.Element | null {
-  const { active, error, activate, account, setError } = useWeb3React<Web3Provider>();
+};
 
-  // initialize metamask onboarding
-  // const onboarding = useRef<MetaMaskOnboarding>();
-  const onboarding = useRef<MetaMaskOnboarding>();
-  useLayoutEffect(() => {
-    onboarding.current = new MetaMaskOnboarding();
-  }, []);
+// const myLoader = ({ src, width, quality }) => {
+//   return `https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/${src}?w=${width}&q=${
+//     quality || 75
+//   }`;
+// };
 
-  // useLayoutEffect(() => {
-  //     onboarding.current = new MetaMaskOnboarding();
-  // }, [])
+const Account = ({ triedToEagerConnect }: AccountProps) => {
+  const { active, error, activate, chainId, account, setError } = useWeb3React();
 
-  // automatically try connecting network connector where applicable
-  // const queryParameters = useQueryParameters();
-  // const requiredChainID = queryParameters[QueryParameters.CHAIN];
-
-  //   useEffect(() => {
-  //     if (triedToEagerConnect && !active && !error) {
-  //       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  //       activate(getNetwork(requiredChainID));
-  //     }
-  //   }, [triedToEagerConnect, active, error, requiredChainID, activate]);
+  const { isMetaMaskInstalled, isWeb3Available, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
 
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
-
   useEffect(() => {
     if (active || error) {
       setConnecting(false);
-      onboarding.current?.stopOnboarding();
+      stopOnboarding();
     }
-  }, [active, error]);
+  }, [active, error, stopOnboarding]);
+
+  const ENSName = useENSName(account as string);
 
   if (error) {
     return null;
   }
-  //   else if (!triedToEagerConnect) {
-  //     return null;
-  //   }
-  else if (typeof account !== "string") {
+
+  if (!triedToEagerConnect) {
+    return null;
+  }
+
+  if (typeof account !== "string") {
     return (
-      <Box>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {typeof window !== "undefined" &&
-        (MetaMaskOnboarding.isMetaMaskInstalled() || (window as any)?.ethereum || (window as any)?.web3) ? (
-          <Button
-            isLoading={connecting}
-            leftIcon={MetaMaskOnboarding.isMetaMaskInstalled() ? ("metamask" as "edit") : undefined}
-            onClick={(): void => {
+      <div>
+        {isWeb3Available ? (
+          <button
+          className="text-white text-xl"
+            disabled={connecting}
+            onClick={() => {
               setConnecting(true);
+
               activate(injected, undefined, true).catch(error => {
+                // ignore the error if it's a user rejected request
                 if (error instanceof UserRejectedRequestError) {
                   setConnecting(false);
                 } else {
@@ -100,37 +62,48 @@ export default function Account(/*{
               });
             }}
           >
-            {MetaMaskOnboarding.isMetaMaskInstalled() ? "Connect to MetaMask" : "Connect to Wallet"}
-          </Button>
+            {isMetaMaskInstalled ? (
+              <button className="btn btn-green btn-launch-app">
+                {/* <Image
+                  loader={myLoader as ImageLoader}
+                  src="220px-MetaMask_Fox.svg.png"
+                  alt="MetaMask"
+                  width={25}
+                  height={25}
+                /> */}
+                {/* <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/220px-MetaMask_Fox.svg.png"
+                  className=""
+                  alt="Connect"
+                  width="25px"
+                  height="25px"
+                />Connect */}
+                Connect 
+                <span><i className="bi bi-app-indicator"></i></span>
+              </button>
+
+            ) : (
+              "Connect to Wallet"
+            )}
+          </button>
         ) : (
-          <Button leftIcon={"metamask" as "edit"} onClick={() => onboarding.current?.startOnboarding()}>
-            Install Metamask
-          </Button>
+          <button onClick={startOnboarding}>Install Metamask</button>
         )}
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Suspense
-      fallback={
-        <Button
-          variant="outline"
-          isLoading
-          cursor="default !important"
-          _hover={{}}
-          _active={{}}
-          style={{
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
-            borderRight: "none",
-          }}
-        >
-          {null}
-        </Button>
-      }
+    <a
+      {...{
+        href: formatEtherscanLink("Account", [chainId as number, account]),
+        target: "_blank",
+        rel: "noopener noreferrer",
+      }}
     >
-      <ETHBalance />
-    </Suspense>
+      {ENSName || `${shortenHex(account, 4)}`}
+    </a>
   );
-}
+};
+
+export default Account;

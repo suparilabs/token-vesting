@@ -1,2 +1,2 @@
 import "./erc20";
-import "./privatesalecontract";
+import "./token-vesting";

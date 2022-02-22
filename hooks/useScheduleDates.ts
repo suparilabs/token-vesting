@@ -1,17 +1,14 @@
 import useSWR, { SWRResponse } from "swr";
 import { Contract } from "ethers";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
-import { PRIVATE_SALE_ADDRESS } from "../constants";
 import { useContract } from "./useContract";
 import { DataType } from "../utils";
-import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
-import moment from "moment";
-import { PrivateSaleContract__factory } from "../src/types";
+import { TokenVesting__factory } from "../src/types";
 
-function computeStartDate(contract: Contract): (address: string) => Promise<any> {
-  return async (address: string): Promise<any> =>
-    contract.getLastVestingScheduleForHolder(address).then((result: any) => result);
+function computeStartDate(contract: Contract): (address: string) => Promise<string> {
+  return async (address: string): Promise<string> =>
+    contract.getLastVestingScheduleForHolder(address).then((result: string) => result);
 }
 // function computeCliff (contract: Contract): (address: string) => Promise<any> {
 //   return async (address: string): Promise<any> => contract.getLastVestingScheduleForHolder(address).then((result: any) => result.cliff.toNumber())
@@ -19,13 +16,13 @@ function computeStartDate(contract: Contract): (address: string) => Promise<any>
 // function computeDuration (contract: Contract): (address: string) => Promise<any> {
 //   return async (address: string): Promise<any> => contract.getLastVestingScheduleForHolder(address).then((result: any) => result.duration.toNumber())
 // }
-export function useStart(address?: string | null, suspense = false): SWRResponse<any, any> {
+export function useStart(vesting, address?: string | null, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
 
-  const contract = useContract(PRIVATE_SALE_ADDRESS, PrivateSaleContract__factory.abi);
+  const contract = useContract(vesting, TokenVesting__factory.abi);
 
   const result: any = useSWR(
-    typeof address === "string" && contract ? [address, chainId, PRIVATE_SALE_ADDRESS, DataType.TokenBalance] : null,
+    typeof address === "string" && contract ? [address, chainId, vesting, DataType.TokenBalance] : null,
     computeStartDate(contract as Contract),
     { suspense },
   );
