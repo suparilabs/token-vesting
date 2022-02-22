@@ -5,11 +5,11 @@ import Account from "../components/Account";
 import { useEagerConnect } from "../hooks/useEagerConnect";
 import { useTokenBalance } from "../hooks/useTokenBalance";
 import { TokenAmount } from "@uniswap/sdk";
-// import Image, { ImageLoader } from "next/image";
+import Image, { ImageLoader } from "next/image";
 
-// const myLoader = ({ src, width, quality }) => {
-//   return `https://seraproject.org/views/front//images/${src}?w=${width}&q=${quality || 75}`;
-// };
+const myLoader = ({ src, width, quality }) => {
+  return `https://seraproject.org/views/front//images/${src}?w=${width}&q=${quality || 75}`;
+};
 
 const Header = () => {
   const triedToEagerConnect = useEagerConnect();
@@ -17,35 +17,29 @@ const Header = () => {
   const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
 
   return (
-    <>
-      <Navbar collapseOnSelect expand="lg" className="bg-blue-700">
-        <Container>
-          <Navbar.Brand href="#home">
-            <img src="https://seraproject.org/views/front//images/logo.png" width="50px" height="60px" alt="Logo" />
-            {/* <Image loader={myLoader as ImageLoader} src="logo.png" alt="SERA" width={60} height={70} /> */}
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-          <Navbar.Collapse id="responsive-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link href="/tokensale" className="text-white text-2xl">
-                Token Sale
-              </Nav.Link>
-              <Nav.Link href="/vesting" className="text-white text-2xl">
-                Vesting
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-          <div className="bg-yellow-500 px-2 py-1 text-xl">
-            <Account triedToEagerConnect={triedToEagerConnect} />
-          </div>
-          {account && chainId && balance && (
-            <div className="ml-2 text-white text-xl">
+    <div className="navigation">
+    <nav className="navbar navbar-light fixed-top">
+         <div className="container">
+           <a className="navbar-brand" href="<?= $url;?>">
+             {/* <Image src="https://seraproject.org/views/front//images/logo.png" width="50px" height="60px" alt="Logo"></Image> */}
+           </a>
+           <ul className="navbar-nav custom d-none d-sm-none d-md-none d-lg-block d-xl-block d-xxl-block">
+             <li className="nav-item"><a href="/vesting" className="nav-link">Home</a></li>
+             <li className="nav-item"><a href="/tokensale" className="nav-link">Presale</a></li>
+             <li className="nav-item"><a href="/dashboard" className="nav-link">Dashboard</a></li>
+             <li className="nav-item"><a href="https://seraproject.org/presale" className="nav-link aboutmenu">WhitePaper </a></li>
+             </ul>
+             <div>
+             <Account triedToEagerConnect={triedToEagerConnect} />
+             </div>
+             {account && chainId && balance && (
+            <div className="text-white text-xl">
               | {(balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA
             </div>
           )}
-        </Container>
-      </Navbar>
-    </>
+    </div>          
+    </nav>
+    </div>
   );
 };
 

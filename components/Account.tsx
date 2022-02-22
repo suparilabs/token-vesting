@@ -47,7 +47,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
-            className="bg-yellow-500 px-2 py-1.5 text-black"
+          className="text-white text-xl"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
@@ -63,7 +63,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
             }}
           >
             {isMetaMaskInstalled ? (
-              <button className="text-lg">
+              <button className="btn btn-green btn-launch-app">
                 {/* <Image
                   loader={myLoader as ImageLoader}
                   src="220px-MetaMask_Fox.svg.png"
@@ -79,7 +79,9 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
                   height="25px"
                 />Connect */}
                 Connect 
+                <span><i className="bi bi-app-indicator"></i></span>
               </button>
+
             ) : (
               "Connect to Wallet"
             )}
