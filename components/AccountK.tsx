@@ -41,7 +41,6 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
-            className="bg-amber-300 px-2 py-1.5 text-black"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
@@ -55,7 +54,7 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
               });
             }}
           >
-            {isMetaMaskInstalled ? <button className="text-xl">Connect</button> : "Connect to Wallet"}
+            {isMetaMaskInstalled ? <button type="button" className="btn btn-warning">Connect</button> : "Connect to Wallet"}
           </button>
         ) : (
           <button onClick={startOnboarding}>Install Metamask</button>
@@ -65,14 +64,9 @@ const AccountK = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   return (
-    <div>
-      <div className="text-lg flex flex-wrap justify-end">
-        <div className="bg-yellow-500 px-2 py-1">
-          <button className="text-black" /*onClick={(e) => handleClick(e)}*/>Claim</button>
-        </div>
-        {/* <h5> SERA to be Unlocked: {(data as TokenAmount).toSignificant(4, { groupSeparator: "," })}</h5> */}
-      </div>
-    </div>
+   
+      <button type="button" className="btn btn-warning"/*onClick={(e) => handleClick(e)}*/>Claim</button>
+    
   );
 };
 
