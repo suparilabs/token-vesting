@@ -33,7 +33,7 @@ const Header = () => {
              <Account triedToEagerConnect={triedToEagerConnect} />
              </div>
              {account && chainId && balance && (
-            <div className="text-white text-xl">
+            <div className="nav-item">
               | {(balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA
             </div>
           )}

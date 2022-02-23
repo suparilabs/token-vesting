@@ -120,7 +120,7 @@ white-space: pre;
 border-radius: 3px;
 }
 
-.titlenew{text-align:center;}
+.titlenew{text-align:center; margin-top: 50px;}
 .titlenew2{font-size: 14px;color: #26262D;text-align:center;}
 .titlespan{color: #0112E5;}
 .Presale_side{background-color: #f1f1f1;padding: 10px;border-radius: 30px;}
