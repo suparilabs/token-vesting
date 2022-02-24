@@ -121,24 +121,45 @@ border-radius: 3px;
 }
 
 .titlenew{text-align:center; margin-top: 50px;}
-.titlenew2{font-size: 14px;color: #26262D;text-align:center;}
+.titlenew2{font-size: 19px;color: #26262D;text-align:center;}
 .titlespan{color: #0112E5;}
 .Presale_side{background-color: #f1f1f1;padding: 10px;border-radius: 30px;}
+
+.titleCountDown{text-align: center;}
 
 .titlespanbuy {
 	text-align: center;
 	padding: 17px;
-	color: #000 !important;padding:20px;
+	color: #000 !important;
+    padding:20px;
+    display:inline;
 }
-.buylink{color: #000;
-	font-size: 15px;
- 
-  
-    
-}
-	
-	#about-page .text p {
 
+.buylink{
+    color: #000;
+	font-size: 18px;
+}
+
+.amtTextbox {
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    width: 470px;
+}
+
+.amtLabel {
+    margin-top: 10px;
+    font-size: 20px;
+}
+
+.amtButton {
+    margin-right: 10px;
+}
+
+.buylinkSection {
+    margin-top:10px;
+    text-align: center;
+}
+
+#about-page .text p {
 	font-size: 18px;
 }
 
@@ -148,7 +169,8 @@ border-radius: 3px;
   align-items: center;
   justify-content: center;
 }
-.wrap a {
+
+.wrap button {
 	width: 210px;
 	height: 45px;
 	font-family: 'Roboto', sans-serif;
@@ -156,14 +178,20 @@ border-radius: 3px;
 	text-transform: uppercase;
 	letter-spacing: 2.5px;
 	font-weight: 500;
-	color: #fff;
-	background-color: #0112E5;
+	color: #fff !important;
+	background-color: #0112E5 !important;
 	border: none;
 	border-radius: 45px;
 	box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
 	transition: all 0.3s ease 0s;
 	cursor: pointer;
 	outline: none;
+    margin-top: 20px;
+}
+
+.wrap button:hover {
+    background-color: #00BCD4;
+    color: rgba(0, 0, 0, 0.1);
 }
 /*
 .wrap a {
@@ -209,28 +237,25 @@ border-radius: 3px;
  font-weight:bold;
 }
 #about-page .heading .title {
- margin-top:7px;
+    margin-top:7px;
 	font-size: 30px;
 }
-.titlespanbuynot{display:none;
-
+.titlespanbuynot {
+    display:none;
 	text-align: center;
 	color: red;
 }
-.titlespanbuynot2{ 
-display:none;
+.titlespanbuynot2 { 
+    display:none;
 	text-align: center;
 	color: Green;
 }
 
 .navbar-nav{padding-right: 400px;}
 
-
-
-
 .card {
     padding: 30px 40px;
-    margin-top: 60px;
+    margin-top: -90px;
     margin-bottom: 60px;
     border: none !important;
     box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2)
@@ -245,8 +270,7 @@ display:none;
 }
 
 input,
-textarea,
-button {
+textarea {
     padding: 8px 15px;
     border-radius: 5px !important;
     margin: 5px 0px;
@@ -254,6 +278,12 @@ button {
     border: 1px solid #ccc;
     font-size: 18px !important;
     font-weight: 300
+}
+
+.countdown {
+    font-size: 50px;
+    color:rgba(0, 0, 0, 0.25);
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
 input:focus,

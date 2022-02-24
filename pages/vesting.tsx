@@ -30,14 +30,12 @@ function Vesting(): JSX.Element {
   const { account, chainId } = useWeb3React();
   const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
   const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress, account as string);
-  const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, "0");
   const { data: vestingScheduleId } = useComputeVestingScheduleIdForAddressAndIndex(
     account as string,
     vestingContractAddress,
     "0",
   );
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
-  const { data: tge } = useAvailableAtTGE(chainId == undefined ? 56 : (chainId as number));
   const claim = useRelease(vestingContractAddress, vestingScheduleId, releasableAmount);
   console.log(vestingScheduleCount);
   
@@ -65,8 +63,7 @@ function Vesting(): JSX.Element {
                     </div>
                     <div className="text">
                         <p>  Daily linear vesting on a block-by-block basis.Please don’t claim too frequently as you have to pay gas fee every time you claim. </p>
- 
- <p> <h2 className="titlenew2">OEC:0x31640330cd2337e57c9591a2a183ac4e8a754e87</h2></p>
+                        <p> <h2 className="titlenew2">Vesting Contract Address {vestingContractAddress}</h2></p>
                     </div>
                 </div>
                 <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-sm-12">
@@ -94,7 +91,7 @@ function Vesting(): JSX.Element {
         <div className="col-md-4">
             <div className="card p-3 mb-2">
             <div className="heading newhead">
-                <h2 data-aos-delay="300" className="title">Claim Private Round Tokens</h2>
+                <h2 className="title">Claim Private Round Tokens</h2>
             </div>
             {Array.from(Array(vestingScheduleCount as number), (_, _index) => _index).map(_vestingScheduleIndex => {
               return (
@@ -113,9 +110,9 @@ function Vesting(): JSX.Element {
 </div>
 </div>
 </section>
-   {/* Footer */}
-   <Footer/>
-    </div>
+{/* Footer */}
+<Footer/>
+</div>
   );
 }
 

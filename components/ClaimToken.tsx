@@ -21,7 +21,7 @@ import {
 const ClaimToken = props => {
     // WEB3 Connection 
     const { account, chainId } = useWeb3React();
-    const triedToEagerConnect = useEagerConnect();
+    // const triedToEagerConnect = useEagerConnect();
     const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
     // Setting up variables to fetch details from hooks
     const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
@@ -65,8 +65,8 @@ const ClaimToken = props => {
               <span className="Claimable">{claimable}</span> </div>
           
        </div>
-        <button type="button" onClick={claim} disabled={props.claimButtonDisable}>
-            <Account triedToEagerConnect={triedToEagerConnect} />
+        <button type="button" className="btn btn-warning" onClick={claim} disabled={props.claimButtonDisable}>
+          Claim
        </button>
       
        <div className="mt-5">

@@ -141,9 +141,7 @@ function Dashboard() {
                                      
                                 </div>
                     <div className="card-body inner-card">
-                       
-                                  
-                            <div className="row justify-content-between text-left">
+                      <div className="row justify-content-between text-left">
                         <div className="form-group col-sm-6 flex-column d-flex"> <label className="form-control-label px-3">Available on tge
                         <span className="text-danger"> *</span></label> <input type="text" id="availableontge" name="availableontge" placeholder="Available on tge"/> </div>
                         <div className="form-group col-sm-6 flex-column d-flex"> <label className="form-control-label px-3">Cliff period<span className="text-danger"> *</span></label> 
