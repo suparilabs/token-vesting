@@ -1,133 +1,101 @@
+import React, { useState } from "react";
 import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
-import Countdown from "react-countdown";
 import Header from "./Header";
 import Footer from "./Footer";
-import Agreement from "../components/StepModals/Agreement";
+import { useWeb3React } from "@web3-react/core";
+import { useSetAvailableAtTGE, useVestingContractAddress, useSetCliffPeriod, useSetDuration, useCreateVestingSchedule } from "../hooks/useTokenSale";
+import moment from "moment";
+import {
+    useComputeReleasableAmount,
+    useComputeVestingScheduleIdForAddressAndIndex,
+    useRelease,
+    useVestingScheduleByAddressAndIndex,
+    useVestingScheduleCountBeneficiary,
+  } from "../hooks/useVesting";
+  import { formatEther } from "@ethersproject/units";
+  import { BigNumber } from "ethers";
+  import { secondsToDhms } from "../utils";
+  import BN from "bignumber.js";
+  import Account from "../components/AccountK";
+  import { useEagerConnect } from "../hooks/useEagerConnect";
+  import { useTokenBalance } from "../hooks/useTokenBalance";
+  import { TokenAmount } from "@uniswap/sdk";
+import { resolve } from "path/posix";
+import { reject } from "lodash";
+import * as XLSX from "xlsx";
+import { stringOrNumber } from "@chakra-ui/core";
 
-const options: Highcharts.Options = {
-  title: {
-    text: "Token Distribution",
-  },
-  tooltip: {
-    pointFormat: "{series.name}: <b>{point.percentage:.1f}%</b>",
-  },
-  accessibility: {
-    point: {
-      valueSuffix: "%",
-    },
-  },
-  plotOptions: {
-    pie: {
-      allowPointSelect: true,
-      cursor: "pointer",
-      dataLabels: {
-        enabled: true,
-        format: "<b>{point.name}</b>: {point.percentage:.1f} %",
-      },
-    },
-  },
-  series: [
-    {
-      name: "Tokenomics",
-      colorByPoint: true,
-      type: "pie",
-      data: [
-        {
-          name: "Liquidity",
-          y: 2,
-        },
-        {
-          name: "SEED ROUND",
-          y: 10,
-        },
-        {
-          name: "Private Sale",
-          y: 10,
-        },
-        {
-          name: "Public Sale",
-          y: 1.5,
-        },
-        {
-          name: "Team",
-          y: 18,
-        },
-        {
-          name: "Marketing",
-          y: 7.5,
-        },
-        {
-          name: "Ecosystem",
-          y: 25,
-        },
-        {
-          name: "Advisors",
-          y: 10,
-        },
-        {
-          name: "Treasury and Reserve",
-          y: 6,
-        },
-        {
-          name: "Staking",
-          y: 10,
-        },
-      ],
-    },
-  ],
-  credits: {
-    enabled: false,
-  },
-};
 
-// "rgb(10, 3, 255)",
-// "rgb(191, 191, 243)",
-// "rgb(192, 208, 242)",
-// "rgb(161, 198, 250)",
-// "rgb(101, 173, 255)",
-// "rgb(44, 142, 249)",
-// "rgb(69, 167, 255)",
-// "rgb(1,121,243)",
-// "rgb(26,146,255)",
-// "rgb(1,121,243)",
-// "rgba(1,121,243,0.1)",
-// "rgba(1,121,243,0.2)",
+function Dashboard():JSX.Element {
+  const { account, chainId } = useWeb3React();
+  var beneficiary:string = "";
+  var start:number, amount:number = 0;
+    // const triedToEagerConnect = useEagerConnect();
+    const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
+    // Setting up variables to fetch details from hooks
+    const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
+    const [mockData, setMockData] = useState([]);
+    const [availableTge, setAvailableTge] = React.useState<Number>();
+    const [cliffPeriod, setCliffPeriod] = React.useState<Number>();
+    const [duration, setDuration] = React.useState<Number>();
+    const cliff_period:number = cliffPeriod * 30 * 86400; //in months
+    const duration_period:number = duration * 30 * 86400; //in months
+    const { data: tge } = useSetAvailableAtTGE(chainId == undefined ? 56 : (chainId as number), availableTge as number);
+    const { data: cliff } = useSetCliffPeriod(chainId == undefined ? 56 : (chainId as number), cliff_period as number);
+    const { data: Duration } = useSetDuration(chainId == undefined ? 56 : (chainId as number), duration as number);
+    const { data: Vesting } = useCreateVestingSchedule(chainId == undefined ? 56 : (chainId as number), beneficiary as string, start as number, cliffPeriod as number, duration as number, amount as number, availableTge as number );
 
-// function StageData(props) {
-//   return (
-//     <div className="">
-//       <div className="w-fit text-sm font-normal bg-slate-300 rounded pr-2 pl-2 pt-2 pb-2">{props.date}</div>
-//       <div className="rounded  box-border w-64 border-1 border-slate-300 text-left mb-2">
-//         <div className="font-bold text-xl ml-2  mt-2">{props.round}</div>
-//         <div>
-//           <span className="font-medium ml-2">Price:</span> {props.price}
-//         </div>
-//         <div>
-//           <span className="font-medium ml-2">Tokens:</span> {props.tokens}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
+    const handleClick = async(e) => {
+      if(mockData.length > 0 || mockData !== undefined){
+        for(var i=0; i<mockData.length; i++) {
+          beneficiary = "0x" + mockData[i].User_Address;
+          start = Date.parse(mockData[i].BlockTime_UTC);
+          amount = parseInt(mockData[i].Tx_Amount + '000000000000000000');
+          console.log("Cliff (in months): ", cliff_period);
+          console.log("Duration (in months): ", duration_period);
+      
+        }
+      } else {
+        console.log("error");
+      }
+    }
+    const readExcel = (file:any) => {
+      const promise = new Promise((resolve,reject) => {
+        const fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(file)
+        fileReader.onload=(e) => {
+          const bufferArray = e.target?.result;
+          const wb = XLSX.read(bufferArray, {type:'buffer'});
+          const wsname = wb.SheetNames[0];
+          const ws = wb.Sheets[wsname];
+          const data = XLSX.utils.sheet_to_json(ws);
+          resolve(data);
 
-function Dashboard() {
+        };
+        fileReader.onerror = ((error) => {
+          reject(error);
+        });
+      });
+      promise.then((d) => {
+        setMockData(d as any);
+        console.log("data", d);
+      });
+    };
   return (
   <div>
     <Header/>
 {/* <!-- Section --> */} 
-
 <div id="about-page" className="page">
     <div className="container">
         <div className="row">
             <div className="text col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
            <div className="container card-0 justify-content-center ">
-    <div className="card-body px-sm-4 px-0">
-        <div className="row justify-content-center mb-5">
-            <div className="col-md-10 col">
-                <h3 className="font-weight-bold ml-md-0 mx-auto text-center text-sm-left"> PreSale Dashboard</h3>
-                <p className="mt-md-4 ml-md-0 ml-2 text-center text-sm-left"> Send Sera PreSale Setting.</p>
-            </div>
+             <div className="card-body px-sm-4 px-0">
+               <div className="row justify-content-center mb-5">
+                 <div className="col-md-10 col">
+                   <h3 className="font-weight-bold ml-md-0 mx-auto text-center text-sm-left"> PreSale Dashboard</h3>
+                   <p className="font-weight-bold ml-md-0 mx-auto text-center text-sm-left"> Send Sera PreSale Setting.</p>
+                </div>
         </div>
         <div className="row justify-content-center round">
             <div className="col-lg-10 col-md-12 ">
@@ -135,34 +103,30 @@ function Dashboard() {
 				
                 <div className="card shadow-lg card-1">
                     <div className="row justify-content-end mb-5">
-                                    <div className="col-lg-12 col-auto "><button type="button" className="btn btn-primary btn-block"><small className="font-weight-bold">Start</small></button> 
-                                    <button type="button" className="btn btn-danger btn-block"><small className="font-weight-bold">Stop</small></button>
-                                    </div>
-                                     
-                                </div>
+                      <div className="col-lg-12 col-auto "><button type="button" className="btn btn-primary btn-block"><small className="font-weight-bold">Start</small></button> 
+                      <button type="button" className="btn btn-danger btn-block"><small className="font-weight-bold">Stop</small></button>
+                      </div>
+                    </div>
                     <div className="card-body inner-card">
                       <div className="row justify-content-between text-left">
                         <div className="form-group col-sm-6 flex-column d-flex"> <label className="form-control-label px-3">Available on tge
-                        <span className="text-danger"> *</span></label> <input type="text" id="availableontge" name="availableontge" placeholder="Available on tge"/> </div>
+                        <span className="text-danger"> *</span></label> <input type="number" id="availableontge" name="availableontge" placeholder="Available on tge" value={availableTge} onChange={e => setAvailableTge(e.target.value)}/> </div>
                         <div className="form-group col-sm-6 flex-column d-flex"> <label className="form-control-label px-3">Cliff period<span className="text-danger"> *</span></label> 
-                        <input type="text" id="Cliffperiod" name="Cliffperiod" placeholder="Cliff period" /> </div>
+                        <input type="number" id="Cliffperiod" name="Cliffperiod" placeholder="Cliff period" value={cliffPeriod} onChange={e => setCliffPeriod(e.target.value)}/> </div>
                     </div>
-                    <div className="row justify-content-between text-left">
-                        <div className="form-group col-sm-6 flex-column d-flex"> <label className="form-control-label px-3">Vesting period<span className="text-danger"> *</span></label>
-                        <input type="text" id="Vestingperiod" name="Vestingperiod" placeholder="Vesting period" /> </div>
+                    <div className="row justify-content-center text-left">
                         <div className="form-group col-sm-6 flex-column d-flex"> <label className="form-control-label px-3">Duration<span className="text-danger"> *</span></label> 
-                        <input type="text" id="Duration" name="Duration" placeholder="Duration" /> </div>
+                        <input type="number" id="Duration" name="Duration" placeholder="Duration" value={duration} onChange={e => setDuration(e.target.value)} /> </div>
                     </div>
                          <div className="row justify-content-center">
                             <div className="col-md-12 col-lg-10 col-12">
-                                <div className="form-group files"><label className="my-auto">Upload private sale or seed round manually </label> <input id="file" type="file" className="form-control" /></div>
+                                <div className="form-group files"><label className="my-auto">Upload private sale or seed round manually </label> <input type="file" className="form-control" id="fileUpload" onChange={(e) => { const file = e.target.files[0]; readExcel(file); }}/></div>
                             </div>
                         </div>
                         <div className="row justify-content-center">
                             <div className="col-md-12 col-lg-10 col-12">
-                              
                                 <div className="row justify-content-end mb-5">
-                                    <div className="col-lg-4 col-auto "><button type="button" className="btn btn-primary btn-block"><small className="font-weight-bold">Send tge tokens now</small></button> </div>
+                                    <div className="col-lg-4 col-auto "><button type="button" className="btn btn-primary btn-block" onClick={(e) => handleClick(e)}><small className="font-weight-bold">Send tge tokens now</small></button> </div>
                                 </div>
                             </div>
                         </div>

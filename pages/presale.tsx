@@ -42,7 +42,7 @@ const options: Highcharts.Options = {
    ],
   plotOptions: {
     pie: {
-      innerSize: 200,
+      innerSize: 210,
       depth: 45
     }
   },
@@ -228,7 +228,7 @@ function PresaleModal(props) {
     );
   }
   
-  function Presale() {
+  function Presale():JSX.Element {
     const [checked, setChecked] = React.useState<boolean>(false);
     const [checkoutShow, setCheckoutShow] = React.useState<boolean>(false);
     const [modalShow, setModalShow] = React.useState(false);
@@ -261,6 +261,7 @@ function PresaleModal(props) {
     <div>
     <Header/>
 {/* <!-- Start Page --> */}
+{ account != undefined && (
 <div id="about-page" className="page">
     <div className="container">
         <div className="row">
@@ -337,9 +338,7 @@ that uses a public blockchain.
       </div>
       </div>
     </div>
-</div>
 {/* <!-- End Section --> */}
-
 <section id="about-page" className="page">
         <div className="container">
             <div className="row">
@@ -356,6 +355,23 @@ that uses a public blockchain.
             </div>
         </div>
     </section>
+</div>
+
+)}; 
+{ account == undefined && (
+<section id="about-page" className="page">
+        <div className="container">
+            <div className="row">
+                <div className="col-xxl-12 col-xl-12 col-lg-112 col-sm-12 col-xs-12">
+                    <div className="heading">
+                      <h2 className="title"> Please Install and Connect to Metamask Wallet </h2>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </section>
+)}
+
 {/* <!-- Footer --> */}
 <Footer/>
 </div>

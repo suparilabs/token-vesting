@@ -21,11 +21,11 @@ const Header = () => {
     <nav className="navbar navbar-light fixed-top">
          <div className="container">
            <a className="navbar-brand" href="<?= $url;?>">
-             {/* <Image src="https://seraproject.org/views/front//images/logo.png" width="50px" height="60px" alt="Logo"></Image> */}
+            <Image src="https://seraproject.org/views/front//images/logo.png" width="50px" height="60px" alt="Logo"></Image> 
            </a>
            <ul className="navbar-nav custom d-none d-sm-none d-md-none d-lg-block d-xl-block d-xxl-block">
              <li className="nav-item"><a href="/vesting" className="nav-link">Home</a></li>
-             <li className="nav-item"><a href="/tokensale" className="nav-link">Presale</a></li>
+             <li className="nav-item"><a href="/presale" className="nav-link">Presale</a></li>
              <li className="nav-item"><a href="/dashboard" className="nav-link">Dashboard</a></li>
              <li className="nav-item"><a href="https://seraproject.org/presale" className="nav-link aboutmenu">WhitePaper </a></li>
              </ul>
@@ -33,7 +33,7 @@ const Header = () => {
              <Account triedToEagerConnect={triedToEagerConnect} />
              </div>
              {account && chainId && balance && (
-            <div className="nav-item">
+            <div className="tokenAmt">
               | {(balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA
             </div>
           )}
