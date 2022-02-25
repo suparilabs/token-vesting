@@ -38,12 +38,12 @@ function Dashboard():JSX.Element {
     const [availableTge, setAvailableTge] = React.useState<Number>();
     const [cliffPeriod, setCliffPeriod] = React.useState<Number>();
     const [duration, setDuration] = React.useState<Number>();
-    const cliff_period:number = cliffPeriod * 30 * 86400; //in months
-    const duration_period:number = duration * 30 * 86400; //in months
+    const cliff_period:any = cliffPeriod as number * 30 * 86400; //in months
+    const duration_period:any = duration as number* 30 * 86400; //in months
     const { data: tge } = useSetAvailableAtTGE(chainId == undefined ? 56 : (chainId as number), availableTge as number);
     const { data: cliff } = useSetCliffPeriod(chainId == undefined ? 56 : (chainId as number), cliff_period as number);
     const { data: Duration } = useSetDuration(chainId == undefined ? 56 : (chainId as number), duration as number);
-    const { data: Vesting } = useCreateVestingSchedule(chainId == undefined ? 56 : (chainId as number), beneficiary as string, start as number, cliffPeriod as number, duration as number, amount as number, availableTge as number );
+    //const { data: Vesting } = useCreateVestingSchedule(chainId == undefined ? 56 : (chainId as number), beneficiary as string, start as number, cliffPeriod as number, duration as number, amount as number, availableTge as number );
 
     const handleClick = async(e) => {
       if(mockData.length > 0 || mockData !== undefined){
