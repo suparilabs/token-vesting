@@ -101,8 +101,8 @@ const options: Highcharts.Options = {
 };
 
 function PresaleModal(props) {
-    const [checked, setChecked] = React.useState<boolean>(false);
-    const [checkoutShow, setCheckoutShow] = React.useState<boolean>(false);
+    const [checked ] = React.useState<boolean>(false);
+    const [checkoutShow ] = React.useState<boolean>(false);
     const [mining, setMining] = React.useState<boolean>(false);
     const [txStatusMessage, setTxStatusMessage] = React.useState<string>("");
   
@@ -146,7 +146,7 @@ function PresaleModal(props) {
           setMining(false);
           setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
         }
-      } catch (e: any) {
+      } catch (e:any) {
         setTxStatusMessage(e?.message as string);
         setMining(false);
       }
@@ -169,7 +169,7 @@ function PresaleModal(props) {
           setMining(false);
           setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
         }
-      } catch (e: any) {
+      } catch (e:any) {
         setTxStatusMessage(e?.message);
         setMining(false);
       }
@@ -252,6 +252,7 @@ function PresaleModal(props) {
     function handleClick(e) {
       e.preventDefault();
       setModalShow(true);
+      console.log(checkoutShow);
       if (checked) {
         setCheckoutShow(true);
       }
@@ -268,7 +269,7 @@ function PresaleModal(props) {
                <div className="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div className="heading">
                     <h2 className="titlenew titlenew3"> 
-                       SERA is the first enterprise resource planning application "ERP"
+                       SERA is the first enterprise resource planning application `&quot;` ERP `&quot;`
 that uses a public blockchain.
                     </h2>
                 </div>
