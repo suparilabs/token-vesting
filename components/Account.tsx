@@ -47,7 +47,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
-          className="btn btn-warning"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);

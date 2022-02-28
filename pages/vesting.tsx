@@ -1,23 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
 // import Image, { ImageLoader } from "next/image";
 import React, { useState } from "react";
-import { BigNumber } from "ethers";
-import moment from "moment";
-import { formatEther } from "@ethersproject/units";
-import BN from "bignumber.js";
 import Footer from "./Footer";
-import ContainerText from "../components/ContainerText";
 import Header from "./Header";
-import { useAvailableAtTGE, useVestingContractAddress } from "../hooks/useTokenSale";
+import { useVestingContractAddress } from "../hooks/useTokenSale";
 import { useWeb3React } from "@web3-react/core";
 import {
   useComputeReleasableAmount,
   useComputeVestingScheduleIdForAddressAndIndex,
   useRelease,
-  useVestingScheduleByAddressAndIndex,
   useVestingScheduleCountBeneficiary,
 } from "../hooks/useVesting";
-import { secondsToDhms } from "../utils";
+// import { secondsToDhms } from "../utils";
 import ClaimToken from "../components/ClaimToken";
 
 
@@ -38,7 +32,7 @@ function Vesting(): JSX.Element {
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
   const claim = useRelease(vestingContractAddress, vestingScheduleId, releasableAmount);
   console.log(vestingScheduleCount);
-  
+  console.log(claimButtonDisable);
 
   const handleClaim = async e => {
     e.preventDefault();

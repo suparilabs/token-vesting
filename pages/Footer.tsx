@@ -28,7 +28,7 @@ const Footer = () => {
                 </div>
                 <ul className="social2">
                     <li>
-                        <a  target="_blank"  href="https://twitter.com/Project_SERA">
+                        <a target="_blank"  href="https://twitter.com/Project_SERA">
                             <span>
                             <i className="bi bi-twitter"></i>
                             </span>

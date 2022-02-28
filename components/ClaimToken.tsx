@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useAvailableAtTGE, useVestingContractAddress } from "../hooks/useTokenSale";
 import moment from "moment";
@@ -6,23 +6,19 @@ import {
     useComputeReleasableAmount,
     useComputeVestingScheduleIdForAddressAndIndex,
     useRelease,
-    useVestingScheduleByAddressAndIndex,
-    useVestingScheduleCountBeneficiary,
+    useVestingScheduleByAddressAndIndex
   } from "../hooks/useVesting";
   import { formatEther } from "@ethersproject/units";
   import { BigNumber } from "ethers";
   import { secondsToDhms } from "../utils";
   import BN from "bignumber.js";
-  import Account from "../components/AccountK";
-  import { useEagerConnect } from "../hooks/useEagerConnect";
-  import { useTokenBalance } from "../hooks/useTokenBalance";
-  import { TokenAmount } from "@uniswap/sdk";
-
+  // import { useTokenBalance } from "../hooks/useTokenBalance";
+  
 const ClaimToken = props => {
     // WEB3 Connection 
     const { account, chainId } = useWeb3React();
     // const triedToEagerConnect = useEagerConnect();
-    const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
+    // const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
     // Setting up variables to fetch details from hooks
     const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
     const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, props.vestingScheduleIndex);

@@ -407,7 +407,19 @@ a:focus, .btn, .btn:focus {
   position: relative;
   z-index: 0;
 }
-
+.btn-launch-app {
+  margin-top: -26px;
+  width: auto;
+  height: 40px;
+  background-color: #4BF0D3;
+  color: #0540F2;
+  border-radius: 5px;
+  font-family: 'CooperHewitt-bold';
+  text-transform: uppercase;
+  padding: 8px 15px;
+  position: absolute;
+  right: 75px;
+}
 .navigation .navbar .container .btn-launch-app {
   width: auto;
   height: 40px;
