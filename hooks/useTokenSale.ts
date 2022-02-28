@@ -20,6 +20,52 @@ export function useBuyTokensWithUsdt(amount: any, chainId: number): any {
   };
 }
 
+//setting tge value in tokensale
+export function useSetAvailableAtTGE(chainId: number, availableAtTGE: number): any {
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  return async () => {
+    return (contract as Contract).setAvailableAtTGE(availableAtTGE);
+  };
+}
+//setting cliff period in tokensale
+export function useSetCliffPeriod(chainId: number, cliff: number): any {
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  return async () => {
+    return (contract as Contract).setCliff(cliff);
+  };
+}
+//setting duration value in tokensale
+export function useSetDuration(chainId: number, duration: number): any {
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  return async () => {
+    return (contract as Contract).setAvailableAtTGE(duration);
+  };
+}
+//creating vesting schedule from dashboard page
+export function useCreateVestingSchedule(
+  chainId: number,
+  beneficiary: string,
+  start: number,
+  cliff: number,
+  duration: number,
+  amount: number,
+  availableAtTGE: number,
+): any {
+  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  return async () => {
+    return (contract as Contract).createVestingSchedule(
+      beneficiary,
+      start,
+      cliff,
+      duration,
+      1,
+      false,
+      amount,
+      availableAtTGE,
+    );
+  };
+}
+
 function getVestingContractAddress(contract: Contract): (address: string) => Promise<string> {
   return async (): Promise<string> => contract.vesting().then((result: string) => result.toString());
 }

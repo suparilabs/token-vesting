@@ -47,7 +47,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
-          className="text-white text-xl"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
@@ -99,6 +98,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         href: formatEtherscanLink("Account", [chainId as number, account]),
         target: "_blank",
         rel: "noopener noreferrer",
+        className: "tokenAmt",
       }}
     >
       {ENSName || `${shortenHex(account, 4)}`}
