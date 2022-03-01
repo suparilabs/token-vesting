@@ -56,15 +56,16 @@ const ClaimToken = props => {
                </div>
            </div>
              <div className="badge"> <span>{unlocked}</span>  
-              <span className="Claimable">{claimable}</span> </div>
-          
+              <span className="Claimable">{claimable}</span> 
+            </div>
        </div>
+       <div className="div-claim_btn">
         <button type="button" className="btn btn-warning" onClick={claim} disabled={props.claimButtonDisable}>
           Claim
        </button>
-      
+       </div>
        <div className="mt-5">
-         <div className="mt-3"> <span className="text1">{splMessage}</span>
+         <div className="mt-3"> <span className="text1">{splMessage}</span><br></br>
          <span className="text2">Claiming date：{claimingDate}</span> <br></br>
          <span className="text2">Unlocking date：{unlockingDate}</span>
        </div>

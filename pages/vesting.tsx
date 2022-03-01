@@ -14,11 +14,6 @@ import {
 // import { secondsToDhms } from "../utils";
 import ClaimToken from "../components/ClaimToken";
 
-
-// const myLoader = ({ src, width, quality }) => {
-//   return `https://vesting-bsc.galaxywar.io/images/${src}?w=${width}&q=${quality || 75}`;
-// };
-
 function Vesting(): JSX.Element {
   const [claimButtonDisable, setClaimButtonDisable] = useState<boolean>(false);
   const { account, chainId } = useWeb3React();
@@ -42,9 +37,7 @@ function Vesting(): JSX.Element {
     setClaimButtonDisable(false);
   };
 
-
-  return (
-  
+  return (  
     <div className="light">
     <Header/>
     {/* SECTION  */}
@@ -97,7 +90,7 @@ function Vesting(): JSX.Element {
               );
             })}
             </div>
-    </div>
+         </div>
 </div>
 </div>
 </div>

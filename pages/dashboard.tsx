@@ -16,17 +16,16 @@ const Dashboard = () => {
 
   const handleUploadCSV = () => {
     setUploading(true);
-
     const input = inputRef ? inputRef.current : 0;
     const reader = new FileReader();
     const [file]:any = input ? input.files : null;
-
     reader.onloadend = ({ target }) => {
       const csv = Papa.parse(target.result, { header: true });
       console.log("Data", csv);
     };
     reader.readAsText(file);
   };
+
   return (
     <div>
       <Header />
