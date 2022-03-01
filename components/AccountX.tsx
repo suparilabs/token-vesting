@@ -33,6 +33,7 @@ const AccountX = ({ triedToEagerConnect }: AccountProps) => {
       <div>
         {isWeb3Available ? (
           <button
+          className="btn-connectBtn"
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
@@ -56,7 +57,7 @@ const AccountX = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   return (
-      <button type="button" className="btn btn-warning">Claim</button>
+      <button type="button">Connect</button>
   );
 };
 

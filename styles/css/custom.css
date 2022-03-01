@@ -317,6 +317,12 @@ textarea:focus {
     font-weight: 400
 }
 
+.btn-connectBtn {
+    border-color: none;
+    background-color: none;
+    padding: 0 0;
+}
+
 .btn-block {
     text-transform: uppercase;
     font-size: 15px !important;

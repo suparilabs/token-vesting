@@ -2,6 +2,10 @@ import React from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useAvailableAtTGE, useVestingContractAddress } from "../hooks/useTokenSale";
 import moment from "moment";
+import Account from "../components/AccountX";
+import { useEagerConnect } from "../hooks/useEagerConnect";
+import { useTokenBalance } from "../hooks/useTokenBalance";
+import { TokenAmount } from "@uniswap/sdk";
 import {
     useComputeReleasableAmount,
     useComputeVestingScheduleIdForAddressAndIndex,
@@ -17,6 +21,9 @@ import {
 const ClaimToken = props => {
     // WEB3 Connection 
     const { account, chainId } = useWeb3React();
+    // Account 
+    const triedToEagerConnect = useEagerConnect();
+    const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
     // Setting up variables to fetch details from hooks
     const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
     const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, props.vestingScheduleIndex);
@@ -87,9 +94,7 @@ const ClaimToken = props => {
             </div>
        </div>
        <div className="div-claim_btn">
-        <button type="button" className="btn btn-warning" disabled>
-          Claim
-       </button>
+         <Account triedToEagerConnect={triedToEagerConnect} />
        </div>
        <div className="mt-5">
          <div className="mt-3"> <span className="text1">Vesting Schedule</span><br></br>
