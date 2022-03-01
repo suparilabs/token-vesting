@@ -21,7 +21,7 @@ const Header = () => {
            </a>
            <ul className="navbar-nav custom d-none d-sm-none d-md-none d-lg-block d-xl-block d-xxl-block">
              <li className="nav-item">
-               <Link href="/vesting">
+               <Link href="/claim">
                  <a className="nav-link">Claim</a>
                </Link>
                <Link href="/presale">
