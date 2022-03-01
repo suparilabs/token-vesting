@@ -6,76 +6,98 @@
 // };
 
 const Footer = () => {
-    return (
-      <>
-        {/* Footer Start from here */}
-        <div className="text-center box-border bg-blue-700 w-90 bg-clip-padding p-4 ...">
-          <div className="grid grid-flow-row-dense grid-cols-2 place-items-center grid-rows-1">
-            <div className="col-span-2 mt-20 pb-20">
-              <table className="table-auto">
-                <tbody className="text-white">
-                  <tr>
-                    <td rowSpan={5}>
-                      <img
-                        src="https://seraproject.org/views/front//images/logo.png"
-                        width="100px"
-                        height="120px"
-                        alt="Logo"
-                      />
-                      {/* <Image loader={myLoader as ImageLoader} src="logo.png" alt="SERA" width={100} height={120} /> */}
-                    </td>
-                    <td>
-                      <div className="box-border bg-white h-0.5 ..."></div>
-                    </td>
-                    <td>
-                      <div className="box-border bg-white h-0.5 ..."></div>
-                    </td>
-                    <td>
-                      <div className="box-border bg-white h-0.5 ..."></div>
-                    </td>
-                    <td>
-                      <div className="box-border bg-white h-0.5 ..."></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-3xl px-4 py-4">Products</td>
-                    <td className="text-3xl px-4 py-4">Documents</td>
-                    <td className="text-3xl px-4 py-4">Community</td>
-                    <td className="text-3xl px-4 py-4">About</td>
-                  </tr>
-                  <tr>
-                    <td>Github</td>
-                    <td>
-                      <a href="https://twitter.com/Project_SERA">Twitter</a>
-                    </td>
-                    <td>Investors</td>
-                    <td>
-                      <a href="https://www.linkedin.com/company/sera-project/">LinkedIn</a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Token</td>
-                    <td>Roadmap</td>
-                    <td>
-                      <a href="https://t.me/Sera_Project">Telegram</a>
-                    </td>
-                    <td>Jobs</td>
-                  </tr>
-                  <tr>
-                    <td></td>
-                    <td>Privacy & Policy</td>
-                    <td><a href="https://bit.ly/SERA_Project">Youtube</a></td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
+  return (
+    <>
+      {/* Footer Start from here */}
+      
+{/* START SECTION */}
+<section className="custom-social2"  id="Socials">
+    <div className="container">
+        <div className="row">
+            <div className="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                <div className="heading">
+                    <h2 className="title">
+                        Join Sera Community
+                    </h2>
+                </div>
+                <div className="text">
+
+                    <p>
+
+                    </p>
+                </div>
+                <ul className="social2">
+                    <li>
+                   <a href="https://twitter.com/Project_SERA">
+                    <span>
+                      <i className="bi bi-twitter"></i>
+                    </span>
+                    <span>
+                      <a>Twitter</a>
+                    </span>
+                    </a>
+                    </li>
+                  
+                    <li>
+                      <a href="https://t.me/Sera_Project">
+                            <span>
+                            <i className="bi bi-telegram"></i>
+                            </span>
+                            <span>
+                                <a>Telegram</a>
+                            </span>
+                        </a>
+                    </li>
+                     <li>
+                        <a href="https://bit.ly/SERA_Project">
+                            <span>
+                            <i className="bi bi-youtube"></i>
+                            </span>
+                            <span>
+                                <a>Youtube</a>
+                            </span>
+                        </a>
+                    </li>
+                   
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{/* END SECTION */}
+{/* START FOOTER */}
+
+    <footer className="footer" id="footer">
+      <div className="container">
+        <div className="row">
+          <div className="col-xxl-7 col-xl-7 col-lg-7 col-md-12 col-sm-12">
+            <div data-aos-delay="500" data-aos="fade-right" className="text">
             </div>
           </div>
+          <div className="col-xxl-5 col-xl-5 col-lg-5 col-md-12 col-sm-12">
+          </div>
         </div>
-        <div className="bg-dark text-white text-center"> 2022 seraproject.org | All Rights Reserved</div>
-        {/* Footer closed */}
-      </>
-    );
-  };
-  
-  export default Footer;
+        <div className="row">
+
+          <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-sm-12">
+            <div className="copyrights">
+              <p>
+              SERA Technologies Ltd. Copyright © 2021-2022. All rights reserved.
+              </p>
+            </div>
+          </div>
+          <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-sm-12">
+              <div className="copyrights">
+                <p>Sera is Beta group company</p>
+              </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  {/* END FOOTER */}
+      {/* Footer closed */}
+    </>
+  );
+};
+
+export default Footer;
