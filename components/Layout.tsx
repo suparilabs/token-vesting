@@ -3,8 +3,7 @@ import { ThemeProvider } from "@chakra-ui/core";
 import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers"
 import Head from 'next/head'
-// import { useEagerConnect } from "../hooks/useEagerConnect";
-// import Account from '../components/Account'
+
 
 type Props = {
   children?: ReactNode

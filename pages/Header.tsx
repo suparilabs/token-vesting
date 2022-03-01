@@ -6,11 +6,6 @@ import { useTokenBalance } from "../hooks/useTokenBalance";
 import { TokenAmount } from "@uniswap/sdk";
 import Image from "next/image";
 import Link from 'next/link';
-// import Image, { ImageLoader } from "next/image";
-
-// const myLoader = ({ src, width, quality }) => {
-//   return `https://seraproject.org/views/front//images/${src}?w=${width}&q=${quality || 75}`;
-// };
 
 const Header = () => {
   const triedToEagerConnect = useEagerConnect();

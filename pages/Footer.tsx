@@ -1,15 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
-// import Image, { ImageLoader } from "next/image";
-
-// const myLoader = ({ src, width, quality }) => {
-//   return `https://seraproject.org/views/front//images/${src}?w=${width}&q=${quality || 75}`;
-// };
-
 const Footer = () => {
   return (
     <>
-      {/* Footer Start from here */}
-      
 {/* START SECTION */}
 <section className="custom-social2"  id="Socials">
     <div className="container">

@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import Papa from "papaparse";
 import Header from "./Header";
 import Footer from "./Footer";
-import * as XLSX from "xlsx";
 
-function Dashboard() {
+const Dashboard = () => {
+  const [uploading, setUploading] = useState(false);
+  const [data, setData] = useState();
+  const inputRef = useRef();
   const [mockData, setMockData] = useState<{ User_Address: string; BlockTime_UTC: string; Tx_Amount: string }[]>([]);
   const [availableTge, setAvailableTge] = React.useState<string>();
   const [cliffPeriod, setCliffPeriod] = React.useState<string>();
@@ -11,39 +14,18 @@ function Dashboard() {
   const cliff_period: any = parseInt(cliffPeriod as string) * 30 * 86400; //in months
   const duration_period: any = parseInt(duration as string) * 30 * 86400; //in months
 
-  const handleClick = async () => {
-    if (mockData.length > 0 || mockData !== undefined) {
-      for (let i = 0; i < mockData.length; i++) {
-        console.log("Cliff (from months): ", cliff_period);
-        console.log("Duration (from months): ", duration_period);
-      }
-    } else {
-      console.log("error");
-    }
-  };
-  const readExcel = e => {
-    const file = e.target.files[0];
-    const promise = new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.readAsArrayBuffer(file);
-      fileReader.onload = e => {
-        const bufferArray = e.target?.result;
-        const wb = XLSX.read(bufferArray, { type: "buffer" });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
-        resolve(data);
-      };
-      fileReader.onerror = error => {
-        reject(error);
-      };
-    });
-    promise
-      .then(d => {
-        setMockData(d as any);
-        console.log("data", d);
-      })
-      .catch(console.error);
+  const handleUploadCSV = () => {
+    setUploading(true);
+
+    const input = inputRef ? inputRef.current : 0;
+    const reader = new FileReader();
+    const [file]:any = input ? input.files : null;
+
+    reader.onloadend = ({ target }) => {
+      const csv = Papa.parse(target.result, { header: true });
+      console.log("Data", csv);
+    };
+    reader.readAsText(file);
   };
   return (
     <div>
@@ -137,15 +119,15 @@ function Dashboard() {
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="form-group files">
                                   <label className="my-auto">Upload private sale or seed round manually </label>{" "}
-                                  <input
-                                    type="file"
-                                    className="form-control"
-                                    id="fileUpload"
-                                    onChange={e => readExcel(e)}
-                                  />
+                                  <div>
+                                    <input ref={inputRef} disabled={uploading} type="file" className="form-control" />
+                                  </div> 
+                                  <button onClick={handleUploadCSV} disabled={uploading} className="btn btn-primary"> 
+                                  {uploading ? "Uploaded" : "Upload"}
+                                  </button>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
                             <div className="row justify-content-center">
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="row justify-content-end mb-5">
@@ -153,7 +135,6 @@ function Dashboard() {
                                     <button
                                       type="button"
                                       className="btn btn-primary btn-block"
-                                      onClick={() => handleClick()}
                                     >
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}
@@ -176,6 +157,8 @@ function Dashboard() {
       <Footer />
     </div>
   );
-}
+};
+
+Dashboard.propTypes = {};
 
 export default Dashboard;

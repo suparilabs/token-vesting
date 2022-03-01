@@ -1,15 +1,6 @@
 import React from "react";
-// import { useEagerConnect } from "../hooks/useEagerConnect";
 
 const ContainerText = props => {
-  // const triedToEagerConnect = useEagerConnect();
-  // function connect() {
-  //   console.log('clicked')
-  // }
-  // const { account, library } = useWeb3React();
-
-  // const triedToEagerConnect = useEagerConnect();
-  // const isConnected = typeof account === "string" && !!library;
   return (
     <div className="h-60 w-96">
       <div className="w-full bg-black h-10 opacity-100 text-white text-xl">
@@ -28,7 +19,6 @@ const ContainerText = props => {
         <div className="flex flex-wrap justify-end">
           <div className="bg-yellow-500 w-16">
             <button className="text-white" onClick={props.claim} disabled={props.claimButtonDisable}>
-              {/* <Account triedToEagerConnect={triedToEagerConnect} /> */}
               Claim
             </button>
           </div>

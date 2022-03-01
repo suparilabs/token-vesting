@@ -14778,6 +14778,13 @@ fsevents@~2.1.1:
   languageName: node
   linkType: hard
 
+"papaparse@npm:^5.3.1":
+  version: 5.3.1
+  resolution: "papaparse@npm:5.3.1"
+  checksum: 3431917bb46f8952e49ca64ecc9107ddf05291573ef666c8fac4e172b57780d131f1af925b47841039bd5ae0ceadc2eafbcb8183c092307442f85eed11f82b69
+  languageName: node
+  linkType: hard
+
 "parent-module@npm:^1.0.0":
   version: 1.0.1
   resolution: "parent-module@npm:1.0.1"
@@ -18423,6 +18430,7 @@ resolve@1.1.x:
     moment: ^2.29.1
     next: 12.0.8
     next-optimized-images: ^2.6.2
+    papaparse: ^5.3.1
     pinst: ^2.1.6
     postcss: ^8.4.5
     prettier: ^2.5.1

@@ -12,13 +12,11 @@ import {
   import { BigNumber } from "ethers";
   import { secondsToDhms } from "../utils";
   import BN from "bignumber.js";
-  // import { useTokenBalance } from "../hooks/useTokenBalance";
+
   
 const ClaimToken = props => {
     // WEB3 Connection 
     const { account, chainId } = useWeb3React();
-    // const triedToEagerConnect = useEagerConnect();
-    // const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
     // Setting up variables to fetch details from hooks
     const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
     const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, props.vestingScheduleIndex);
