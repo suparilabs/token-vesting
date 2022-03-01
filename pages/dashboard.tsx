@@ -133,8 +133,7 @@ const Dashboard = () => {
                                   <div className="col-lg-4 col-auto ">
                                     <button
                                       type="button"
-                                      className="btn btn-primary btn-block"
-                                    >
+                                      className="btn btn-primary btn-block">
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}
                                   </div>

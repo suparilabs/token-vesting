@@ -46,17 +46,17 @@ const ClaimToken = props => {
       }`;
   return (
     <div>
-        { claimable.toString() > "0.0000" && (
-          <div>
-            <div className="d-flex justify-content-between">
-              <div className="d-flex flex-row align-items-center">
+        { claimable.toString() > "0.0000"  &&  account && (
+        <div>
+          <div className="d-flex justify-content-between">
+            <div className="d-flex flex-row align-items-center">
                <div className="ms-2 c-details">
                    <h6 className="mb-0">Sera to be unlocked: </h6>  
-                   <h6 className="mb-0">Sera Claimable: </h6>  
+                   <h6 className="mb-0">Sera Claimable: </h6>
                </div>
            </div>
-             <div className="badge"> <span>{unlocked}</span>  
-              <span className="Claimable">{claimable}</span> 
+             <div className="badge"><span> {unlocked} </span>  
+              <span className="Claimable"> {claimable} </span> 
             </div>
        </div>
        <div className="div-claim_btn">
@@ -73,7 +73,33 @@ const ClaimToken = props => {
        <hr></hr>
        </div>
         )}
-       
+        { account == undefined && (
+        <div>
+          <div className="d-flex justify-content-between">
+            <div className="d-flex flex-row align-items-center">
+               <div className="ms-2 c-details">
+                   <h6 className="mb-0">Sera to be unlocked: </h6>  
+                   <h6 className="mb-0">Sera Claimable: </h6>
+               </div>
+           </div>
+             <div className="badge"><span> 0.0000 </span>  
+              <span className="Claimable"> 0.0000 </span> 
+            </div>
+       </div>
+       <div className="div-claim_btn">
+        <button type="button" className="btn btn-warning" disabled>
+          Claim
+       </button>
+       </div>
+       <div className="mt-5">
+         <div className="mt-3"> <span className="text1">Vesting Schedule</span><br></br>
+         <span className="text2">Claiming date：Connect Metamask to Reveal</span> <br></br>
+         <span className="text2">Unlocking date：Connect Metamask to Reveal</span>
+       </div>
+       </div>
+       <hr></hr>
+       </div>
+        )}
     </div>
   )
 };
