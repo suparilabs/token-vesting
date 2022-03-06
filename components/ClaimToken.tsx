@@ -4,7 +4,6 @@ import { useAvailableAtTGE, useVestingContractAddress } from "../hooks/useTokenS
 import moment from "moment";
 import Account from "../components/AccountX";
 import { useEagerConnect } from "../hooks/useEagerConnect";
-import { useTokenBalance } from "../hooks/useTokenBalance";
 import {
     useComputeReleasableAmount,
     useComputeVestingScheduleIdForAddressAndIndex,

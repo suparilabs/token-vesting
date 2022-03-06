@@ -3,7 +3,7 @@ import Papa from "papaparse";
 
 const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
-  const inputRef = useRef();
+  const inputRef = useRef<any>();
   const [availableTge, setAvailableTge] = React.useState<string>();
   const [cliffPeriod, setCliffPeriod] = React.useState<string>();
   const [duration, setDuration] = React.useState<string>();
