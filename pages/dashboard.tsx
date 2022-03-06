@@ -1,26 +1,20 @@
 import React, { useState, useRef } from "react";
 import Papa from "papaparse";
-import Header from "./Header";
-import Footer from "./Footer";
 
 const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
-  const [data, setData] = useState();
   const inputRef = useRef();
-  const [mockData, setMockData] = useState<{ User_Address: string; BlockTime_UTC: string; Tx_Amount: string }[]>([]);
   const [availableTge, setAvailableTge] = React.useState<string>();
   const [cliffPeriod, setCliffPeriod] = React.useState<string>();
   const [duration, setDuration] = React.useState<string>();
-  const cliff_period: any = parseInt(cliffPeriod as string) * 30 * 86400; //in months
-  const duration_period: any = parseInt(duration as string) * 30 * 86400; //in months
 
   const handleUploadCSV = () => {
     setUploading(true);
     const input = inputRef ? inputRef.current : 0;
     const reader = new FileReader();
-    const [file]:any = input ? input.files : null;
+    const [file]: any = input && input.files;
     reader.onloadend = ({ target }) => {
-      const csv = Papa.parse(target.result, { header: true });
+      const csv = Papa.parse(target?.result, { header: true });
       console.log("Data", csv);
     };
     reader.readAsText(file);
@@ -28,7 +22,6 @@ const Dashboard = () => {
 
   return (
     <div>
-      <Header />
       {/* <!-- Section --> */}
       <div id="about-page" className="page">
         <div className="container">
@@ -120,20 +113,18 @@ const Dashboard = () => {
                                   <label className="my-auto">Upload private sale or seed round manually </label>{" "}
                                   <div>
                                     <input ref={inputRef} disabled={uploading} type="file" className="form-control" />
-                                  </div> 
-                                  <button onClick={handleUploadCSV} disabled={uploading} className="btn btn-primary"> 
-                                  {uploading ? "Uploaded" : "Upload"}
-                                  </button>
                                   </div>
+                                  <button onClick={handleUploadCSV} disabled={uploading} className="btn btn-primary">
+                                    {uploading ? "Uploaded" : "Upload"}
+                                  </button>
                                 </div>
                               </div>
+                            </div>
                             <div className="row justify-content-center">
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="row justify-content-end mb-5">
                                   <div className="col-lg-4 col-auto ">
-                                    <button
-                                      type="button"
-                                      className="btn btn-primary btn-block">
+                                    <button type="button" className="btn btn-primary btn-block">
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}
                                   </div>
@@ -151,8 +142,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      {/* <!-- Footer --> */}
-      <Footer />
     </div>
   );
 };

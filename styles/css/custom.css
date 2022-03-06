@@ -486,13 +486,13 @@ button:focus {
 }
 
 .badge span {
-    background-color: #fffbec;
+    background-color: #f7d351;
     width: 60px;
     height: 25px;
     padding-bottom: 3px;
     border-radius: 5px;
     display: flex;
-    color: #fed85d;
+    color: #000000;
     justify-content: center;
     align-items: center
 }

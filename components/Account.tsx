@@ -14,7 +14,7 @@ type AccountProps = {
 const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
 
-  const { isMetaMaskInstalled, isWeb3Available, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
+  const { isMetaMaskInstalled, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
 
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);

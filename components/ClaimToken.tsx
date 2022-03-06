@@ -5,7 +5,6 @@ import moment from "moment";
 import Account from "../components/AccountX";
 import { useEagerConnect } from "../hooks/useEagerConnect";
 import { useTokenBalance } from "../hooks/useTokenBalance";
-import { TokenAmount } from "@uniswap/sdk";
 import {
     useComputeReleasableAmount,
     useComputeVestingScheduleIdForAddressAndIndex,
@@ -23,7 +22,6 @@ const ClaimToken = props => {
     const { account, chainId } = useWeb3React();
     // Account 
     const triedToEagerConnect = useEagerConnect();
-    const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
     // Setting up variables to fetch details from hooks
     const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
     const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, props.vestingScheduleIndex);
