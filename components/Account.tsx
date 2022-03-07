@@ -1,6 +1,7 @@
 import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
@@ -10,10 +11,8 @@ type AccountProps = {
   triedToEagerConnect: boolean;
 };
 
-
 const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
-
   const { isMetaMaskInstalled, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
 
   // manage connecting state for injected connector
@@ -26,7 +25,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
   }, [active, error, stopOnboarding]);
 
   const ENSName = useENSName(account as string);
-
   if (error) {
     return null;
   }
@@ -35,22 +33,85 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
     return null;
   }
 
+  const handleConnect = async() => {
+    setConnecting(true);
+    enableMetamask();
+    activate(injected, undefined, true).catch(error => {
+      // ignore the error if it's a user rejected request
+      if (error instanceof UserRejectedRequestError) {
+        setConnecting(false);
+      } else {
+        setError(error);
+      }
+    });
+  }
+
+  const chainIds = {
+    goerli: 5,
+    hardhat: 31337,
+    kovan: 42,
+    mainnet: 1,
+    rinkeby: 4,
+    ropsten: 3,
+    bsctestnet: 97,
+    bsc: 56,
+  };
+
+  const enableMetamask = async () => {
+    if(window.ethereum?.isMetaMask){
+      if(chainId != 97) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x61' }],
+          });
+        } catch (switchError) {
+          // This error code indicates that the chain has not been added to MetaMask.
+          console.log("ERROR", switchError);
+          console.log("Please Change the Network to Binance");
+          if (switchError.code === 4902) {
+            try {
+              console.log("Adding chain --please wait");
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                  {
+                    chainId: '0x61',
+                    chainName: 'bsctestnet',
+                    rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545', 'https://bsc-dataseed.binance.org/' ] /* ... */,
+                  },
+                ],
+              });
+            } catch (addError) {
+              console.log("ERROR", addError);
+            }
+          }
+
+          // handle other "switch" errors
+          return (
+            <div>
+              <h2>Hello</h2>
+            </div>
+          );
+        }
+      } else {
+        console.log("connected...");
+      }
+    } else {
+      return (
+        <div>
+          <button onClick={startOnboarding}>Install Metamask</button>
+        </div>
+      );
+    }
+    
+
+  }
   if (typeof account !== "string") {
     return (
       <div>
         {isMetaMaskInstalled ? (
-              <button className="btn btn-green btn-launch-app"  disabled={connecting} onClick={() => {
-                setConnecting(true);
-  
-                activate(injected, undefined, true).catch(error => {
-                  // ignore the error if it's a user rejected request
-                  if (error instanceof UserRejectedRequestError) {
-                    setConnecting(false);
-                  } else {
-                    setError(error);
-                  }
-                });
-              }}>
+              <button className="btn btn-green btn-launch-app"  disabled={connecting} onClick={() => handleConnect()}>
                 Connect 
                 <span><i className="bi bi-app-indicator"></i></span>
               </button>
