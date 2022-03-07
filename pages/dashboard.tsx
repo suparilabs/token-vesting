@@ -114,9 +114,6 @@ const Dashboard = () => {
                                   <div>
                                     <input ref={inputRef} disabled={uploading} type="file" className="form-control" />
                                   </div>
-                                  <button onClick={handleUploadCSV} disabled={uploading} className="btn btn-primary">
-                                    {uploading ? "Uploaded" : "Upload"}
-                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -124,7 +121,7 @@ const Dashboard = () => {
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="row justify-content-end mb-5">
                                   <div className="col-lg-4 col-auto ">
-                                    <button type="button" className="btn btn-primary btn-block">
+                                    <button type="button" className="btn btn-primary btn-block" onClick={handleUploadCSV} disabled={uploading}>
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}
                                   </div>

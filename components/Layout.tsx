@@ -57,9 +57,11 @@ export default function Layout({ children, title = "This is the default title" }
                 </li>
               </ul>
               <div>
-                <Account triedToEagerConnect={triedToEagerConnect} />
+                { account == undefined && (
+                  <Account triedToEagerConnect={triedToEagerConnect} />
+                )}
               </div>
-              {account && chainId && balance && (
+              { account && chainId && balance && (
                 <div className="tokenAmt">
                   | {(balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA
                 </div>
