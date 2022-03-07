@@ -1,7 +1,6 @@
 import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
-import { ethers } from "ethers";
 import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
@@ -35,7 +34,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
 
   const handleConnect = async() => {
     setConnecting(true);
-    enableMetamask();
+    await enableMetamask();
     activate(injected, undefined, true).catch(error => {
       // ignore the error if it's a user rejected request
       if (error instanceof UserRejectedRequestError) {
@@ -51,18 +50,18 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
     if(window.ethereum?.isMetaMask){
       if(chainId != 97) {
         try {
-          await window.ethereum.request({
+          await (window as any).ethereum.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: '0x61' }],
           });
-        } catch (switchError) {
+        } catch (switchError:any) {
           // This error code indicates that the chain has not been added to MetaMask.
           console.log("ERROR", switchError);
           console.log("Please Change the Network to Binance");
           if (switchError.code === 4902) {
             try {
               console.log("Adding chain --please wait");
-              await window.ethereum.request({
+              await (window as any).ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [
                   {
