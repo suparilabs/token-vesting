@@ -46,16 +46,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
     });
   }
 
-  const chainIds = {
-    goerli: 5,
-    hardhat: 31337,
-    kovan: 42,
-    mainnet: 1,
-    rinkeby: 4,
-    ropsten: 3,
-    bsctestnet: 97,
-    bsc: 56,
-  };
 
   const enableMetamask = async () => {
     if(window.ethereum?.isMetaMask){
@@ -86,16 +76,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
               console.log("ERROR", addError);
             }
           }
-
-          // handle other "switch" errors
-          return (
-            <div>
-              <h2>Hello</h2>
-            </div>
-          );
         }
-      } else {
-        console.log("connected...");
       }
     } else {
       return (
