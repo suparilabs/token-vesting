@@ -15,7 +15,7 @@ import "./TokenVesting.sol";
  * @title TokenSale Contract
  */
 
-contract TokenSale is Ownable {
+contract TokenPreSale is Ownable {
     using SafeMath for uint256;
     IERC20 public token; // the token being sold
 
