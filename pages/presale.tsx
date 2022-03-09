@@ -255,7 +255,6 @@ function Presale(): JSX.Element {
   const [checked, setChecked] = React.useState<boolean>(false);
   const [checkoutShow, setCheckoutShow] = React.useState<boolean>(false);
   const [modalShow, setModalShow] = React.useState(false);
-
   const { account, chainId } = useWeb3React();
   const { data: busd } = useBUSD(chainId == undefined ? 56 : (chainId as number));
   const { data: usdt } = useUSDT(chainId == undefined ? 56 : (chainId as number));
@@ -265,8 +264,10 @@ function Presale(): JSX.Element {
   const [enoughBusd, setEnoughBusd] = React.useState<boolean>(false);
   const [enoughUsdt, setEnoughUsdt] = React.useState<boolean>(false);
   const [enoughEth, setEnoughEth] = React.useState<boolean>(false);
+  const [timer, setTimer] = React.useState<String>();
 
   useEffect(() => {
+    handleTimer();
     busdBalance !== undefined && setEnoughBusd(busdBalance.equalTo("1000") || busdBalance.greaterThan("1000"));
     usdtBalance !== undefined && setEnoughUsdt(usdtBalance.equalTo("1000") || usdtBalance.greaterThan("1000"));
     ethBalance !== undefined && setEnoughEth(ethBalance.greaterThan("0"));
@@ -281,6 +282,26 @@ function Presale(): JSX.Element {
     }
   }
 
+  function handleTimer() {
+    const countDownTimer = () => {
+      const difference = +new Date("2022-03-11") - +new Date();
+      let remaining = "Time's up!";
+      if (difference > 0) {
+        const parts = {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        };
+        remaining = Object.keys(parts).map(part => {
+          return `${parts[part]}`;
+        }).join(" : ");
+      }
+      setTimer(remaining);
+    }
+    setInterval(countDownTimer, 1000);
+  }
+ 
   return (
     <div>
       {/* <!-- Start Page --> */}
@@ -355,8 +376,10 @@ function Presale(): JSX.Element {
                   <h2 className="titlenew">We will be live in</h2>
                   <h2 className="titlespanbuynot2"> We are live Now !</h2>
                   <div className="titleCountDown">
-                    <Countdown date={Date.now() + 5000000000} className="countdown" />
+                    <h2 className="countdown">{timer}</h2>
                   </div>
+                  {/* <Button variant="primary" onClick={e => handleTimer(e)}></Button> */}
+                  {/* <div onLoad={e => handleTimer(e)}></div> */}
                 </div>
                 {/* TIMER */}
               </div>
@@ -394,7 +417,6 @@ function Presale(): JSX.Element {
           </div>
         </section>
       )}
-
       {/* <!-- Footer --> */}
       {/* <Footer /> */}
     </div>
