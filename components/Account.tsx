@@ -5,6 +5,8 @@ import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { formatEtherscanLink, shortenHex } from "../utils";
+import { useTokenBalance } from "../hooks/useTokenBalance";
+import { TokenAmount } from "@uniswap/sdk";
 
 type AccountProps = {
   triedToEagerConnect: boolean;
@@ -13,7 +15,7 @@ type AccountProps = {
 const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
   const { isMetaMaskInstalled, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
-
+  const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
   useEffect(() => {
@@ -87,10 +89,10 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
     
 
   }
-  if (typeof account !== "string") {
+  if (typeof account !== "string" && account == undefined) {
     return (
       <div>
-        {isMetaMaskInstalled ? (
+        { isMetaMaskInstalled ? (
               <button className="btn btn-green btn-launch-app"  disabled={connecting} onClick={() => handleConnect()}>
                 Connect 
                 <span><i className="bi bi-app-indicator"></i></span>
@@ -104,6 +106,9 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   return (
+    <>
+    
+    <span className="tokenAmt">
     <a
       {...{
         href: formatEtherscanLink("Account", [chainId as number, account]),
@@ -112,8 +117,10 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         className: "tokenAmt",
       }}
     >
-      {ENSName || `${shortenHex(account, 4)}`}
+      {ENSName || `${shortenHex(account, 4)}`} &nbsp; | {account != undefined && balance != undefined && (balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA
     </a>
+    </span>
+    </>
   );
 };
 

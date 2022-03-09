@@ -4,10 +4,8 @@ import { Web3Provider } from "@ethersproject/providers";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { TokenAmount } from "@uniswap/sdk";
 import { useEagerConnect } from "../hooks/useEagerConnect";
 import Account from "./Account";
-import { useTokenBalance } from "../hooks/useTokenBalance";
 
 type Props = {
   children?: ReactNode;
@@ -22,8 +20,6 @@ export default function Layout({ children, title = "This is the default title" }
   // automatically try connecting to the injected connector on pageload
   const triedToEagerConnect = useEagerConnect();
   const { account, chainId } = useWeb3React();
-  const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
-
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
       {/* <div> */}
@@ -57,15 +53,10 @@ export default function Layout({ children, title = "This is the default title" }
                 </li>
               </ul>
               <div>
-                { account == undefined && (
+                {(
                   <Account triedToEagerConnect={triedToEagerConnect} />
                 )}
               </div>
-              { account && chainId && balance && (
-                <div className="tokenAmt">
-                  | {(balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA
-                </div>
-              )}
             </div>
           </nav>
         </div>
