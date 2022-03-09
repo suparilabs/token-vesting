@@ -16,7 +16,7 @@ import {
   import BN from "bignumber.js";
 
   
-const ClaimToken = props => {
+const IdoRound = props => {
     // WEB3 Connection 
     const { account, chainId } = useWeb3React();
     // Account 
@@ -106,4 +106,4 @@ const ClaimToken = props => {
   )
 };
 
-export default ClaimToken;
+export default IdoRound;
