@@ -18,6 +18,10 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         bool initialized;
         // beneficiary of tokens after they are released
         address beneficiary;
+        // cliff of the vesting period in seconds
+        uint256 cliff_;
+        // start of the vesting period in seconds
+        uint256 start_;
         // duration of the vesting period in seconds
         uint256 duration;
         // duration of a slice period for the vesting in seconds
@@ -135,8 +139,6 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
     /**
      * @notice Creates a new vesting schedule for a beneficiary.
      * @param _beneficiary address of the beneficiary to whom vested tokens are transferred
-     * @param _start start time of the vesting period
-     * @param _cliff duration in seconds of the cliff in which tokens will begin to vest
      * @param _duration duration in seconds of the period in which the tokens will vest
      * @param _slicePeriodSeconds duration of a slice period for the vesting in seconds
      * @param _revocable whether the vesting is revocable or not
@@ -174,6 +176,52 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         vestingSchedulesIds.push(vestingScheduleId);
         uint256 currentVestingCount = holdersVestingCount[_beneficiary];
         holdersVestingCount[_beneficiary] = currentVestingCount.add(1);
+    }
+
+    /**
+     * BULK : CREATING VESTING SCHEDULE IN BULK
+     * @notice Creates a new vesting schedule for a beneficiary.
+     * @param _beneficiary address of the beneficiary to whom vested tokens are transferred
+     * @param _duration duration in seconds of the period in which the tokens will vest
+     * @param _slicePeriodSeconds duration of a slice period for the vesting in seconds
+     * @param _revocable whether the vesting is revocable or not
+     * @param _amount total amount of tokens to be released at the end of the vesting
+     */
+    function createVestingSchedule(
+        address[] memory _beneficiary,
+        uint256[] memory _duration,
+        uint256[] memory _slicePeriodSeconds,
+        bool[] memory _revocable,
+        uint256[] memory _amount
+    ) public onlyIfLaunchTimestampSet onlyOwner {
+        require(launchTimestampset == false, "TokenPreVesting: Launch timing are not initialized");
+        //looping through beneficiaries
+        for (uint256 i = 0; i < _beneficiary.length; i++) {
+            require(
+                this.getWithdrawableAmount() >= _amount[i],
+                "TokenPreVesting: cannot create vesting schedule because not sufficient tokens"
+            );
+            require(_duration[i] > 0, "TokenPreVesting: duration must be > 0");
+            require(_amount[i] > 0, "TokenPreVesting: amount must be > 0");
+            require(_slicePeriodSeconds[i] >= 1, "TokenPreVesting: slicePeriodSeconds must be >= 1");
+            bytes32 vestingScheduleId = this.computeNextVestingScheduleIdForHolder(_beneficiary[i]);
+            vestingSchedules[vestingScheduleId] = VestingSchedule(
+                true,
+                _beneficiary[i],
+                cliff,
+                start,
+                _duration[i],
+                _slicePeriodSeconds[i],
+                _revocable[i],
+                _amount[i],
+                0,
+                false
+            );
+            vestingSchedulesTotalAmount = vestingSchedulesTotalAmount.add(_amount[i]);
+            vestingSchedulesIds.push(vestingScheduleId);
+            uint256 currentVestingCount = holdersVestingCount[_beneficiary[i]];
+            holdersVestingCount[_beneficiary[i]] = currentVestingCount.add(1);
+        }
     }
 
     /**
@@ -288,14 +336,14 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
      */
     function _computeReleasableAmount(VestingSchedule memory vestingSchedule) internal view returns (uint256) {
         uint256 currentTime = getCurrentTime();
-        if ((currentTime < vestingSchedule.cliff) || vestingSchedule.revoked == true) {
+        if ((currentTime < vestingSchedule.cliff_) || vestingSchedule.revoked == true) {
             return 0;
-        } else if (currentTime >= vestingSchedule.start.add(vestingSchedule.duration)) {
+        } else if (currentTime >= vestingSchedule.start_.add(vestingSchedule.duration)) {
             return vestingSchedule.amountTotal.sub(vestingSchedule.released);
         } else if (launchTimestampset == false) {
             return 0;
         } else {
-            uint256 timeFromStart = currentTime.sub(vestingSchedule.start);
+            uint256 timeFromStart = currentTime.sub(vestingSchedule.start_);
             uint256 secondsPerSlice = vestingSchedule.slicePeriodSeconds;
             uint256 vestedSlicePeriods = timeFromStart.div(secondsPerSlice);
             uint256 vestedSeconds = vestedSlicePeriods.mul(secondsPerSlice);
