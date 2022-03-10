@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import Countdown from "react-countdown";
 import { Modal, Button, Form } from "react-bootstrap";
 import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
@@ -264,7 +263,7 @@ function Presale(): JSX.Element {
   const [enoughBusd, setEnoughBusd] = React.useState<boolean>(false);
   const [enoughUsdt, setEnoughUsdt] = React.useState<boolean>(false);
   const [enoughEth, setEnoughEth] = React.useState<boolean>(false);
-  const [timer, setTimer] = React.useState<String>();
+  const [timer, setTimer] = React.useState<string>();
 
   useEffect(() => {
     handleTimer();

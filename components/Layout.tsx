@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { useWeb3React, Web3ReactProvider } from "@web3-react/core";
+import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
 import Head from "next/head";
 import Image from "next/image";
@@ -19,7 +19,6 @@ function getLibrary(provider: any): Web3Provider {
 export default function Layout({ children, title = "This is the default title" }: Props): JSX.Element {
   // automatically try connecting to the injected connector on pageload
   const triedToEagerConnect = useEagerConnect();
-  const { account, chainId } = useWeb3React();
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
       {/* <div> */}
