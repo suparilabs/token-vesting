@@ -119,7 +119,7 @@ contract TokenPreTimelock is Ownable {
     function depositTokens(address recipient, uint256 amount)
         public
         onlyOwner
-        timestampIsSet
+        timestampIsNotSet
         incomingDepositsStillAllowed
     {
         require(recipient != address(0), "ERC20: transfer to the zero address");
@@ -133,7 +133,7 @@ contract TokenPreTimelock is Ownable {
     function bulkDepositTokens(address[] calldata recipients, uint256[] calldata amounts)
         external
         onlyOwner
-        timestampIsSet
+        timestampIsNotSet
         incomingDepositsStillAllowed
     {
         require(

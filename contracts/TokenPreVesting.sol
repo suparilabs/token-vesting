@@ -18,10 +18,6 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         bool initialized;
         // beneficiary of tokens after they are released
         address beneficiary;
-        // cliff of the vesting period in seconds
-        uint256 cliff_;
-        // start of the vesting period in seconds
-        uint256 start_;
         // duration of the vesting period in seconds
         uint256 duration;
         // duration of a slice period for the vesting in seconds
@@ -37,9 +33,9 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
     }
 
     // address of the MEI token
-    bool launchTimestampset;
-    uint256 cliff;
-    uint256 start;
+    bool public launchTimestampset;
+    uint256 public cliff;
+    uint256 public start;
     IERC20 private immutable _token;
     bytes32[] private vestingSchedulesIds;
     mapping(bytes32 => VestingSchedule) private vestingSchedules;
@@ -60,8 +56,8 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         _;
     }
 
-    modifier onlyIfLaunchTimestampSet() {
-        require(launchTimestampset == true, "TokenPreVesting: launch timestamp not set");
+    modifier onlyIfLaunchTimestampNotSet() {
+        require(launchTimestampset == false, "TokenPreVesting: launch timestamp is set");
         _;
     }
     /**
@@ -87,6 +83,7 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
     fallback() external payable {}
 
     function setLaunchTimestamp(uint256 _start, uint256 _cliff) external {
+        require(!launchTimestampset, "TokenPreVesting: already launched!");
         launchTimestampset = true;
         start = _start;
         cliff = _start.add(_cliff);
@@ -150,7 +147,7 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         uint256 _slicePeriodSeconds,
         bool _revocable,
         uint256 _amount
-    ) public onlyIfLaunchTimestampSet onlyOwner {
+    ) public onlyIfLaunchTimestampNotSet onlyOwner {
         require(launchTimestampset == false, "TokenPreVesting: Launch timing are not initialized");
         require(
             this.getWithdrawableAmount() >= _amount,
@@ -163,8 +160,6 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         vestingSchedules[vestingScheduleId] = VestingSchedule(
             true,
             _beneficiary,
-            cliff,
-            start,
             _duration,
             _slicePeriodSeconds,
             _revocable,
@@ -193,7 +188,7 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         uint256[] memory _slicePeriodSeconds,
         bool[] memory _revocable,
         uint256[] memory _amount
-    ) public onlyIfLaunchTimestampSet onlyOwner {
+    ) public onlyIfLaunchTimestampNotSet onlyOwner {
         require(launchTimestampset == false, "TokenPreVesting: Launch timing are not initialized");
         //looping through beneficiaries
         for (uint256 i = 0; i < _beneficiary.length; i++) {
@@ -208,8 +203,6 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
             vestingSchedules[vestingScheduleId] = VestingSchedule(
                 true,
                 _beneficiary[i],
-                cliff,
-                start,
                 _duration[i],
                 _slicePeriodSeconds[i],
                 _revocable[i],
@@ -335,15 +328,16 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
      * @return the amount of releasable tokens
      */
     function _computeReleasableAmount(VestingSchedule memory vestingSchedule) internal view returns (uint256) {
+        if (!launchTimestampset) {
+            return uint256(0);
+        }
         uint256 currentTime = getCurrentTime();
-        if ((currentTime < vestingSchedule.cliff_) || vestingSchedule.revoked == true) {
+        if ((currentTime < cliff) || vestingSchedule.revoked == true) {
             return 0;
-        } else if (currentTime >= vestingSchedule.start_.add(vestingSchedule.duration)) {
+        } else if (currentTime >= start.add(vestingSchedule.duration)) {
             return vestingSchedule.amountTotal.sub(vestingSchedule.released);
-        } else if (launchTimestampset == false) {
-            return 0;
         } else {
-            uint256 timeFromStart = currentTime.sub(vestingSchedule.start_);
+            uint256 timeFromStart = currentTime.sub(start);
             uint256 secondsPerSlice = vestingSchedule.slicePeriodSeconds;
             uint256 vestedSlicePeriods = timeFromStart.div(secondsPerSlice);
             uint256 vestedSeconds = vestedSlicePeriods.mul(secondsPerSlice);

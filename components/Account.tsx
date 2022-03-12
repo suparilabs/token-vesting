@@ -49,7 +49,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
     });
   }
 
-
   const enableMetamask = async () => {
     if(window.ethereum?.isMetaMask){
       if(chainId != desiredChainId) {
@@ -88,8 +87,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         </div>
       );
     }
-    
-
   }
   if (typeof account !== "string" && account == undefined || chainId != desiredChainId) {
     return (
