@@ -403,19 +403,6 @@ function Presale(): JSX.Element {
           </div>
         </section>
       </div>
-      {account == undefined && (
-        <section id="about-page" className="page">
-          <div className="container">
-            <div className="row">
-              <div className="col-xxl-12 col-xl-12 col-lg-112 col-sm-12 col-xs-12">
-                <div className="heading">
-                  <h2 className="title"> Please Install and Connect to Metamask Wallet </h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
       {/* <!-- Footer --> */}
       {/* <Footer /> */}
     </div>

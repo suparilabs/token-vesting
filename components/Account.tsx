@@ -15,6 +15,7 @@ type AccountProps = {
 const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
   const { isMetaMaskInstalled, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
+  const [desiredChainId, setDesiredChainId] = useState<number>();
   const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
@@ -35,6 +36,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   const handleConnect = async() => {
+    setDesiredChainId(97); //setting desired chain id
     setConnecting(true);
     await enableMetamask();
     activate(injected, undefined, true).catch(error => {
@@ -50,11 +52,11 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
 
   const enableMetamask = async () => {
     if(window.ethereum?.isMetaMask){
-      if(chainId != 97) {
+      if(chainId != desiredChainId) {
         try {
           await (window as any).ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x61' }],
+            params: [{ chainId: '0x61' }], // binance testnet chain id (in hexadecimal)
           });
         } catch (switchError:any) {
           // This error code indicates that the chain has not been added to MetaMask.
@@ -89,7 +91,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
     
 
   }
-  if (typeof account !== "string" && account == undefined) {
+  if (typeof account !== "string" && account == undefined || chainId != desiredChainId) {
     return (
       <div>
         { isMetaMaskInstalled ? (
