@@ -113,7 +113,8 @@ contract TokenSale is Ownable {
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
             //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
-            require(token.transferFrom(owner(), timelock, _nonVestedTokenAmount));
+            require(token.transferFrom(owner(), address(timelock), _nonVestedTokenAmount));
+            timelock.depositTokens(msg.sender, _nonVestedTokenAmount);
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
@@ -135,7 +136,8 @@ contract TokenSale is Ownable {
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
             //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
-            require(token.transferFrom(owner(), timelock, _nonVestedTokenAmount));
+            require(token.transferFrom(owner(), address(timelock), _nonVestedTokenAmount));
+            timelock.depositTokens(msg.sender, _nonVestedTokenAmount);
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 

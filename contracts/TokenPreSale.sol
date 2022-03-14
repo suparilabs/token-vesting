@@ -9,14 +9,14 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./Token.sol";
-import "./IDOTokenPreTimelock.sol";
-import "./IDOTokenPreVesting.sol";
+import "./TokenPreTimelock.sol";
+import "./TokenPreVesting.sol";
 
 /**
  * @title TokenSale Contract
  */
 
-contract TokenSale is Ownable {
+contract TokenPreSale is Ownable {
     using SafeMath for uint256;
     IERC20 public token; // the token being sold
 
@@ -29,14 +29,13 @@ contract TokenSale is Ownable {
 
     uint256 public exchangePriceUSDT = 120000000000000000;
     uint256 public exchangePriceBUSD = 120000000000000000;
-    uint256 public cliff = 3 * 30 days;
     uint256 public duration = 18 * 30 days;
     uint256 public minBuyAmountUSDT = 10000000000000000000;
     uint256 public maxBuyAmountUSDT = 10000000000000000000000;
     uint256 public minBuyAmountBUSD = 10000000000000000000;
     uint256 public maxBuyAmountBUSD = 10000000000000000000000;
-    IDOTokenPreVesting public vesting;
-    IDOTokenPreTimelock public timelock;
+    TokenPreVesting public vesting;
+    TokenPreTimelock public timelock;
 
     uint256 public availableAtTGE = 200; // percentage basis points
 
@@ -55,8 +54,8 @@ contract TokenSale is Ownable {
         token = _token;
         USDT = _usdt;
         BUSD = _busd;
-        vesting = new IDOTokenPreVesting(address(token));
-        timelock = new IDOTokenPreTimelock(address(token));
+        vesting = new TokenPreVesting(address(token));
+        timelock = new TokenPreTimelock(address(token));
     }
 
     modifier onSale() {
@@ -72,12 +71,13 @@ contract TokenSale is Ownable {
         exchangePriceBUSD = _busdPrice;
     }
 
-    function setCliff(uint256 _cliff) external onlyOwner {
-        cliff = _cliff;
-    }
-
     function setDuration(uint256 _duration) external onlyOwner {
         duration = _duration;
+    }
+
+    function setLaunchTimeInfo(uint256 _startTimeStamp, uint256 _cliffDurationForVesting) external onlyOwner {
+        vesting.setLaunchTimestamp(_startTimeStamp, _cliffDurationForVesting);
+        timelock.setTimestamp(_startTimeStamp);
     }
 
     function setSaleStatus(SaleStatus _saleStatus) external onlyOwner {
@@ -86,6 +86,16 @@ contract TokenSale is Ownable {
 
     function setAvailableAtTGE(uint256 _availableAtTGE) external onlyOwner {
         availableAtTGE = _availableAtTGE;
+    }
+
+    function withdrawETHFromTimeLock() public onlyOwner {
+        timelock.withdrawEth(payable(timelock).balance);
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function transferAccidentallyLockedTokensInTimeLock(IERC20 _token, uint256 _amount) external onlyOwner {
+        timelock.transferAccidentallyLockedTokens(_token, _amount);
+        _token.transfer(owner(), _amount);
     }
 
     function setBuyAmountRangeBUSD(uint256 _min, uint256 _max) external onlyOwner {
@@ -112,12 +122,12 @@ contract TokenSale is Ownable {
         uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
-            require(token.transferFrom(owner(), timelock, _nonVestedTokenAmount));
+            require(token.transferFrom(owner(), address(timelock), _nonVestedTokenAmount));
+            timelock.depositTokens(msg.sender, _nonVestedTokenAmount);
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
-        vesting.createVestingSchedule(msg.sender, block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
+        vesting.createVestingSchedule(msg.sender, duration, 1, false, _vestedTokenAmount);
     }
 
     function buyTokensUsingUSDT(uint256 _usdtAmount) external onSale {
@@ -135,11 +145,12 @@ contract TokenSale is Ownable {
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
             //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
-            require(token.transferFrom(owner(), timelock, _nonVestedTokenAmount));
+            require(token.transferFrom(owner(), address(timelock), _nonVestedTokenAmount));
+            timelock.depositTokens(msg.sender, _nonVestedTokenAmount);
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
-        vesting.createVestingSchedule(msg.sender, block.timestamp, cliff, duration, 1, false, _vestedTokenAmount);
+        vesting.createVestingSchedule(msg.sender, duration, 1, false, _vestedTokenAmount);
     }
 
     function computeTokensForBUSD(uint256 _busdAmount) public view returns (uint256) {
@@ -150,37 +161,6 @@ contract TokenSale is Ownable {
     function computeTokensForUSDT(uint256 _usdtAmount) public view returns (uint256) {
         uint256 _tokenDecimals = ERC20(address(token)).decimals();
         return (_usdtAmount * 10**_tokenDecimals) / exchangePriceUSDT;
-    }
-
-    function createVestingSchedule(
-        address _beneficiary,
-        uint256 _start,
-        uint256 _cliff,
-        uint256 _duration,
-        uint256 _slicePeriodSeconds,
-        bool _revocable,
-        uint256 _amount,
-        uint256 _availableAtTGE
-    ) external onlyOwner {
-        require(token.allowance(owner(), address(this)) >= _amount);
-        emit Sold(_beneficiary, _amount);
-        coinsSold += _amount;
-        uint256 _nonVestedTokenAmount = _amount.mul(_availableAtTGE).div(10000);
-        uint256 _vestedTokenAmount = _amount.sub(_nonVestedTokenAmount);
-        // send some pct of tokens to buyer right away
-        if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), _beneficiary, _nonVestedTokenAmount));
-        } // vest rest of the tokens
-        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount));
-        vesting.createVestingSchedule(
-            _beneficiary,
-            _start,
-            _cliff,
-            _duration,
-            _slicePeriodSeconds,
-            _revocable,
-            _vestedTokenAmount
-        );
     }
 
     function withdrawBUSD() public onlyOwner {
@@ -197,7 +177,7 @@ contract TokenSale is Ownable {
         }
     }
 
-    function withdraw(uint256 _amount) public onlyOwner {
+    function withdrawFromVesting(uint256 _amount) public onlyOwner {
         vesting.withdraw(_amount);
         token.transfer(owner(), _amount);
     }
@@ -213,7 +193,10 @@ contract TokenSale is Ownable {
         saleStatus = SaleStatus.Pause;
         uint256 _withdrawableAmount = vesting.getWithdrawableAmount();
         if (_withdrawableAmount > 0) {
-            withdraw(vesting.getWithdrawableAmount());
+            withdrawFromVesting(vesting.getWithdrawableAmount());
+        }
+        if (payable(timelock).balance > 0) {
+            withdrawETHFromTimeLock();
         }
         withdrawBUSD();
         withdrawUSDT();

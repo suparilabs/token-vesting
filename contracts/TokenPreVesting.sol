@@ -11,7 +11,7 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 /**
  * @title Token vesting Contract
  */
-contract IDOTokenPreVesting is Ownable, ReentrancyGuard {
+contract TokenPreVesting is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     struct VestingSchedule {
@@ -82,7 +82,7 @@ contract IDOTokenPreVesting is Ownable, ReentrancyGuard {
 
     fallback() external payable {}
 
-    function setLaunchTimestamp(uint256 _start, uint256 _cliff) external {
+    function setLaunchTimestamp(uint256 _start, uint256 _cliff) external onlyOwner {
         require(!launchTimestampset, "TokenPreVesting: already launched!");
         launchTimestampset = true;
         start = _start;
@@ -148,7 +148,6 @@ contract IDOTokenPreVesting is Ownable, ReentrancyGuard {
         bool _revocable,
         uint256 _amount
     ) public onlyIfLaunchTimestampNotSet onlyOwner {
-        require(launchTimestampset == false, "TokenPreVesting: Launch timing are not initialized");
         require(
             this.getWithdrawableAmount() >= _amount,
             "TokenPreVesting: cannot create vesting schedule because not sufficient tokens"
@@ -176,44 +175,36 @@ contract IDOTokenPreVesting is Ownable, ReentrancyGuard {
     /**
      * BULK : CREATING VESTING SCHEDULE IN BULK
      * @notice Creates a new vesting schedule for a beneficiary.
-     * @param _beneficiary address of the beneficiary to whom vested tokens are transferred
-     * @param _duration duration in seconds of the period in which the tokens will vest
+     * @param _beneficiaries address of the beneficiary to whom vested tokens are transferred
+     * @param _durations duration in seconds of the period in which the tokens will vest
      * @param _slicePeriodSeconds duration of a slice period for the vesting in seconds
-     * @param _revocable whether the vesting is revocable or not
-     * @param _amount total amount of tokens to be released at the end of the vesting
+     * @param _revocables whether the vesting is revocable or not
+     * @param _amounts total amount of tokens to be released at the end of the vesting
      */
     function createVestingSchedule(
-        address[] memory _beneficiary,
-        uint256[] memory _duration,
-        uint256[] memory _slicePeriodSeconds,
-        bool[] memory _revocable,
-        uint256[] memory _amount
-    ) public onlyIfLaunchTimestampNotSet onlyOwner {
-        require(launchTimestampset == false, "TokenPreVesting: Launch timing are not initialized");
+        address[] calldata _beneficiaries,
+        uint256[] calldata _durations,
+        uint256[] calldata _slicePeriodSeconds,
+        bool[] calldata _revocables,
+        uint256[] calldata _amounts
+    ) external onlyIfLaunchTimestampNotSet onlyOwner {
+        require(
+            _beneficiaries.length == _durations.length &&
+                _durations.length == _slicePeriodSeconds.length &&
+                _slicePeriodSeconds.length == _revocables.length &&
+                _revocables.length == _amounts.length,
+            ""
+        );
+
         //looping through beneficiaries
-        for (uint256 i = 0; i < _beneficiary.length; i++) {
-            require(
-                this.getWithdrawableAmount() >= _amount[i],
-                "TokenPreVesting: cannot create vesting schedule because not sufficient tokens"
+        for (uint256 _i; _i < _beneficiaries.length; _i++) {
+            createVestingSchedule(
+                _beneficiaries[_i],
+                _durations[_i],
+                _slicePeriodSeconds[_i],
+                _revocables[_i],
+                _amounts[_i]
             );
-            require(_duration[i] > 0, "TokenPreVesting: duration must be > 0");
-            require(_amount[i] > 0, "TokenPreVesting: amount must be > 0");
-            require(_slicePeriodSeconds[i] >= 1, "TokenPreVesting: slicePeriodSeconds must be >= 1");
-            bytes32 vestingScheduleId = this.computeNextVestingScheduleIdForHolder(_beneficiary[i]);
-            vestingSchedules[vestingScheduleId] = VestingSchedule(
-                true,
-                _beneficiary[i],
-                _duration[i],
-                _slicePeriodSeconds[i],
-                _revocable[i],
-                _amount[i],
-                0,
-                false
-            );
-            vestingSchedulesTotalAmount = vestingSchedulesTotalAmount.add(_amount[i]);
-            vestingSchedulesIds.push(vestingScheduleId);
-            uint256 currentVestingCount = holdersVestingCount[_beneficiary[i]];
-            holdersVestingCount[_beneficiary[i]] = currentVestingCount.add(1);
         }
     }
 

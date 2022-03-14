@@ -7,14 +7,12 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./Token.sol";
-import "./IDOTokenPreSale.sol";
-import "./IDOTokenPreVesting.sol";
 
 /**
- * @title TokenSale Contract
+ * @title TokenPreTimeLock Contract
  */
 
-contract IDOTokenPreTimelock is Ownable {
+contract TokenPreTimelock is Ownable {
     // boolean to prevent reentrancy
     bool internal locked;
     using SafeERC20 for IERC20;
@@ -92,7 +90,7 @@ contract IDOTokenPreTimelock is Ownable {
     }
 
     // @dev Takes away any ability (for the contract owner) to assign any tokens to any recipients. This function is only to be called by the contract owner. Calling this function can not be undone. Calling this function must only be performed when all of the addresses and amounts are allocated (to the recipients). This function finalizes the contract owners involvement and at this point the contract's timelock functionality is non-custodial
-    function finalizeAllIncomingDeposits() public timestampIsSet incomingDepositsStillAllowed {
+    function finalizeAllIncomingDeposits() public onlyOwner timestampIsSet incomingDepositsStillAllowed {
         allIncomingDepositsFinalised = true;
     }
 
@@ -119,7 +117,7 @@ contract IDOTokenPreTimelock is Ownable {
     function depositTokens(address recipient, uint256 amount)
         public
         onlyOwner
-        timestampIsNotSet
+        timestampNotSet
         incomingDepositsStillAllowed
     {
         require(recipient != address(0), "ERC20: transfer to the zero address");
@@ -133,7 +131,7 @@ contract IDOTokenPreTimelock is Ownable {
     function bulkDepositTokens(address[] calldata recipients, uint256[] calldata amounts)
         external
         onlyOwner
-        timestampIsNotSet
+        timestampNotSet
         incomingDepositsStillAllowed
     {
         require(
