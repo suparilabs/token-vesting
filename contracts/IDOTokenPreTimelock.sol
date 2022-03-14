@@ -7,14 +7,14 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./Token.sol";
-import "./TokenSale.sol";
-import "./TokenVesting.sol";
+import "./IDOTokenPreSale.sol";
+import "./IDOTokenPreVesting.sol";
 
 /**
  * @title TokenSale Contract
  */
 
-contract TokenPreTimelock is Ownable {
+contract IDOTokenPreTimelock is Ownable {
     // boolean to prevent reentrancy
     bool internal locked;
     using SafeERC20 for IERC20;

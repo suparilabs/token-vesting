@@ -9,13 +9,14 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./Token.sol";
-import "./TokenPreVesting.sol";
+import "./IDOTokenPreTimelock.sol";
+import "./IDOTokenPreVesting.sol";
 
 /**
  * @title TokenSale Contract
  */
 
-contract TokenPreSale is Ownable {
+contract TokenSale is Ownable {
     using SafeMath for uint256;
     IERC20 public token; // the token being sold
 
@@ -30,8 +31,12 @@ contract TokenPreSale is Ownable {
     uint256 public exchangePriceBUSD = 120000000000000000;
     uint256 public cliff = 3 * 30 days;
     uint256 public duration = 18 * 30 days;
-
-    TokenPreVesting public vesting;
+    uint256 public minBuyAmountUSDT = 10000000000000000000;
+    uint256 public maxBuyAmountUSDT = 10000000000000000000000;
+    uint256 public minBuyAmountBUSD = 10000000000000000000;
+    uint256 public maxBuyAmountBUSD = 10000000000000000000000;
+    IDOTokenPreVesting public vesting;
+    IDOTokenPreTimelock public timelock;
 
     uint256 public availableAtTGE = 200; // percentage basis points
 
@@ -47,12 +52,11 @@ contract TokenPreSale is Ownable {
         address _usdt,
         address _busd
     ) {
-        //deploy token prevesting contract
-        //deploy token pretimelock contract
         token = _token;
         USDT = _usdt;
         BUSD = _busd;
-        vesting = new TokenPreVesting(address(token));
+        vesting = new IDOTokenPreVesting(address(token));
+        timelock = new IDOTokenPreTimelock(address(token));
     }
 
     modifier onSale() {
@@ -84,14 +88,22 @@ contract TokenPreSale is Ownable {
         availableAtTGE = _availableAtTGE;
     }
 
+    function setBuyAmountRangeBUSD(uint256 _min, uint256 _max) external onlyOwner {
+        minBuyAmountBUSD = _min;
+        maxBuyAmountBUSD = _max;
+    }
+
+    function setBuyAmountRangeUSDT(uint256 _min, uint256 _max) external onlyOwner {
+        minBuyAmountUSDT = _min;
+        maxBuyAmountUSDT = _max;
+    }
+
     function buyTokensUsingBUSD(uint256 _busdAmount) external onSale {
         uint256 _balanceBefore = IERC20(BUSD).balanceOf(address(this));
         require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount), "2");
         uint256 _balanceAfter = IERC20(BUSD).balanceOf(address(this));
         uint256 _actualBUSDAmount = _balanceAfter.sub(_balanceBefore);
-        // 1000 should be param
-        // min busd and usdt required
-        require(_actualBUSDAmount >= 1000 ether, "3"); // BUSD has 18 ethers
+        require(_actualBUSDAmount >= minBuyAmountBUSD && _actualBUSDAmount <= maxBuyAmountBUSD, "3");
         uint256 _numberOfTokens = computeTokensForBUSD(_actualBUSDAmount);
         require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
         emit Sold(msg.sender, _numberOfTokens);
@@ -100,7 +112,8 @@ contract TokenPreSale is Ownable {
         uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
+            //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
+            require(token.transferFrom(owner(), timelock, _nonVestedTokenAmount));
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
@@ -112,7 +125,7 @@ contract TokenPreSale is Ownable {
         require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount), "2");
         uint256 _balanceAfter = IERC20(USDT).balanceOf(address(this));
         uint256 _actualUSDTAmount = _balanceAfter.sub(_balanceBefore);
-        require(_actualUSDTAmount >= 1000 ether, "3"); // USDT has 18 ethers
+        require(_actualUSDTAmount >= minBuyAmountUSDT && _actualUSDTAmount <= maxBuyAmountUSDT, "3"); // BUSD has 18 ethers
         uint256 _numberOfTokens = computeTokensForUSDT(_actualUSDTAmount);
         require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
         emit Sold(msg.sender, _numberOfTokens);
@@ -121,7 +134,8 @@ contract TokenPreSale is Ownable {
         uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
+            //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
+            require(token.transferFrom(owner(), timelock, _nonVestedTokenAmount));
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
