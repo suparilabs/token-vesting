@@ -15,8 +15,7 @@ function Dashboard() {
   // const { data: endSaleStatus } = useStartSale(chainId == undefined ? 56 : chainId);
 
   //web3
-  
- 
+
   const handleUploadCSV = () => {
     setUploading(true);
     const input = inputRef ? inputRef.current : 0;
@@ -34,8 +33,8 @@ function Dashboard() {
     console.log("hello there");
   };
 
-  const handleStartSale = useStartSale(chainId == undefined ? 56 : chainId as number);
-  const handleEndSale = useEndSale(chainId == undefined ? 56 : chainId as number)
+  const handleStartSale = useStartSale(chainId == undefined ? 97 : chainId as number);
+  const handleEndSale = useEndSale(chainId == undefined ? 97 : chainId as number)
  
 
   return (
@@ -75,7 +74,7 @@ function Dashboard() {
                               <button type="button" className="btn btn-danger btn-block" onClick={handleEndSale}>
                                 <small className="font-weight-bold">Stop</small>
                               </button>
-                              <button type="button" className="btn btn-success btn-block" >
+                              <button type="button" className="btn btn-success btn-block">
                                 <small className="font-weight-bold">Approve the user For admin</small>
                               </button>
                               
