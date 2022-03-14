@@ -7,14 +7,14 @@ import { DataType } from "../utils";
 import { useContract } from "./useContract";
 
 export function useBuyTokensWithBusd(amount: any, chainId: number): any {
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi, true);
   return async () => {
     return (contract as Contract).buyTokensUsingBUSD(amount);
   };
 }
 
 export function useBuyTokensWithUsdt(amount: any, chainId: number): any {
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi, true);
   return async () => {
     return (contract as Contract).buyTokensUsingUSDT(amount);
   };
@@ -22,21 +22,21 @@ export function useBuyTokensWithUsdt(amount: any, chainId: number): any {
 
 //setting tge value in tokensale
 export function useSetAvailableAtTGE(chainId: number, availableAtTGE: number): any {
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi, true);
   return async () => {
     return (contract as Contract).setAvailableAtTGE(availableAtTGE);
   };
 }
 //setting cliff period in tokensale
 export function useSetCliffPeriod(chainId: number, cliff: number): any {
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi, true);
   return async () => {
     return (contract as Contract).setCliff(cliff);
   };
 }
 //setting duration value in tokensale
 export function useSetDuration(chainId: number, duration: number): any {
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi, true);
   return async () => {
     return (contract as Contract).setAvailableAtTGE(duration);
   };
@@ -51,7 +51,7 @@ export function useCreateVestingSchedule(
   amount: number,
   availableAtTGE: number,
 ): any {
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi, true);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi, true);
   return async () => {
     return (contract as Contract).createVestingSchedule(
       beneficiary,
@@ -72,9 +72,9 @@ function getVestingContractAddress(contract: Contract): (address: string) => Pro
 
 export function useVestingContractAddress(chainId: number, suspense = false): SWRResponse<any, any> {
   // const { chainId } = useWeb3React();
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, "vesting", addresses[chainId as number].TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    contract ? [chainId, "vesting", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
     getVestingContractAddress(contract as Contract),
     { suspense },
   );
@@ -86,7 +86,7 @@ export function useVestingContractAddress(chainId: number, suspense = false): SW
 function getTokenAllowance(account: string, contract: Contract, chainId: number): (address: string) => Promise<string> {
   return async (): Promise<string> =>
     contract
-      .allowance(account, addresses[chainId as number].TOKEN_SALE_ADDRESS)
+      .allowance(account, addresses[chainId as number].IDO_TOKEN_PRE_SALE)
       .then((result: string) => result.toString());
 }
 
@@ -109,9 +109,9 @@ function getBUSD(contract: Contract): (address: string) => Promise<string> {
 
 export function useBUSD(chainId: number, suspense = false): SWRResponse<any, any> {
   // const { chainId } = useWeb3React();
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, "busd", addresses[chainId as number].TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    contract ? [chainId, "busd", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
     getBUSD(contract as Contract),
     { suspense },
   );
@@ -125,9 +125,9 @@ function getUSDT(contract: Contract): (address: string) => Promise<string> {
 
 export function useUSDT(chainId: number, suspense = false): SWRResponse<any, any> {
   // const { chainId } = useWeb3React();
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, "usdt", addresses[chainId as number].TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    contract ? [chainId, "usdt", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
     getUSDT(contract as Contract),
     { suspense },
   );
@@ -140,9 +140,9 @@ function getAvailableAtTGE(contract: Contract): (address: string) => Promise<str
 }
 
 export function useAvailableAtTGE(chainId: number, suspense = false): SWRResponse<any, any> {
-  const contract = useContract(addresses[chainId as number].TOKEN_SALE_ADDRESS, TokenSale__factory.abi);
+  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, "tge", addresses[chainId as number].TOKEN_SALE_ADDRESS, DataType.Address] : null,
+    contract ? [chainId, "tge", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
     getAvailableAtTGE(contract as Contract),
     { suspense },
   );
@@ -154,7 +154,7 @@ export function useTxApprove(token: string, amount: BigNumber, chainId: number):
   const contract = useContract(token, ERC20__factory.abi, true);
   return async () => {
     return (contract as Contract)
-      .approve(addresses[chainId as number].TOKEN_SALE_ADDRESS, amount)
+      .approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE, amount)
       .then((result: boolean) => result);
   };
 }

@@ -5,7 +5,7 @@ pragma solidity ^0.8.4;
 import "./TokenPreVesting.sol";
 
 /**
- * @title MockTokenVesting
+ * @title MockTokenPreVesting
  * WARNING: use only for testing and debugging purpose
  */
 contract MockTokenPreVesting is TokenPreVesting {

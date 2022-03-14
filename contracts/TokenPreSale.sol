@@ -13,7 +13,7 @@ import "./TokenPreTimelock.sol";
 import "./TokenPreVesting.sol";
 
 /**
- * @title TokenSale Contract
+ * @title TokenPreSale Contract
  */
 
 contract TokenPreSale is Ownable {
