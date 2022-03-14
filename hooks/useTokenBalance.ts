@@ -16,7 +16,7 @@ function getTokenBalance(contract: Contract, token: Token): (address: string) =>
 }
 
 export function useTokenBalance(
-  chainId: number,
+  chainId: number = 56,
   address?: string | null,
   token?: string | null,
   suspense = false,
@@ -24,8 +24,7 @@ export function useTokenBalance(
 ): SWRResponse<TokenAmount, any> {
   // const { chainId } = useWeb3React();
   if (token == null) {
-    token =
-      chainId !== undefined ? addresses[chainId as number].ERC20_TOKEN_ADDRESS : addresses[56].ERC20_TOKEN_ADDRESS;
+    token = addresses[chainId as number].ERC20_TOKEN_ADDRESS;
   }
   const contract = useContract(token as string, ERC20__factory.abi);
 

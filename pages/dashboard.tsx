@@ -1,13 +1,22 @@
 import React, { useState, useRef } from "react";
 import Papa from "papaparse";
+import { BigNumber } from "ethers";
+import { useWeb3React } from "@web3-react/core";
+import {useStartSale, useEndSale} from "../hooks/useTokenPreSale";
 
-const Dashboard = () => {
+function Dashboard() {
+  const { account, chainId } = useWeb3React();
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<any>();
   const [availableTge, setAvailableTge] = React.useState<string>();
   const [cliffPeriod, setCliffPeriod] = React.useState<string>();
   const [duration, setDuration] = React.useState<string>();
+  
+  // const { data: endSaleStatus } = useStartSale(chainId == undefined ? 56 : chainId);
 
+  //web3
+  
+ 
   const handleUploadCSV = () => {
     setUploading(true);
     const input = inputRef ? inputRef.current : 0;
@@ -19,6 +28,15 @@ const Dashboard = () => {
     };
     reader.readAsText(file);
   };
+
+  const approveUser = (e) => {
+    e.preventDefault();
+    console.log("hello there");
+  };
+
+  const handleStartSale = useStartSale(chainId == undefined ? 56 : chainId as number);
+  const handleEndSale = useEndSale(chainId == undefined ? 56 : chainId as number)
+ 
 
   return (
     <div>
@@ -51,12 +69,16 @@ const Dashboard = () => {
                         <div className="card shadow-lg card-1">
                           <div className="row justify-content-end mb-5">
                             <div className="col-lg-12 col-auto ">
-                              <button type="button" className="btn btn-primary btn-block">
+                              <button type="button" className="btn btn-primary btn-block" onClick={handleStartSale}>
                                 <small className="font-weight-bold">Start</small>
                               </button>
-                              <button type="button" className="btn btn-danger btn-block">
+                              <button type="button" className="btn btn-danger btn-block" onClick={handleEndSale}>
                                 <small className="font-weight-bold">Stop</small>
                               </button>
+                              <button type="button" className="btn btn-success btn-block" >
+                                <small className="font-weight-bold">Approve the user For admin</small>
+                              </button>
+                              
                             </div>
                           </div>
                           <div className="card-body inner-card">

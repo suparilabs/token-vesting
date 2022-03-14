@@ -15,8 +15,14 @@ type AccountProps = {
 const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
   const { isMetaMaskInstalled, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
-  const [desiredChainId, setDesiredChainId] = useState<number>();
-  const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
+  const [ desiredChainId, setDesiredChainId ] = useState<number>();
+  const [ bal, setBal ] = useState<number>();
+  
+
+  // const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
+  
+  console.log("chain ID:", chainId);
+  // 
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
   useEffect(() => {
@@ -103,6 +109,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       </div>
     );
   }
+  
 
   return (
     <>
@@ -116,7 +123,8 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         className: "tokenAmt",
       }}
     >
-      {ENSName || `${shortenHex(account, 4)}`} &nbsp; | {account != undefined && balance != undefined && (balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA
+      {ENSName || `${shortenHex(account, 4)}`} &nbsp; 
+      {/* {account != undefined && balance != undefined && (balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA */}
     </a>
     </span>
     </>
