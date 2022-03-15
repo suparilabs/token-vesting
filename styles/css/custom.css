@@ -45,6 +45,9 @@
     background: #f1f7ff;
 }
 
+.radioAlign {
+    display: inline;
+}
 .navigation .navbar {
 	background-color: #0112E5;
 	-webkit-box-shadow: 0px 6px 27px 0px rgba(0, 0, 0, 0.25);

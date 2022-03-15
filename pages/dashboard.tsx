@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import Papa from "papaparse";
 import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
-import {useStartSale, useEndSale} from "../hooks/useTokenPreSale";
+import {useStartSale, useEndSale, useCreateVestingSchedule} from "../hooks/useTokenPreSale";
 
 function Dashboard() {
   const { account, chainId } = useWeb3React();
@@ -11,30 +11,61 @@ function Dashboard() {
   const [availableTge, setAvailableTge] = React.useState<string>();
   const [cliffPeriod, setCliffPeriod] = React.useState<string>();
   const [duration, setDuration] = React.useState<string>();
-  
+  const [round, setRound] = React.useState<string>();
+  const [csvData, setCsvData] = React.useState<[]>();
+  const [beneficiaries, setBeneficiaries] = React.useState<[0]>();
+  const desiredChainId:number = 97; //chain id for bsc testnet
+  //start and end sale
+  const handleStartSale = useStartSale(chainId == undefined ? desiredChainId : chainId as number);
+  const handleEndSale = useEndSale(chainId == undefined ? desiredChainId : chainId as number);
+  var beneficiary:string;
+
   // const { data: endSaleStatus } = useStartSale(chainId == undefined ? 56 : chainId);
 
   //web3
 
-  const handleUploadCSV = () => {
+  const handleUploadCSV = async () => {
     setUploading(true);
     const input = inputRef ? inputRef.current : 0;
     const reader = new FileReader();
     const [file]: any = input && input.files;
     reader.onloadend = ({ target }) => {
       const csv = Papa.parse(target?.result, { header: true });
-      console.log("Data", csv);
+      setCsvData(csv?.data);
     };
     reader.readAsText(file);
   };
+  
+  const handleSeedRound  = () => {
+    if(csvData !== undefined) {
+      for (var _i=0;_i<csvData.length;_i++) {
+        //setBeneficiaries(csvData[_i]);
+        setBeneficiaries(csvData[_i].beneficiaries);
+      }  
+    }
+  };
 
+  function handleClick(e) {
+    e.preventDefault();
+    if(chainId !== undefined) {
+      handleUploadCSV();
+      handleSeedRound();
+    }
+  }
+
+  const handleChange = (e) => {
+    setRound(e.target.value);
+  }
+  
   const approveUser = (e) => {
     e.preventDefault();
     console.log("hello there");
   };
-
-  const handleStartSale = useStartSale(chainId == undefined ? 97 : chainId as number);
-  const handleEndSale = useEndSale(chainId == undefined ? 97 : chainId as number)
+  
+  const dispCsvData = () => {
+   // console.log("disp",csvData);
+    console.log("Disp", beneficiaries);
+  } 
  
 
   return (
@@ -77,10 +108,37 @@ function Dashboard() {
                               <button type="button" className="btn btn-success btn-block">
                                 <small className="font-weight-bold">Approve the user For admin</small>
                               </button>
+                              <button type="button" className="btn btn-primary btn-block" onClick={dispCsvData}>
+                                <small className="font-weight-bold">Display CSV data</small>
+                              </button>
                               
                             </div>
                           </div>
                           <div className="card-body inner-card">
+                          <div className="row justify-content-between text-left">
+                              <div className="form-group col-sm-6 flex-column d-flex">
+                                <label>
+                                <input 
+                                  type="radio" 
+                                  className="radioAlign" 
+                                  id="seed" 
+                                  name="rounds" 
+                                  value="seed" 
+                                  checked={round === "seed"}
+                                  onChange={(e) => handleChange(e)}/> Seed Round</label>
+                              </div>
+                              <div className="form-group col-sm-6 flex-column d-flex">
+                                <label>
+                                <input 
+                                  type="radio" 
+                                  className="radioAlign" 
+                                  id="private" 
+                                  name="rounds" 
+                                  value="private" 
+                                  checked={round === "private"}
+                                  onChange={(e) => handleChange(e)}/> Private Round</label>
+                              </div>
+                            </div>
                             <div className="row justify-content-between text-left">
                               <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
@@ -142,7 +200,10 @@ function Dashboard() {
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="row justify-content-end mb-5">
                                   <div className="col-lg-4 col-auto ">
-                                    <button type="button" className="btn btn-primary btn-block" onClick={handleUploadCSV} disabled={uploading}>
+                                  <button type="button" className="btn btn-primary btn-block" onClick={handleUploadCSV} disabled={uploading}>
+                                      <small className="font-weight-bold">Upload</small>
+                                    </button>{" "}
+                                    <button type="button" className="btn btn-primary btn-block" onClick={e => handleClick(e)}>
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}
                                   </div>
