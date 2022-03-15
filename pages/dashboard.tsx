@@ -2,38 +2,36 @@ import React, { useState, useRef } from "react";
 import Papa from "papaparse";
 import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
-import {useStartSale, useEndSale, useCreateVestingSchedule} from "../hooks/useTokenPreSale";
+import BN from "bignumber.js";
+import { useStartSale, useEndSale, useCreateVestingSchedule } from "../hooks/useTokenPreSale";
 import {
-  useCreateVestingScheduleSeed, 
-  useCreateVestingSchedulePrivate, 
-  useTransferTokenPreVestingSeed, 
-  useTransferTokenPreVestingPrivate 
+  useCreateVestingScheduleSeed,
+  useCreateVestingSchedulePrivate,
+  useTransferTokenPreVestingSeed,
+  useTransferTokenPreVestingPrivate,
 } from "../hooks/useTokenPreVesting";
-import {
-  useTransferTokenPreTimelockSeed, 
-  useTransferTokenPreTimelockPrivate
-} from "../hooks/useTokenPreTimelock";
+import { useTransferTokenPreTimelockSeed, useTransferTokenPreTimelockPrivate } from "../hooks/useTokenPreTimelock";
 
 function Dashboard() {
   const { account, chainId } = useWeb3React();
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<any>();
-  const [availableTge, setAvailableTge] = React.useState<string>();
+  const [availableTge, setAvailableTge] = React.useState<string>("0");
   const [cliffPeriod, setCliffPeriod] = React.useState<string>();
-  const [duration, setDuration] = React.useState<string>();
+  const [duration, setDuration] = React.useState<string>("0");
   const [round, setRound] = React.useState<string>();
   const [csvData, setCsvData] = React.useState<[]>();
   const [beneficiaries, setBeneficiaries] = React.useState<["foo"]>();
-  const desiredChainId:number = 97; //chain id for bsc testnet
+  const desiredChainId: number = 97; //chain id for bsc testnet
   //start and end sale
-  const handleStartSale = useStartSale(chainId == undefined ? desiredChainId : chainId as number);
-  const handleEndSale = useEndSale(chainId == undefined ? desiredChainId : chainId as number);
+  const handleStartSale = useStartSale(chainId == undefined ? desiredChainId : (chainId as number));
+  const handleEndSale = useEndSale(chainId == undefined ? desiredChainId : (chainId as number));
 
   // const { data: endSaleStatus } = useStartSale(chainId == undefined ? 56 : chainId);
 
   //web3
 
-  const handleUploadCSV = async (e) => {
+  const handleUploadCSV = async e => {
     e.preventDefault();
     setUploading(true);
     const input = inputRef ? inputRef.current : 0;
@@ -42,10 +40,10 @@ function Dashboard() {
     reader.onloadend = ({ target }) => {
       const csv = Papa.parse(target?.result, { header: true });
       setCsvData(csv?.data);
-      if(chainId !== undefined) {
-        if(round == 'seed') {
-          handleSeedRound();
-        } else if (round == 'private') {
+      if (chainId !== undefined) {
+        if (round == "seed") {
+          handleSeedRound(csv?.data);
+        } else if (round == "private") {
           handlePrivateRound();
         } else {
           console.log("ERROR: PLEASE SELECT A ROUND IN THE FORM");
@@ -56,15 +54,36 @@ function Dashboard() {
     };
     reader.readAsText(file);
   };
-  
-  const handleSeedRound  = () => {
-    if(csvData !== undefined) {
-      for (var _i=0;_i<csvData.length;_i++) {
-        //setBeneficiaries(csvData[_i]);
-        console.log("SEED ROUND");
-        setBeneficiaries(csvData[_i].beneficiaries);
-        console.log(beneficiaries);
-      }  
+
+  const handleSeedRound = (data: any) => {
+    if (data !== undefined) {
+      // array of beneficiaries
+      const beneficiariesArr = data.map(d => d.beneficiaries);
+      console.log("beneficiary ", beneficiariesArr);
+      const amountsArr = data.map(d => BigNumber.from(d.amounts).mul(BigNumber.from("10").pow("18")));
+      console.log("amounts ", amountsArr);
+      const nonVestingAmountsArr = amountsArr.map(x =>
+        BigNumber.from(x)
+          .mul(BigNumber.from(new BN(availableTge.toString()).multipliedBy("100").toString()))
+          .div("10000"),
+      );
+      console.log("nonVestingAmounts ", nonVestingAmountsArr);
+      const vestingAmountsArr = amountsArr.map((x, i) => BigNumber.from(x).sub(nonVestingAmountsArr[i]));
+      console.log("vestingAmounts ", vestingAmountsArr);
+      const nonVestingAmountTotal = nonVestingAmountsArr.reduce((pv, cv) => BigNumber.from(pv).add(BigNumber.from(cv)), 0);
+      console.log("nonVestingAmountTotal ", nonVestingAmountTotal);
+      const vestingAmountTotal = vestingAmountsArr.reduce((pv, cv) => BigNumber.from(pv).add(BigNumber.from(cv)), 0);
+      console.log("vestingAmountTotal ", vestingAmountTotal);
+      const durationArr = new Array(amountsArr.length).fill(BigNumber.from(duration),0,)
+      console.log("durationArr ",durationArr )
+      const slicesPerSecondsArr = new Array(amountsArr.length).fill(BigNumber.from("1"),0,)
+      console.log("slicesPerSecondsArr ",slicesPerSecondsArr )
+      const revocablesArr = new Array(amountsArr.length).fill(false,0,)
+      console.log("revocablesArr ",revocablesArr )
+      // 2. transfer total TGE token to timelock
+      // 3. call timelock.bulkDepositTokens
+      // 5. transfer total vesting tokens to vesting
+      // 6. call vesting.createVestingSchedule
     }
   };
 
@@ -72,21 +91,19 @@ function Dashboard() {
     console.log("PRIVATE ROUND");
   };
 
-
-  const handleChange = (e) => {
+  const handleChange = e => {
     setRound(e.target.value);
-  }
-  
-  const approveUser = (e) => {
+  };
+
+  const approveUser = e => {
     e.preventDefault();
     console.log("hello there");
   };
-  
+
   const dispCsvData = () => {
-    console.log("disp",csvData);
+    console.log("disp", csvData);
     //console.log("Disp", beneficiaries);
-  } 
- 
+  };
 
   return (
     <div>
@@ -125,40 +142,15 @@ function Dashboard() {
                               <button type="button" className="btn btn-danger btn-block" onClick={handleEndSale}>
                                 <small className="font-weight-bold">Stop</small>
                               </button>
-                              <button type="button" className="btn btn-success btn-block">
+                              {/* <button type="button" className="btn btn-success btn-block">
                                 <small className="font-weight-bold">Transfer Ownership</small>
                               </button>
                               <button type="button" className="btn btn-primary btn-block" onClick={dispCsvData}>
                                 <small className="font-weight-bold">Display CSV data</small>
-                              </button>
-                              
+                              </button> */}
                             </div>
                           </div>
-                          <div className="card-body inner-card">
-                          <div className="row justify-content-between text-left">
-                              <div className="form-group col-sm-6 flex-column d-flex">
-                                <label>
-                                <input 
-                                  type="radio" 
-                                  className="radioAlign" 
-                                  id="seed" 
-                                  name="rounds" 
-                                  value="seed" 
-                                  checked={round === "seed"}
-                                  onChange={(e) => handleChange(e)}/> Seed Round</label>
-                              </div>
-                              <div className="form-group col-sm-6 flex-column d-flex">
-                                <label>
-                                <input 
-                                  type="radio" 
-                                  className="radioAlign" 
-                                  id="private" 
-                                  name="rounds" 
-                                  value="private" 
-                                  checked={round === "private"}
-                                  onChange={(e) => handleChange(e)}/> Private Round</label>
-                              </div>
-                            </div>
+                          <div className="card-body inner-card ">
                             <div className="row justify-content-between text-left">
                               <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
@@ -174,7 +166,6 @@ function Dashboard() {
                                   value={availableTge}
                                   onChange={e => setAvailableTge(e.target.value)}
                                 />{" "}
-                                
                               </div>
                               <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
@@ -217,11 +208,42 @@ function Dashboard() {
                                 </div>
                               </div>
                             </div>
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                id="seed"
+                                value="seed"
+                                checked={round === "seed"}
+                                onChange={e => handleChange(e)}
+                              />
+                              <label className="form-check-label ms-3" htmlFor="seed">
+                                SEED Round
+                              </label>
+                            </div>
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                id="private"
+                                value="private"
+                                checked={round === "private"}
+                                onChange={e => handleChange(e)}
+                              />
+                              <label className="form-check-label  ms-3" htmlFor="private">
+                                Private Round
+                              </label>
+                            </div>
                             <div className="row justify-content-center">
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="row justify-content-end mb-5">
                                   <div className="col-lg-4 col-auto ">
-                                    <button type="button" className="btn btn-primary btn-block" onClick={e => handleUploadCSV(e)} disabled={uploading}>
+                                    <button
+                                      type="button"
+                                      className="btn btn-primary btn-block"
+                                      onClick={e => handleUploadCSV(e)}
+                                      disabled={uploading}
+                                    >
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}
                                   </div>
@@ -241,7 +263,7 @@ function Dashboard() {
       </div>
     </div>
   );
-};
+}
 
 Dashboard.propTypes = {};
 
