@@ -33,7 +33,8 @@ function Dashboard() {
 
   //web3
 
-  const handleUploadCSV = async () => {
+  const handleUploadCSV = async (e) => {
+    e.preventDefault();
     setUploading(true);
     const input = inputRef ? inputRef.current : 0;
     const reader = new FileReader();
@@ -41,6 +42,17 @@ function Dashboard() {
     reader.onloadend = ({ target }) => {
       const csv = Papa.parse(target?.result, { header: true });
       setCsvData(csv?.data);
+      if(chainId !== undefined) {
+        if(round == 'seed') {
+          handleSeedRound();
+        } else if (round == 'private') {
+          handlePrivateRound();
+        } else {
+          console.log("ERROR: PLEASE SELECT A ROUND IN THE FORM");
+        }
+      } else {
+        console.log("ERROR: PLEASE CONNECT TO WEB3");
+      }
     };
     reader.readAsText(file);
   };
@@ -49,31 +61,17 @@ function Dashboard() {
     if(csvData !== undefined) {
       for (var _i=0;_i<csvData.length;_i++) {
         //setBeneficiaries(csvData[_i]);
-        console.log("SEED");
+        console.log("SEED ROUND");
         setBeneficiaries(csvData[_i].beneficiaries);
+        console.log(beneficiaries);
       }  
     }
   };
 
   const handlePrivateRound = () => {
-    console.log("PRIVATE");
+    console.log("PRIVATE ROUND");
   };
 
-  function handleClick(e) {
-    e.preventDefault();
-    if(chainId !== undefined) {
-      handleUploadCSV();
-      if(round == 'seed') {
-        handleSeedRound();
-      } else if (round == 'private') {
-        handlePrivateRound();
-      } else {
-        console.log("ERROR: PLEASE SELECT A ROUND IN THE FORM");
-      }
-    } else {
-      console.log("ERROR: PLEASE CONNECT TO WEB3");
-    }
-  }
 
   const handleChange = (e) => {
     setRound(e.target.value);
@@ -128,7 +126,7 @@ function Dashboard() {
                                 <small className="font-weight-bold">Stop</small>
                               </button>
                               <button type="button" className="btn btn-success btn-block">
-                                <small className="font-weight-bold">Approve the user For admin</small>
+                                <small className="font-weight-bold">Transfer Ownership</small>
                               </button>
                               <button type="button" className="btn btn-primary btn-block" onClick={dispCsvData}>
                                 <small className="font-weight-bold">Display CSV data</small>
@@ -176,6 +174,7 @@ function Dashboard() {
                                   value={availableTge}
                                   onChange={e => setAvailableTge(e.target.value)}
                                 />{" "}
+                                
                               </div>
                               <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
@@ -222,10 +221,7 @@ function Dashboard() {
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="row justify-content-end mb-5">
                                   <div className="col-lg-4 col-auto ">
-                                  <button type="button" className="btn btn-primary btn-block" onClick={handleUploadCSV} disabled={uploading}>
-                                      <small className="font-weight-bold">Upload</small>
-                                    </button>{" "}
-                                    <button type="button" className="btn btn-primary btn-block" onClick={e => handleClick(e)}>
+                                    <button type="button" className="btn btn-primary btn-block" onClick={e => handleUploadCSV(e)} disabled={uploading}>
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}
                                   </div>
