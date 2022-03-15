@@ -3,6 +3,16 @@ import Papa from "papaparse";
 import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import {useStartSale, useEndSale, useCreateVestingSchedule} from "../hooks/useTokenPreSale";
+import {
+  useCreateVestingScheduleSeed, 
+  useCreateVestingSchedulePrivate, 
+  useTransferTokenPreVestingSeed, 
+  useTransferTokenPreVestingPrivate 
+} from "../hooks/useTokenPreVesting";
+import {
+  useTransferTokenPreTimelockSeed, 
+  useTransferTokenPreTimelockPrivate
+} from "../hooks/useTokenPreTimelock";
 
 function Dashboard() {
   const { account, chainId } = useWeb3React();
@@ -13,12 +23,11 @@ function Dashboard() {
   const [duration, setDuration] = React.useState<string>();
   const [round, setRound] = React.useState<string>();
   const [csvData, setCsvData] = React.useState<[]>();
-  const [beneficiaries, setBeneficiaries] = React.useState<[0]>();
+  const [beneficiaries, setBeneficiaries] = React.useState<["foo"]>();
   const desiredChainId:number = 97; //chain id for bsc testnet
   //start and end sale
   const handleStartSale = useStartSale(chainId == undefined ? desiredChainId : chainId as number);
   const handleEndSale = useEndSale(chainId == undefined ? desiredChainId : chainId as number);
-  var beneficiary:string;
 
   // const { data: endSaleStatus } = useStartSale(chainId == undefined ? 56 : chainId);
 
@@ -40,16 +49,29 @@ function Dashboard() {
     if(csvData !== undefined) {
       for (var _i=0;_i<csvData.length;_i++) {
         //setBeneficiaries(csvData[_i]);
+        console.log("SEED");
         setBeneficiaries(csvData[_i].beneficiaries);
       }  
     }
+  };
+
+  const handlePrivateRound = () => {
+    console.log("PRIVATE");
   };
 
   function handleClick(e) {
     e.preventDefault();
     if(chainId !== undefined) {
       handleUploadCSV();
-      handleSeedRound();
+      if(round == 'seed') {
+        handleSeedRound();
+      } else if (round == 'private') {
+        handlePrivateRound();
+      } else {
+        console.log("ERROR: PLEASE SELECT A ROUND IN THE FORM");
+      }
+    } else {
+      console.log("ERROR: PLEASE CONNECT TO WEB3");
     }
   }
 
@@ -63,8 +85,8 @@ function Dashboard() {
   };
   
   const dispCsvData = () => {
-   // console.log("disp",csvData);
-    console.log("Disp", beneficiaries);
+    console.log("disp",csvData);
+    //console.log("Disp", beneficiaries);
   } 
  
 

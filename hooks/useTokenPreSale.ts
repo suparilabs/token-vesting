@@ -26,13 +26,12 @@ export function useCreateVestingSchedule(
   chainId: number,
   beneficiaries: string[],
   durations: number,
-  revocables: boolean[],
   amounts: number[],
 ): any {
   const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
   for (var _i = 0; _i < beneficiaries.length; _i++) {
     return async () => {
-      return (contract as Contract).createVestingSchedule(beneficiaries, durations, 1, revocables, amounts);
+      return (contract as Contract).createVestingSchedule(beneficiaries, durations, 1, "false", amounts);
     };
   }
 }

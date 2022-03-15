@@ -7,12 +7,6 @@ import { TokenPreVesting__factory, ERC20__factory } from "../src/types";
 import { DataType } from "../utils";
 import { useContract } from "./useContract";
 
-export function useSeedPreVesting(chainId: number): any {
-  const contract = useContract(addresses[chainId as number].SEED_PRE_VESTING, TokenPreVesting__factory.abi, true);
-  return async () => {
-    return (contract as Contract).setSaleStatus("1");
-  };
-}
 //SEED ROUND
 //creating vesting schedule from dashboard page -- bulk
 export function useCreateVestingScheduleSeed(
@@ -36,7 +30,6 @@ export function useCreateVestingSchedulePrivate(
   chainId: number,
   beneficiaries: string[],
   durations: number,
-  revocables: boolean[],
   amounts: number[],
 ): any {
   const contract = useContract(
@@ -46,23 +39,7 @@ export function useCreateVestingSchedulePrivate(
   );
   for (var _i = 0; _i < beneficiaries.length; _i++) {
     return async () => {
-      return (contract as Contract).createVestingSchedule(beneficiaries, durations, 1, revocables, amounts);
-    };
-  }
-}
-
-//SEED ROUND
-export function useTransferTokensSeedPreVesting(
-  chainId: number,
-  beneficiaries: string[],
-  durations: number,
-  revocables: boolean[],
-  amounts: number[],
-): any {
-  const contract = useContract(addresses[chainId as number].PRIVATE_SALE_PRE_VESTING, ERC20__factory.abi, true);
-  for (var _i = 0; _i < beneficiaries.length; _i++) {
-    return async () => {
-      return (contract as Contract).createVestingSchedule(beneficiaries, durations, 1, revocables, amounts);
+      return (contract as Contract).createVestingSchedule(beneficiaries, durations, 1, "false", amounts);
     };
   }
 }
