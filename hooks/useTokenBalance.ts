@@ -2,10 +2,9 @@ import useSWR, { SWRResponse } from "swr";
 import { ChainId, Token, TokenAmount } from "@uniswap/sdk";
 import { Contract } from "ethers";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
-import { addresses } from "../constants";
+import { addresses, desiredChain } from "../constants";
 import { useContract } from "./useContract";
 import { DataType } from "../utils";
-import { useWeb3React } from "@web3-react/core";
 import { ERC20__factory } from "../src/types";
 
 function getTokenBalance(contract: Contract, token: Token): (address: string) => Promise<TokenAmount> {
@@ -16,7 +15,7 @@ function getTokenBalance(contract: Contract, token: Token): (address: string) =>
 }
 
 export function useTokenBalance(
-  chainId: number = 56,
+  chainId: number = desiredChain.chainId,
   address?: string | null,
   token?: string | null,
   suspense = false,

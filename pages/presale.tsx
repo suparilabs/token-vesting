@@ -14,6 +14,7 @@ import {
 } from "../hooks/useTokenSale";
 import { useTokenBalance } from "../hooks/useTokenBalance";
 import { useETHBalance } from "../hooks/useETHBalance";
+import { desiredChain } from "../constants";
 
 const options: Highcharts.Options = {
   chart: {
@@ -130,11 +131,11 @@ function PresaleModal(props) {
   ); // send amount from user
   const buyTokensWithBusd = useBuyTokensWithBusd(
     busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")),
-    props.chainId !== undefined ? props.chainId : 56,
+    props.chainId !== undefined ? props.chainId : desiredChain.chainId,
   );
   const buyTokensWithUsdt = useBuyTokensWithUsdt(
     usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")),
-    props.chainId !== undefined ? props.chainId : 56,
+    props.chainId !== undefined ? props.chainId : desiredChain.chainId,
   );
   const handleBuyTokenUsingBusd = async amount => {
     try {
@@ -254,8 +255,8 @@ function Presale(): JSX.Element {
   const [checkoutShow, setCheckoutShow] = React.useState<boolean>(false);
   const [modalShow, setModalShow] = React.useState(false);
   const { account, chainId } = useWeb3React();
-  const { data: busd } = useBUSD(chainId == undefined ? 56 : (chainId as number));
-  const { data: usdt } = useUSDT(chainId == undefined ? 56 : (chainId as number));
+  const { data: busd } = useBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: usdt } = useUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: busdBalance } = useTokenBalance(chainId as number, account, busd as string);
   const { data: usdtBalance } = useTokenBalance(chainId as number, account, usdt as string);
   const { data: ethBalance } = useETHBalance(account);

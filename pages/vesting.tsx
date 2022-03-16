@@ -12,11 +12,12 @@ import {
 import ClaimToken from "../components/ClaimToken";
 import IdoRound from "../components/IdoRound";
 import SeedRound from "../components/SeedRound";
+import { desiredChain } from "../constants";
 
 function Vesting(): JSX.Element {
   const [claimButtonDisable, setClaimButtonDisable] = useState<boolean>(false);
   const { account, chainId } = useWeb3React();
-  const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
+  const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? desiredChain.chainId : chainId);
   const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress, account as string);
   const { data: vestingScheduleId } = useComputeVestingScheduleIdForAddressAndIndex(
     account as string,

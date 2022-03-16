@@ -14,6 +14,7 @@ import {
   import { BigNumber } from "ethers";
   import { secondsToDhms } from "../utils";
   import BN from "bignumber.js";
+import { desiredChain } from "../constants";
 
   
 const IdoRound = props => {
@@ -22,14 +23,14 @@ const IdoRound = props => {
     // Account 
     const triedToEagerConnect = useEagerConnect();
     // Setting up variables to fetch details from hooks
-    const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
+    const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? desiredChain.chainId : chainId);
     const vestingSchedule = useVestingScheduleByAddressAndIndex(account as string, vestingContractAddress, props.vestingScheduleIndex);
     const { data: vestingScheduleId } = useComputeVestingScheduleIdForAddressAndIndex(
         account as string,
         vestingContractAddress,
         props.vestingScheduleIndex,
       );
-    const { data: tge } = useAvailableAtTGE(chainId == undefined ? 56 : (chainId as number));
+    const { data: tge } = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
     const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
     const unlocked = vestingSchedule !== undefined && releasableAmount
     ? parseFloat(

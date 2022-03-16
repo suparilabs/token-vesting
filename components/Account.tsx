@@ -2,6 +2,7 @@ import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
 import { injected } from "../connectors";
+import { desiredChain } from "../constants";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { formatEtherscanLink, shortenHex } from "../utils";
@@ -41,7 +42,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   const handleConnect = async() => {
-    setDesiredChainId(97); //setting desired chain id
+    setDesiredChainId(desiredChain.chainId); //setting desired chain id
     setConnecting(true);
     await enableMetamask();
     activate(injected, undefined, true).catch(error => {
