@@ -10,27 +10,48 @@ import {
   useTransferTokenPreVestingSeed,
   useTransferTokenPreVestingPrivate,
 } from "../hooks/useTokenPreVesting";
-import { useTransferTokenPreTimelockSeed, useTransferTokenPreTimelockPrivate } from "../hooks/useTokenPreTimelock";
+import { 
+  useTransferTokenPreTimelockSeed, 
+  useTransferTokenPreTimelockPrivate, 
+  useBulkDepositTokensSeed, 
+  useBulkDepositTokensPrivate
+ } from "../hooks/useTokenPreTimelock";
 
 function Dashboard() {
   const { account, chainId } = useWeb3React();
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<any>();
+  const desiredChainId: number = 97; //chain id for bsc testnet
   const [availableTge, setAvailableTge] = React.useState<string>("0");
   const [cliffPeriod, setCliffPeriod] = React.useState<string>();
   const [duration, setDuration] = React.useState<string>("0");
   const [round, setRound] = React.useState<string>();
-  const [csvData, setCsvData] = React.useState<[]>();
-  const [beneficiaries, setBeneficiaries] = React.useState<["foo"]>();
-  const desiredChainId: number = 97; //chain id for bsc testnet
+  //hooks for seed round
+  const [beneficiaries, setBeneficiaries] = React.useState<any>([]);
+  const [totalNonVestingAmt, setTotalNonVestingAmt] = React.useState<string>("");
+  
+  const [totalVestingAmt, setTotalVestingAmt] = React.useState<any>();
+  const [amt, setAmt] = React.useState<any>([]);
+  const [nonVestingAmt, setNonVestingAmt] = React.useState<any>();
+  const [vestingAmt, setVestingAmt] = React.useState<any>([]);
+  const [durations, setDurations] = React.useState<any>([]);
+  const [revocables, setRevocables] = React.useState<any>([]);
+  const [slice, setSlice] = React.useState<any>([]);
   //start and end sale
   const handleStartSale = useStartSale(chainId == undefined ? desiredChainId : (chainId as number));
   const handleEndSale = useEndSale(chainId == undefined ? desiredChainId : (chainId as number));
-
-  // const { data: endSaleStatus } = useStartSale(chainId == undefined ? 56 : chainId);
-
+  //FOR SEED ROUND 
+  const preTimelockSeed = useTransferTokenPreTimelockSeed(totalNonVestingAmt == "" ? BigNumber.from("0") : BigNumber.from(totalNonVestingAmt), chainId == undefined ? 97 : chainId);
+  const preVestingSeed = useTransferTokenPreVestingSeed(totalVestingAmt == undefined ? BigNumber.from("0") : totalVestingAmt, chainId == undefined ? 97 : chainId);
+  const createVestingScheduleSeed = useCreateVestingScheduleSeed(chainId == undefined ? 97 : chainId, beneficiaries, durations, revocables, amt);
+  const createBulkDepositSeed = useBulkDepositTokensSeed(beneficiaries, amt, chainId == undefined ? 97 : chainId);
+  //FOR PRIVATE ROUND
+  const preTimelockPrivate = useTransferTokenPreTimelockPrivate(totalNonVestingAmt == "" ? BigNumber.from("0") : BigNumber.from(totalNonVestingAmt), chainId == undefined ? 97 : chainId);
+  const preVestingPrivate = useTransferTokenPreVestingPrivate(totalVestingAmt == undefined ? BigNumber.from("0") : totalVestingAmt, chainId == undefined ? 97 : chainId);
+  const createVestingSchedulePrivate = useCreateVestingSchedulePrivate(chainId == undefined ? 97 : chainId, beneficiaries, durations, revocables, amt);
+  const createBulkDepositPrivate = useBulkDepositTokensPrivate(beneficiaries, amt, chainId == undefined ? 97 : chainId);
+  
   //web3
-
   const handleUploadCSV = async e => {
     e.preventDefault();
     setUploading(true);
@@ -39,70 +60,94 @@ function Dashboard() {
     const [file]: any = input && input.files;
     reader.onloadend = ({ target }) => {
       const csv = Papa.parse(target?.result, { header: true });
-      setCsvData(csv?.data);
       if (chainId !== undefined) {
-        if (round == "seed") {
-          handleSeedRound(csv?.data);
-        } else if (round == "private") {
-          handlePrivateRound();
-        } else {
-          console.log("ERROR: PLEASE SELECT A ROUND IN THE FORM");
-        }
+        console.log(csv?.data)
+        handleRounds(csv?.data);
       } else {
-        console.log("ERROR: PLEASE CONNECT TO WEB3");
+        console.log("Please connect to web3");
       }
     };
     reader.readAsText(file);
   };
 
-  const handleSeedRound = (data: any) => {
-    if (data !== undefined) {
-      // array of beneficiaries
-      const beneficiariesArr = data.map(d => d.beneficiaries);
-      console.log("beneficiary ", beneficiariesArr);
-      const amountsArr = data.map(d => BigNumber.from(d.amounts).mul(BigNumber.from("10").pow("18")));
-      console.log("amounts ", amountsArr);
-      const nonVestingAmountsArr = amountsArr.map(x =>
-        BigNumber.from(x)
-          .mul(BigNumber.from(new BN(availableTge.toString()).multipliedBy("100").toString()))
-          .div("10000"),
-      );
-      console.log("nonVestingAmounts ", nonVestingAmountsArr);
-      const vestingAmountsArr = amountsArr.map((x, i) => BigNumber.from(x).sub(nonVestingAmountsArr[i]));
-      console.log("vestingAmounts ", vestingAmountsArr);
-      const nonVestingAmountTotal = nonVestingAmountsArr.reduce((pv, cv) => BigNumber.from(pv).add(BigNumber.from(cv)), 0);
-      console.log("nonVestingAmountTotal ", nonVestingAmountTotal);
-      const vestingAmountTotal = vestingAmountsArr.reduce((pv, cv) => BigNumber.from(pv).add(BigNumber.from(cv)), 0);
-      console.log("vestingAmountTotal ", vestingAmountTotal);
-      const durationArr = new Array(amountsArr.length).fill(BigNumber.from(duration),0,)
-      console.log("durationArr ",durationArr )
-      const slicesPerSecondsArr = new Array(amountsArr.length).fill(BigNumber.from("1"),0,)
-      console.log("slicesPerSecondsArr ",slicesPerSecondsArr )
-      const revocablesArr = new Array(amountsArr.length).fill(false,0,)
-      console.log("revocablesArr ",revocablesArr )
-      // 2. transfer total TGE token to timelock
-      // 3. call timelock.bulkDepositTokens
-      // 5. transfer total vesting tokens to vesting
-      // 6. call vesting.createVestingSchedule
-    }
+  const handleRounds = (data: any) => {
+    if(chainId !== undefined) {
+      if (data !== undefined) {
+        // array of beneficiaries
+        const beneficiariesArr = Object.values(data.map(d => d.beneficiary));
+        console.log(typeof(beneficiariesArr));
+        console.log("79",beneficiariesArr);
+
+        setBeneficiaries(beneficiariesArr);
+
+        const amountsArr = Object.values(data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow("18"))));
+        setAmt(amountsArr);
+
+        const nonVestingAmountsArr = Object.values(amountsArr.map(x =>
+          BigNumber.from(x)
+            .mul(BigNumber.from(new BN(availableTge.toString()).multipliedBy("100").toString()))
+            .div("10000"),
+        ));
+        setNonVestingAmt(nonVestingAmountsArr);
+
+        const vestingAmountsArr = Object.values(amountsArr.map((x, i) => BigNumber.from(x).sub(nonVestingAmountsArr[i])));
+        setVestingAmt(vestingAmountsArr);
+
+        let nonVestingAmountTotal:BigNumber=BigNumber.from(0);
+        let vestingAmountTotal:BigNumber=BigNumber.from(0);
+        for(let i=0;i<vestingAmountsArr.length;i++) {
+            nonVestingAmountTotal.add(nonVestingAmountsArr[i]);
+            vestingAmountTotal.add(vestingAmountsArr[i]);
+        }
+        // const nonVestingAmountTotal = nonVestingAmountsArr.reduce((pv, cv) => BigNumber.from(pv).add(BigNumber.from(cv)), 0);
+         setTotalNonVestingAmt(nonVestingAmountTotal.toString());
+        
+        // const vestingAmountTotal = vestingAmountsArr.reduce((pv, cv) => BigNumber.from(pv).add(BigNumber.from(cv)), 0);
+         setTotalVestingAmt(vestingAmountTotal.toString());
+
+        const durationArr = new Array(amountsArr.length).fill(BigNumber.from(duration),0,);
+        setDurations(durationArr);
+        
+        const slicesPerSecondsArr = new Array(amountsArr.length).fill(BigNumber.from("1"),0,)
+        setSlice(slicesPerSecondsArr);
+
+        const revocablesArr = new Array(amountsArr.length).fill(false,0,)
+        setRevocables(revocablesArr);
+
+        if(round == 'seed'){
+          handleSeedRound();
+        } else if (round == 'private'){
+          handlePrivateRound();
+        } else {
+          console.log("ERROR: PLEASE SELECT A ROUND IN THE FORM");
+        }
+  
+      }
+    }      
   };
 
+  const handleSeedRound = async () => {
+    if(chainId !== undefined) {
+      console.log("state", beneficiaries);
+      console.log("132",totalNonVestingAmt);
+      await preTimelockSeed();
+      // createBulkDepositSeed();
+      // preVestingSeed();
+      //createVestingScheduleSeed(); 
+    }
+  };
   const handlePrivateRound = () => {
-    console.log("PRIVATE ROUND");
+    if(chainId !== undefined) {
+      console.log("state", beneficiaries);
+      preTimelockPrivate();
+      createBulkDepositPrivate();
+      preVestingPrivate();
+      createVestingSchedulePrivate();
+    }
   };
 
   const handleChange = e => {
     setRound(e.target.value);
-  };
-
-  const approveUser = e => {
-    e.preventDefault();
-    console.log("hello there");
-  };
-
-  const dispCsvData = () => {
-    console.log("disp", csvData);
-    //console.log("Disp", beneficiaries);
   };
 
   return (

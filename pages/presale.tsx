@@ -113,7 +113,6 @@ function PresaleModal(props) {
   const [checkoutShow] = React.useState<boolean>(false);
   const [mining, setMining] = React.useState<boolean>(false);
   const [txStatusMessage, setTxStatusMessage] = React.useState<string>("");
-
   const [busdAmount, setBusdAmount] = React.useState<string>("");
   const [usdtAmount, setUsdtAmount] = React.useState<string>("");
   const { data: busdAllowance } = useTokenAllowance(props.account as string, props.busd); //check allowance

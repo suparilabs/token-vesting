@@ -30,6 +30,7 @@ export function useCreateVestingSchedulePrivate(
   chainId: number,
   beneficiaries: string[],
   durations: number,
+  revocables: boolean[],
   amounts: number[],
 ): any {
   const contract = useContract(
@@ -45,7 +46,8 @@ export function useCreateVestingSchedulePrivate(
 }
 
 //transferring sera tokens to seed round => pre vesting contract
-export function useTransferTokenPreVestingSeed(token: string, amount: BigNumber, chainId: number): any {
+export function useTransferTokenPreVestingSeed(amount: BigNumber, chainId: number): any {
+  const token = addresses[chainId as number].ERC20_TOKEN_ADDRESS;
   const contract = useContract(token, ERC20__factory.abi, true);
   return async () => {
     return (contract as Contract)
@@ -55,7 +57,8 @@ export function useTransferTokenPreVestingSeed(token: string, amount: BigNumber,
 }
 
 //transferring sera tokens to seed round => private sale contract
-export function useTransferTokenPreVestingPrivate(token: string, amount: BigNumber, chainId: number): any {
+export function useTransferTokenPreVestingPrivate(amount: BigNumber, chainId: number): any {
+  const token = addresses[chainId as number].ERC20_TOKEN_ADDRESS;
   const contract = useContract(token, ERC20__factory.abi, true);
   return async () => {
     return (contract as Contract)
