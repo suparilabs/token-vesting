@@ -5,8 +5,8 @@ import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { formatEtherscanLink, shortenHex } from "../utils";
-import { useTokenBalance } from "../hooks/useTokenBalance";
-import { TokenAmount } from "@uniswap/sdk";
+// import { useTokenBalance } from "../hooks/useTokenBalance";
+// import { TokenAmount } from "@uniswap/sdk";
 
 type AccountProps = {
   triedToEagerConnect: boolean;
@@ -16,12 +16,11 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
   const { isMetaMaskInstalled, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
   const [ desiredChainId, setDesiredChainId ] = useState<number>();
-  const [ bal, setBal ] = useState<number>();
+  // const [ bal, setBal ] = useState<number>();
   
 
   // const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
   
-  console.log("chain ID:", chainId);
   // 
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);

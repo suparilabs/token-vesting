@@ -61,3 +61,8 @@ export const addresses: SaleAddressType = {
   //   // TOKEN_SALE_ADDRESS: TypedTokenSaleBsc.address,
   // },
 };
+
+export const desiredChain = {
+  chainId: 97,
+  network: "bsctestnet",
+};

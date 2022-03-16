@@ -139,4 +139,5 @@ function Vesting(): JSX.Element {
   );
 }
 
+Vesting.propTypes = {};
 export default Vesting;

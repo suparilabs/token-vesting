@@ -408,4 +408,5 @@ function Presale(): JSX.Element {
   );
 }
 
+Presale.propTypes = {};
 export default Presale;
