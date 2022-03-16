@@ -15,7 +15,6 @@ function Dashboard():JSX.Element {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<any>();
   const [availableTge, setAvailableTge] = React.useState<string>("0");
-  const [cliffPeriod, setCliffPeriod] = React.useState<string>();
   const [duration, setDuration] = React.useState<string>("0");
   const [round, setRound] = React.useState<string>();
   //hooks for seed round
@@ -141,7 +140,7 @@ function Dashboard():JSX.Element {
 
     // create bulk deposit transaction
     const bulkDepositForSeedTx = await createBulkDepositForSeed();
-    await notifyBulkDepositTokens(bulkDepositForSeedTx, "Seed");
+    await notifyBulkDepositTokens(bulkDepositForSeedTx.wait(1), "Seed");
 
     // transfer tokens to pre vesting
     const sendTokenToPreVestingForSeedTX = await sendTokenToPreVestingForSeed();
@@ -159,7 +158,7 @@ function Dashboard():JSX.Element {
 
     // create bulk deposit transaction
     const bulkDepositForPrivateSaleTx = await createBulkDepositForPrivateSale();
-    await notifyBulkDepositTokens(bulkDepositForPrivateSaleTx, "PrivateSale");
+    await notifyBulkDepositTokens(bulkDepositForPrivateSaleTx.wait(1), "PrivateSale");
 
     // transfer tokens to pre vesting
     const sendTokenToPreVestingForPrivateSaleTX = await sendTokenToPreVestingForPrivateSale();
@@ -276,8 +275,8 @@ function Dashboard():JSX.Element {
                               <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
                                 <label className="form-control-label px-3">
-                                  Available on tge
-                                  <span className="text-danger"> *</span>
+                                  Available on tge 
+                                  <span className="text-danger"> *(in %)</span>
                                 </label>{" "}
                                 <input
                                   type="number"
@@ -291,23 +290,7 @@ function Dashboard():JSX.Element {
                               <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
                                 <label className="form-control-label px-3">
-                                  Cliff period<span className="text-danger"> *</span>
-                                </label>
-                                <input
-                                  type="number"
-                                  id="Cliffperiod"
-                                  name="Cliffperiod"
-                                  placeholder="Cliff period"
-                                  value={cliffPeriod}
-                                  onChange={e => setCliffPeriod(e.target.value)}
-                                />{" "}
-                              </div>
-                            </div>
-                            <div className="row justify-content-center text-left">
-                              <div className="form-group col-sm-6 flex-column d-flex">
-                                {" "}
-                                <label className="form-control-label px-3">
-                                  Duration<span className="text-danger"> *</span>
+                                  Duration<span className="text-danger"> *(in seconds)</span>
                                 </label>
                                 <input
                                   type="number"
@@ -318,11 +301,41 @@ function Dashboard():JSX.Element {
                                   onChange={e => setDuration(e.target.value)}
                                 />{" "}
                               </div>
+                              {/* <div className="form-group col-sm-6 flex-column d-flex">
+                                {" "}
+                                <label className="form-control-label px-3">
+                                  Cliff period<span className="text-danger"> *</span>
+                                </label>
+                                <input
+                                  type="number"
+                                  id="Cliffperiod"
+                                  name="Cliffperiod"
+                                  placeholder="Cliff period"
+                                  value={cliffPeriod}
+                                  onChange={e => setCliffPeriod(e.target.value)}
+                                />{" "}
+                              </div> */}
                             </div>
+                            {/* <div className="row justify-content-center text-left"> */}
+                              {/* <div className="form-group col-sm-6 flex-column d-flex">
+                                {" "}
+                                <label className="form-control-label px-3">
+                                  Duration<span className="text-danger"> *(in seconds)</span>
+                                </label>
+                                <input
+                                  type="number"
+                                  id="Duration"
+                                  name="Duration"
+                                  placeholder="Duration"
+                                  value={duration}
+                                  onChange={e => setDuration(e.target.value)}
+                                />{" "}
+                              </div> */}
+                            {/* </div> */}
                             <div className="row justify-content-center">
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="form-group files">
-                                  <label className="my-auto">Upload private sale or seed round manually </label>{" "}
+                                  <label className="my-auto">Upload private sale or seed round csv file </label>{" "}
                                   <div>
                                     <input
                                       ref={inputRef}
