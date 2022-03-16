@@ -8,6 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
   const chainId = await hre.getChainId();
   const token = await hre.deployments.get("Token");
+  const artifact = await deployments.getArtifact("TokenPreSale");
   let tokenAddress = token.address;
   if (chainId == "56") {
     if (process.env.ENV == "prod") {
@@ -44,8 +45,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     usdtAddress = coinAddress.USDT[chainId];
     busdAddress = coinAddress.BUSD[chainId];
   }
-  await deploy("TokenSale", {
+  await deploy("IDOTokenPreSale", {
     from: deployer,
+    contract: {
+      abi: artifact.abi,
+      bytecode: artifact.bytecode,
+      deployedBytecode: artifact.deployedBytecode,
+    },
     args: [tokenAddress, usdtAddress, busdAddress],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
@@ -69,4 +75,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // }
 };
 export default func;
-func.tags = ["TokenSale"];
+func.tags = ["IDO"];

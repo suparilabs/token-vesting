@@ -10,11 +10,14 @@ import {
   useVestingScheduleCountBeneficiary,
 } from "../hooks/useVesting";
 import ClaimToken from "../components/ClaimToken";
+import IdoRound from "../components/IdoRound";
+import SeedRound from "../components/SeedRound";
+import { desiredChain } from "../constants";
 
 function Vesting(): JSX.Element {
   const [claimButtonDisable, setClaimButtonDisable] = useState<boolean>(false);
   const { account, chainId } = useWeb3React();
-  const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? 56 : chainId);
+  const { data: vestingContractAddress } = useVestingContractAddress(chainId == undefined ? desiredChain.chainId : chainId);
   const { data: vestingScheduleCount } = useVestingScheduleCountBeneficiary(vestingContractAddress, account as string);
   const { data: vestingScheduleId } = useComputeVestingScheduleIdForAddressAndIndex(
     account as string,
@@ -71,7 +74,24 @@ function Vesting(): JSX.Element {
                 <div className="row">
                   {/* <div className="col-md-4">
         </div> */}
-                  <div className="col-md-4"></div>
+                  <div className="col-md-4">
+                  <div className="card p-3 mb-2">
+                      <div className="heading newhead">
+                        <h2 className="title">Seed Round Tokens</h2>
+                      </div>
+                      {Array.from(Array(vestingScheduleCount as number), (_, _index) => _index).map(
+                        _vestingScheduleIndex => {
+                          return (
+                            <SeedRound
+                              key={_vestingScheduleIndex}
+                              claim={e => handleClaim(e)}
+                              vestingScheduleIndex={_vestingScheduleIndex}
+                            />
+                          );
+                        },
+                      )}
+                    </div>
+                  </div>
                   {/* SECTION FOR DISPLAYING SERA TOKEN VESTING INFORMATION */}
                   <div className="col-md-4">
                     <div className="card p-3 mb-2">
@@ -91,6 +111,25 @@ function Vesting(): JSX.Element {
                       )}
                     </div>
                   </div>
+                  <div className="col-md-4">
+                    <div className="card p-3 mb-2">
+                      <div className="heading newhead">
+                        <h2 className="title">IDO Round Tokens</h2>
+                      </div>
+                      {Array.from(Array(vestingScheduleCount as number), (_, _index) => _index).map(
+                        _vestingScheduleIndex => {
+                          return (
+                            <IdoRound
+                              key={_vestingScheduleIndex}
+                              claim={e => handleClaim(e)}
+                              vestingScheduleIndex={_vestingScheduleIndex}
+                            />
+                          );
+                        },
+                      )}
+                    </div>
+                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -101,4 +140,5 @@ function Vesting(): JSX.Element {
   );
 }
 
+Vesting.propTypes = {};
 export default Vesting;

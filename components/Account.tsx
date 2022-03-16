@@ -2,9 +2,12 @@ import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
 import { injected } from "../connectors";
+import { desiredChain } from "../constants";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { formatEtherscanLink, shortenHex } from "../utils";
+// import { useTokenBalance } from "../hooks/useTokenBalance";
+// import { TokenAmount } from "@uniswap/sdk";
 
 type AccountProps = {
   triedToEagerConnect: boolean;
@@ -13,7 +16,13 @@ type AccountProps = {
 const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, chainId, account, setError } = useWeb3React();
   const { isMetaMaskInstalled, startOnboarding, stopOnboarding } = useMetaMaskOnboarding();
+  const [ desiredChainId, setDesiredChainId ] = useState<number>();
+  // const [ bal, setBal ] = useState<number>();
+  
 
+  // const { data: balance } = useTokenBalance(chainId !== undefined ? (chainId as number) : 56, account as string, null);
+  
+  // 
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
   useEffect(() => {
@@ -33,6 +42,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
   }
 
   const handleConnect = async() => {
+    setDesiredChainId(desiredChain.chainId); //setting desired chain id
     setConnecting(true);
     await enableMetamask();
     activate(injected, undefined, true).catch(error => {
@@ -45,14 +55,13 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
     });
   }
 
-
   const enableMetamask = async () => {
     if(window.ethereum?.isMetaMask){
-      if(chainId != 97) {
+      if(chainId != desiredChainId) {
         try {
           await (window as any).ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x61' }],
+            params: [{ chainId: '0x61' }], // binance testnet chain id (in hexadecimal)
           });
         } catch (switchError:any) {
           // This error code indicates that the chain has not been added to MetaMask.
@@ -84,13 +93,11 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         </div>
       );
     }
-    
-
   }
-  if (typeof account !== "string") {
+  if (typeof account !== "string" && account == undefined || chainId != desiredChainId) {
     return (
       <div>
-        {isMetaMaskInstalled ? (
+        { isMetaMaskInstalled ? (
               <button className="btn btn-green btn-launch-app"  disabled={connecting} onClick={() => handleConnect()}>
                 Connect 
                 <span><i className="bi bi-app-indicator"></i></span>
@@ -102,8 +109,12 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
       </div>
     );
   }
+  
 
   return (
+    <>
+    
+    <span className="tokenAmt">
     <a
       {...{
         href: formatEtherscanLink("Account", [chainId as number, account]),
@@ -112,8 +123,11 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         className: "tokenAmt",
       }}
     >
-      {ENSName || `${shortenHex(account, 4)}`}
+      {ENSName || `${shortenHex(account, 4)}`} &nbsp; 
+      {/* {account != undefined && balance != undefined && (balance as TokenAmount).toSignificant(4, { groupSeparator: "," })} SERA */}
     </a>
+    </span>
+    </>
   );
 };
 

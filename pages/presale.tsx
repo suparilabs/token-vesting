@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import Countdown from "react-countdown";
 import { Modal, Button, Form } from "react-bootstrap";
 import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
@@ -15,6 +14,7 @@ import {
 } from "../hooks/useTokenSale";
 import { useTokenBalance } from "../hooks/useTokenBalance";
 import { useETHBalance } from "../hooks/useETHBalance";
+import { desiredChain } from "../constants";
 
 const options: Highcharts.Options = {
   chart: {
@@ -114,7 +114,6 @@ function PresaleModal(props) {
   const [checkoutShow] = React.useState<boolean>(false);
   const [mining, setMining] = React.useState<boolean>(false);
   const [txStatusMessage, setTxStatusMessage] = React.useState<string>("");
-
   const [busdAmount, setBusdAmount] = React.useState<string>("");
   const [usdtAmount, setUsdtAmount] = React.useState<string>("");
   const { data: busdAllowance } = useTokenAllowance(props.account as string, props.busd); //check allowance
@@ -132,11 +131,11 @@ function PresaleModal(props) {
   ); // send amount from user
   const buyTokensWithBusd = useBuyTokensWithBusd(
     busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")),
-    props.chainId !== undefined ? props.chainId : 56,
+    props.chainId !== undefined ? props.chainId : desiredChain.chainId,
   );
   const buyTokensWithUsdt = useBuyTokensWithUsdt(
     usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")),
-    props.chainId !== undefined ? props.chainId : 56,
+    props.chainId !== undefined ? props.chainId : desiredChain.chainId,
   );
   const handleBuyTokenUsingBusd = async amount => {
     try {
@@ -255,18 +254,19 @@ function Presale(): JSX.Element {
   const [checked, setChecked] = React.useState<boolean>(false);
   const [checkoutShow, setCheckoutShow] = React.useState<boolean>(false);
   const [modalShow, setModalShow] = React.useState(false);
-
   const { account, chainId } = useWeb3React();
-  const { data: busd } = useBUSD(chainId == undefined ? 56 : (chainId as number));
-  const { data: usdt } = useUSDT(chainId == undefined ? 56 : (chainId as number));
+  const { data: busd } = useBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: usdt } = useUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: busdBalance } = useTokenBalance(chainId as number, account, busd as string);
   const { data: usdtBalance } = useTokenBalance(chainId as number, account, usdt as string);
   const { data: ethBalance } = useETHBalance(account);
   const [enoughBusd, setEnoughBusd] = React.useState<boolean>(false);
   const [enoughUsdt, setEnoughUsdt] = React.useState<boolean>(false);
   const [enoughEth, setEnoughEth] = React.useState<boolean>(false);
+  const [timer, setTimer] = React.useState<string>();
 
   useEffect(() => {
+    handleTimer();
     busdBalance !== undefined && setEnoughBusd(busdBalance.equalTo("1000") || busdBalance.greaterThan("1000"));
     usdtBalance !== undefined && setEnoughUsdt(usdtBalance.equalTo("1000") || usdtBalance.greaterThan("1000"));
     ethBalance !== undefined && setEnoughEth(ethBalance.greaterThan("0"));
@@ -281,6 +281,26 @@ function Presale(): JSX.Element {
     }
   }
 
+  function handleTimer() {
+    const countDownTimer = () => {
+      const difference = +new Date("2022-03-11") - +new Date();
+      let remaining = "Time's up!";
+      if (difference > 0) {
+        const parts = {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        };
+        remaining = Object.keys(parts).map(part => {
+          return `${parts[part]}`;
+        }).join(" : ");
+      }
+      setTimer(remaining);
+    }
+    setInterval(countDownTimer, 1000);
+  }
+ 
   return (
     <div>
       {/* <!-- Start Page --> */}
@@ -355,8 +375,10 @@ function Presale(): JSX.Element {
                   <h2 className="titlenew">We will be live in</h2>
                   <h2 className="titlespanbuynot2"> We are live Now !</h2>
                   <div className="titleCountDown">
-                    <Countdown date={Date.now() + 5000000000} className="countdown" />
+                    <h2 className="countdown">{timer}</h2>
                   </div>
+                  {/* <Button variant="primary" onClick={e => handleTimer(e)}></Button> */}
+                  {/* <div onLoad={e => handleTimer(e)}></div> */}
                 </div>
                 {/* TIMER */}
               </div>
@@ -381,24 +403,11 @@ function Presale(): JSX.Element {
           </div>
         </section>
       </div>
-      {account == undefined && (
-        <section id="about-page" className="page">
-          <div className="container">
-            <div className="row">
-              <div className="col-xxl-12 col-xl-12 col-lg-112 col-sm-12 col-xs-12">
-                <div className="heading">
-                  <h2 className="title"> Please Install and Connect to Metamask Wallet </h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* <!-- Footer --> */}
       {/* <Footer /> */}
     </div>
   );
 }
 
+Presale.propTypes = {};
 export default Presale;
