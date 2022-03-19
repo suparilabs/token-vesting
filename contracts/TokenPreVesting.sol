@@ -18,6 +18,8 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         bool initialized;
         // beneficiary of tokens after they are released
         address beneficiary;
+        // cliff period in seconds
+        uint256 cliff;
         // duration of the vesting period in seconds
         uint256 duration;
         // duration of a slice period for the vesting in seconds
@@ -30,20 +32,36 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         uint256 released;
         // whether or not the vesting has been revoked
         bool revoked;
+        // tge tokens in percentage basis points
+        uint256 tge;
     }
 
-    // address of the MEI token
-    bool public launchTimestampset;
-    uint256 public cliff;
+    // Contract owner access
+    bool public allIncomingDepositsFinalised;
+
+    // Timestamp related variables
+    bool public timestampSet;
+    uint256 public initialTimestamp;
     uint256 public start;
-    IERC20 private immutable _token;
+
     bytes32[] private vestingSchedulesIds;
-    mapping(bytes32 => VestingSchedule) private vestingSchedules;
     uint256 private vestingSchedulesTotalAmount;
+    mapping(bytes32 => VestingSchedule) private vestingSchedules;
     mapping(address => uint256) private holdersVestingCount;
+
+    IERC20 private immutable _token;
 
     event Released(uint256 amount);
     event Revoked();
+    event VestingScheduleCreated(address beneficiary, bytes32 vestingScheduleId);
+
+    /**
+     * @dev Throws if allIncomingDepositsFinalised is true.
+     */
+    modifier incomingDepositsStillAllowed() {
+        require(allIncomingDepositsFinalised == false, "TokenPreVesting: Incoming deposits have been finalised.");
+        _;
+    }
 
     /**
      * @dev Reverts if no vesting schedule matches the passed identifier.
@@ -57,15 +75,19 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
     }
 
     modifier onlyIfLaunchTimestampNotSet() {
-        require(launchTimestampset == false, "TokenPreVesting: launch timestamp is set");
+        require(timestampSet == false, "TokenPreVesting: launch timestamp is set");
         _;
     }
+
     /**
      * @dev Reverts if the vesting schedule does not exist or has been revoked.
      */
     modifier onlyIfVestingScheduleNotRevoked(bytes32 vestingScheduleId) {
-        require(vestingSchedules[vestingScheduleId].initialized == true);
-        require(vestingSchedules[vestingScheduleId].revoked == false);
+        require(
+            vestingSchedules[vestingScheduleId].initialized == true,
+            "TokenPreVesting: Vesting schedule does not exists"
+        );
+        require(vestingSchedules[vestingScheduleId].revoked == false, "TokenPreVesting: Vesting schedule is revoked");
         _;
     }
 
@@ -75,18 +97,19 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
      */
     constructor(address token_) {
         require(token_ != address(0x0), "TokenPreVesting: token address is zero");
+        initialTimestamp = block.timestamp;
         _token = IERC20(token_);
     }
 
-    receive() external payable {}
-
-    fallback() external payable {}
-
-    function setLaunchTimestamp(uint256 _start, uint256 _cliff) external onlyOwner {
-        require(!launchTimestampset, "TokenPreVesting: already launched!");
-        launchTimestampset = true;
-        start = _start;
-        cliff = _start.add(_cliff);
+    /**
+     * @dev set timestamp and finalize deposits
+     * @param _timePeriodInSeconds time period in seconds
+     */
+    function setTimestamp(uint256 _timePeriodInSeconds) external onlyOwner onlyIfLaunchTimestampNotSet {
+        timestampSet = true;
+        allIncomingDepositsFinalised = true;
+        initialTimestamp = block.timestamp;
+        start = initialTimestamp.add(_timePeriodInSeconds);
     }
 
     /**
@@ -136,18 +159,22 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
     /**
      * @notice Creates a new vesting schedule for a beneficiary.
      * @param _beneficiary address of the beneficiary to whom vested tokens are transferred
+     * @param _cliff duration in seconds of the cliff in which tokens will begin to vest
      * @param _duration duration in seconds of the period in which the tokens will vest
      * @param _slicePeriodSeconds duration of a slice period for the vesting in seconds
      * @param _revocable whether the vesting is revocable or not
      * @param _amount total amount of tokens to be released at the end of the vesting
+     * @param _tge tge tokens in percentage basis points
      */
     function createVestingSchedule(
         address _beneficiary,
+        uint256 _cliff,
         uint256 _duration,
         uint256 _slicePeriodSeconds,
         bool _revocable,
-        uint256 _amount
-    ) public onlyIfLaunchTimestampNotSet onlyOwner {
+        uint256 _amount,
+        uint256 _tge
+    ) public incomingDepositsStillAllowed onlyOwner {
         require(
             this.getWithdrawableAmount() >= _amount,
             "TokenPreVesting: cannot create vesting schedule because not sufficient tokens"
@@ -159,51 +186,60 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         vestingSchedules[vestingScheduleId] = VestingSchedule(
             true,
             _beneficiary,
+            _cliff,
             _duration,
             _slicePeriodSeconds,
             _revocable,
             _amount,
             0,
-            false
+            false,
+            _tge
         );
         vestingSchedulesTotalAmount = vestingSchedulesTotalAmount.add(_amount);
         vestingSchedulesIds.push(vestingScheduleId);
         uint256 currentVestingCount = holdersVestingCount[_beneficiary];
         holdersVestingCount[_beneficiary] = currentVestingCount.add(1);
+        emit VestingScheduleCreated(_beneficiary, vestingScheduleId);
     }
 
     /**
      * BULK : CREATING VESTING SCHEDULE IN BULK
      * @notice Creates a new vesting schedule for a beneficiary.
      * @param _beneficiaries address of the beneficiary to whom vested tokens are transferred
+     * @param _cliffs duration in seconds of the cliff in which tokens will begin to vest
      * @param _durations duration in seconds of the period in which the tokens will vest
      * @param _slicePeriodSeconds duration of a slice period for the vesting in seconds
      * @param _revocables whether the vesting is revocable or not
      * @param _amounts total amount of tokens to be released at the end of the vesting
+     * @param _tges list of tges in percentage basis points
      */
     function createVestingSchedule(
         address[] calldata _beneficiaries,
+        uint256[] calldata _cliffs,
         uint256[] calldata _durations,
         uint256[] calldata _slicePeriodSeconds,
         bool[] calldata _revocables,
-        uint256[] calldata _amounts
-    ) external onlyIfLaunchTimestampNotSet onlyOwner {
+        uint256[] memory _amounts,
+        uint256[] memory _tges
+    ) external incomingDepositsStillAllowed onlyOwner {
         require(
             _beneficiaries.length == _durations.length &&
                 _durations.length == _slicePeriodSeconds.length &&
                 _slicePeriodSeconds.length == _revocables.length &&
                 _revocables.length == _amounts.length,
-            ""
+            "TokenPreVesting: Length mismatch"
         );
 
         //looping through beneficiaries
         for (uint256 _i; _i < _beneficiaries.length; _i++) {
             createVestingSchedule(
                 _beneficiaries[_i],
+                _cliffs[_i],
                 _durations[_i],
                 _slicePeriodSeconds[_i],
                 _revocables[_i],
-                _amounts[_i]
+                _amounts[_i],
+                _tges[_i]
             );
         }
     }
@@ -319,11 +355,11 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
      * @return the amount of releasable tokens
      */
     function _computeReleasableAmount(VestingSchedule memory vestingSchedule) internal view returns (uint256) {
-        if (!launchTimestampset) {
+        if (!timestampSet) {
             return uint256(0);
         }
         uint256 currentTime = getCurrentTime();
-        if ((currentTime < cliff) || vestingSchedule.revoked == true) {
+        if ((currentTime < start.add(vestingSchedule.cliff)) || vestingSchedule.revoked == true) {
             return 0;
         } else if (currentTime >= start.add(vestingSchedule.duration)) {
             return vestingSchedule.amountTotal.sub(vestingSchedule.released);
@@ -338,7 +374,7 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         }
     }
 
-    function getCurrentTime() internal view virtual returns (uint256) {
+    function getCurrentTime() public view virtual returns (uint256) {
         return block.timestamp;
     }
 }

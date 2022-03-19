@@ -1,4 +1,3 @@
-// contracts/TokenVesting.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
@@ -17,7 +16,7 @@ contract MockTokenPreVesting is TokenPreVesting {
         mockTime = _time;
     }
 
-    function getCurrentTime() internal view virtual override returns (uint256) {
+    function getCurrentTime() public view virtual override returns (uint256) {
         return mockTime;
     }
 }

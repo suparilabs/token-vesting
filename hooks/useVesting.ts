@@ -42,7 +42,6 @@ function getVestingScheduleByBeneficiary(
 export function useVestingScheduleBeneficiary(account: string, token: string, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
   const contract = useContract(token, TokenVesting__factory.abi, true);
-  console.log("vesting contract", contract);
   const result: any = useSWR(
     contract ? [chainId, token, DataType.Address] : null,
     getVestingScheduleByBeneficiary(account as string, token as string, contract as Contract),

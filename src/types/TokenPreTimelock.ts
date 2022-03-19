@@ -24,9 +24,9 @@ export interface TokenPreTimelockInterface extends utils.Interface {
     "alreadyWithdrawn(address)": FunctionFragment;
     "balances(address)": FunctionFragment;
     "bulkDepositTokens(address[],uint256[])": FunctionFragment;
-    "contractBalance()": FunctionFragment;
     "depositTokens(address,uint256)": FunctionFragment;
-    "finalizeAllIncomingDeposits()": FunctionFragment;
+    "getCurrentTime()": FunctionFragment;
+    "getToken()": FunctionFragment;
     "initialTimestamp()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -36,7 +36,6 @@ export interface TokenPreTimelockInterface extends utils.Interface {
     "transferAccidentallyLockedTokens(address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "transferTimeLockedTokensAfterTimePeriod(address,address,uint256)": FunctionFragment;
-    "withdrawEth(uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -53,17 +52,14 @@ export interface TokenPreTimelockInterface extends utils.Interface {
     values: [string[], BigNumberish[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "contractBalance",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "depositTokens",
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "finalizeAllIncomingDeposits",
+    functionFragment: "getCurrentTime",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "getToken", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initialTimestamp",
     values?: undefined
@@ -97,10 +93,6 @@ export interface TokenPreTimelockInterface extends utils.Interface {
     functionFragment: "transferTimeLockedTokensAfterTimePeriod",
     values: [string, string, BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "withdrawEth",
-    values: [BigNumberish]
-  ): string;
 
   decodeFunctionResult(
     functionFragment: "allIncomingDepositsFinalised",
@@ -116,17 +108,14 @@ export interface TokenPreTimelockInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "contractBalance",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "depositTokens",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "finalizeAllIncomingDeposits",
+    functionFragment: "getCurrentTime",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getToken", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "initialTimestamp",
     data: BytesLike
@@ -155,10 +144,6 @@ export interface TokenPreTimelockInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferTimeLockedTokensAfterTimePeriod",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "withdrawEth",
     data: BytesLike
   ): Result;
 
@@ -248,17 +233,15 @@ export interface TokenPreTimelock extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    contractBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     depositTokens(
       recipient: string,
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    finalizeAllIncomingDeposits(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    getCurrentTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getToken(overrides?: CallOverrides): Promise<[string]>;
 
     initialTimestamp(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -294,11 +277,6 @@ export interface TokenPreTimelock extends BaseContract {
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    withdrawEth(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
   };
 
   allIncomingDepositsFinalised(overrides?: CallOverrides): Promise<boolean>;
@@ -313,17 +291,15 @@ export interface TokenPreTimelock extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  contractBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
   depositTokens(
     recipient: string,
     amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  finalizeAllIncomingDeposits(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  getCurrentTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getToken(overrides?: CallOverrides): Promise<string>;
 
   initialTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -360,11 +336,6 @@ export interface TokenPreTimelock extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  withdrawEth(
-    amount: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     allIncomingDepositsFinalised(overrides?: CallOverrides): Promise<boolean>;
 
@@ -381,15 +352,15 @@ export interface TokenPreTimelock extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    contractBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
     depositTokens(
       recipient: string,
       amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    finalizeAllIncomingDeposits(overrides?: CallOverrides): Promise<void>;
+    getCurrentTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getToken(overrides?: CallOverrides): Promise<string>;
 
     initialTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -423,8 +394,6 @@ export interface TokenPreTimelock extends BaseContract {
       amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    withdrawEth(amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
@@ -475,17 +444,15 @@ export interface TokenPreTimelock extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    contractBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
     depositTokens(
       recipient: string,
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    finalizeAllIncomingDeposits(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    getCurrentTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     initialTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -521,11 +488,6 @@ export interface TokenPreTimelock extends BaseContract {
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    withdrawEth(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -549,17 +511,15 @@ export interface TokenPreTimelock extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    contractBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     depositTokens(
       recipient: string,
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    finalizeAllIncomingDeposits(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
+    getCurrentTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initialTimestamp(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -592,11 +552,6 @@ export interface TokenPreTimelock extends BaseContract {
     transferTimeLockedTokensAfterTimePeriod(
       token: string,
       to: string,
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawEth(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

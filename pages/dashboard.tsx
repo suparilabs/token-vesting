@@ -15,7 +15,10 @@ function Dashboard(): JSX.Element {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<any>();
   const [availableTge, setAvailableTge] = React.useState<string>("0");
+  const [tges, setTges] = React.useState<any>([]);
   const [duration, setDuration] = React.useState<string>("0");
+  const [cliff, setCliff] = React.useState<string>("0");
+  const [cliffs, setCliffs] = React.useState<any>([]);
   const [round, setRound] = React.useState<string>();
   //hooks for seed round
   const [beneficiaries, setBeneficiaries] = React.useState<any>([]);
@@ -50,10 +53,12 @@ function Dashboard(): JSX.Element {
       ? addresses[chainId as number].SEED_PRE_VESTING
       : addresses[desiredChain.chainId].SEED_PRE_VESTING,
     beneficiaries,
-    slice,
+    cliffs,
     durations,
+    slice,
     revocables,
     vestingAmt,
+    tges,
   );
   const createBulkDepositForSeed = useBulkDepositTokens(
     chainId != undefined
@@ -82,10 +87,12 @@ function Dashboard(): JSX.Element {
       ? addresses[chainId as number].PRIVATE_SALE_PRE_VESTING
       : addresses[desiredChain.chainId].PRIVATE_SALE_PRE_VESTING,
     beneficiaries,
-    slice,
+    cliffs,
     durations,
+    slice,
     revocables,
     vestingAmt,
+    tges,
   );
   const createBulkDepositForPrivateSale = useBulkDepositTokens(
     chainId != undefined
@@ -119,9 +126,9 @@ function Dashboard(): JSX.Element {
 
   const notifyBulkDepositTokens = async (promiseObj, roundName) => {
     await toast.promise(promiseObj, {
-      pending: `Depositing tokens to pre time lock for ${roundName} round`,
-      success: `Deposited tokens for pre time lock for ${roundName} round👌`,
-      error: `Failed to deposit tokens for ${roundName} round 🤯"`,
+      pending: `Create token lock schedule on pre time lock for ${roundName} round`,
+      success: `Created token lock schedule for pre time lock for ${roundName} round👌`,
+      error: `Failed to create token lock schedule for ${roundName} round 🤯"`,
     });
   };
 
@@ -176,6 +183,10 @@ function Dashboard(): JSX.Element {
   const parseCSV = (data: any) => {
     const beneficiariesArr = data.map(d => d.beneficiary);
     setBeneficiaries(beneficiariesArr);
+    const cliffsArr = new Array(beneficiariesArr.length).fill(cliff);
+    setCliffs(cliffsArr);
+    const tges = new Array(beneficiariesArr.length).fill(BigNumber.from(new BN(availableTge).multipliedBy("100").toString()),0);
+    setTges(tges);
     const amountsArr = Object.values(data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow("18"))));
     const nonVestingAmountsArr = Object.values(
       amountsArr.map(x =>
@@ -326,22 +337,22 @@ function Dashboard(): JSX.Element {
                                 />{" "}
                               </div> */}
                             </div>
-                            {/* <div className="row justify-content-center text-left"> */}
-                            {/* <div className="form-group col-sm-6 flex-column d-flex">
+                            <div className="row justify-content-center text-left">
+                              <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
                                 <label className="form-control-label px-3">
-                                  Duration<span className="text-danger"> *(in seconds)</span>
+                                  Cliff<span className="text-danger"> *(in seconds)</span>
                                 </label>
                                 <input
                                   type="number"
-                                  id="Duration"
-                                  name="Duration"
-                                  placeholder="Duration"
-                                  value={duration}
-                                  onChange={e => setDuration(e.target.value)}
+                                  id="cliff"
+                                  name="cliff"
+                                  placeholder="cliff"
+                                  value={cliff}
+                                  onChange={e => setCliff(e.target.value)}
                                 />{" "}
-                              </div> */}
-                            {/* </div> */}
+                              </div>
+                            </div>
                             <div className="row justify-content-center">
                               <div className="col-md-12 col-lg-10 col-12">
                                 <div className="form-group files">
@@ -392,7 +403,7 @@ function Dashboard(): JSX.Element {
                                       type="button"
                                       className="btn btn-primary btn-block"
                                       onClick={e => handleSendTGETokensNow(e)}
-                                      disabled={uploading}
+                                      disabled={!active || uploading}
                                     >
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}

@@ -1,8 +1,9 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { waitforme } from "../helpers/utils";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, getNamedAccounts } = hre;
+  const { deployments, getNamedAccounts, ethers } = hre;
   const { deploy } = deployments;
 
   const { deployer } = await getNamedAccounts();
@@ -16,11 +17,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  //prices are calculated on the basis of ( 1 SERA token = 1 CAD)
-  // const exPriceUSDT = "120000000000000000"; // 0.12, 18 decimals
-  // const exPriceBUSD = "120000000000000000"; // 0.12, 18 decimals
-  // const USDT = "0xfd55D5eB19731e79FB600579756dF7f454b2aA08" // bsc testnet
-  // const BUSD = "0xa0D61133044ACB8Fb72Bc5a0378Fe13786538Dd0" // bsc testnet
   const coinAddress = {
     USDT: {
       "56": "0x55d398326f99059ff775485246999027b3197955",
@@ -45,7 +41,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     usdtAddress = coinAddress.USDT[chainId];
     busdAddress = coinAddress.BUSD[chainId];
   }
-  await deploy("IDOTokenPreSale", {
+  const contractTx = await deploy("IDOTokenPreSale", {
     from: deployer,
     contract: {
       abi: artifact.abi,
@@ -56,23 +52,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
-  // if (contractTx.newlyDeployed) {
-  //   const tokenSale = await ethers.getContract("TokenSale");
-  //   if (!["31337", "1337"].includes(chainId)) {
-  //     await waitforme(20000);
+  if (contractTx.newlyDeployed) {
+    const tokenSale = await ethers.getContract("IDOTokenPreSale");
+    if (!["31337", "1337"].includes(chainId)) {
+      await waitforme(20000);
 
-  //     await hre.run("verify:verify", {
-  //       address: tokenSale.address,
-  //       constructorArguments: [
-  //         tokenAddress,
-  //         coinAddress.USDT[chainId],
-  //         coinAddress.BUSD[chainId],
-  //         exPriceUSDT,
-  //         exPriceBUSD,
-  //       ],
-  //     });
-  //   }
-  // }
+      await hre.run("verify:verify", {
+        address: tokenSale.address,
+        constructorArguments: [tokenAddress, coinAddress.USDT[chainId], coinAddress.BUSD[chainId]],
+      });
+    }
+  }
 };
 export default func;
 func.tags = ["IDO"];

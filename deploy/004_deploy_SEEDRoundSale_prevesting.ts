@@ -1,8 +1,9 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { waitforme } from "../helpers/utils";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, getNamedAccounts } = hre;
+  const { deployments, getNamedAccounts, ethers } = hre;
   const { deploy } = deployments;
 
   const { deployer } = await getNamedAccounts();
@@ -16,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  await deploy("SEEDPreVesting", {
+  const contractTx = await deploy("SEEDPreVesting", {
     from: deployer,
     contract: {
       abi: artifact.abi,
@@ -27,23 +28,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
-  // if (contractTx.newlyDeployed) {
-  //   const tokenSale = await ethers.getContract("TokenSale");
-  //   if (!["31337", "1337"].includes(chainId)) {
-  //     await waitforme(20000);
-
-  //     await hre.run("verify:verify", {
-  //       address: tokenSale.address,
-  //       constructorArguments: [
-  //         tokenAddress,
-  //         coinAddress.USDT[chainId],
-  //         coinAddress.BUSD[chainId],
-  //         exPriceUSDT,
-  //         exPriceBUSD,
-  //       ],
-  //     });
-  //   }
-  // }
+  if (contractTx.newlyDeployed) {
+    const seedTokenPreVesting = await ethers.getContract("SEEDPreVesting");
+    if (!["31337", "1337"].includes(chainId)) {
+      await waitforme(20000);
+      await hre.run("verify:verify", {
+        address: seedTokenPreVesting.address,
+        constructorArguments: [tokenAddress],
+      });
+    }
+  }
 };
 export default func;
 func.tags = ["SEEDPreVesting"];
