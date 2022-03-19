@@ -21,12 +21,14 @@ export declare namespace TokenPreVesting {
   export type VestingScheduleStruct = {
     initialized: boolean;
     beneficiary: string;
+    cliff: BigNumberish;
     duration: BigNumberish;
     slicePeriodSeconds: BigNumberish;
     revocable: boolean;
     amountTotal: BigNumberish;
     released: BigNumberish;
     revoked: boolean;
+    tge: BigNumberish;
   };
 
   export type VestingScheduleStructOutput = [
@@ -34,30 +36,35 @@ export declare namespace TokenPreVesting {
     string,
     BigNumber,
     BigNumber,
+    BigNumber,
     boolean,
     BigNumber,
     BigNumber,
-    boolean
+    boolean,
+    BigNumber
   ] & {
     initialized: boolean;
     beneficiary: string;
+    cliff: BigNumber;
     duration: BigNumber;
     slicePeriodSeconds: BigNumber;
     revocable: boolean;
     amountTotal: BigNumber;
     released: BigNumber;
     revoked: boolean;
+    tge: BigNumber;
   };
 }
 
 export interface TokenPreVestingInterface extends utils.Interface {
   contractName: "TokenPreVesting";
   functions: {
-    "cliff()": FunctionFragment;
+    "allIncomingDepositsFinalised()": FunctionFragment;
     "computeNextVestingScheduleIdForHolder(address)": FunctionFragment;
     "computeReleasableAmount(bytes32)": FunctionFragment;
     "computeVestingScheduleIdForAddressAndIndex(address,uint256)": FunctionFragment;
-    "createVestingSchedule(address,uint256,uint256,bool,uint256)": FunctionFragment;
+    "createVestingSchedule(address,uint256,uint256,uint256,bool,uint256,uint256)": FunctionFragment;
+    "getCurrentTime()": FunctionFragment;
     "getLastVestingScheduleForHolder(address)": FunctionFragment;
     "getToken()": FunctionFragment;
     "getVestingIdAtIndex(uint256)": FunctionFragment;
@@ -67,18 +74,22 @@ export interface TokenPreVestingInterface extends utils.Interface {
     "getVestingSchedulesCountByBeneficiary(address)": FunctionFragment;
     "getVestingSchedulesTotalAmount()": FunctionFragment;
     "getWithdrawableAmount()": FunctionFragment;
-    "launchTimestampset()": FunctionFragment;
+    "initialTimestamp()": FunctionFragment;
     "owner()": FunctionFragment;
     "release(bytes32,uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "revoke(bytes32)": FunctionFragment;
-    "setLaunchTimestamp(uint256,uint256)": FunctionFragment;
+    "setTimestamp(uint256)": FunctionFragment;
     "start()": FunctionFragment;
+    "timestampSet()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "cliff", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "allIncomingDepositsFinalised",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "computeNextVestingScheduleIdForHolder",
     values: [string]
@@ -93,7 +104,19 @@ export interface TokenPreVestingInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createVestingSchedule",
-    values: [string, BigNumberish, BigNumberish, boolean, BigNumberish]
+    values: [
+      string,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      boolean,
+      BigNumberish,
+      BigNumberish
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getCurrentTime",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getLastVestingScheduleForHolder",
@@ -129,7 +152,7 @@ export interface TokenPreVestingInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "launchTimestampset",
+    functionFragment: "initialTimestamp",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -143,10 +166,14 @@ export interface TokenPreVestingInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "revoke", values: [BytesLike]): string;
   encodeFunctionData(
-    functionFragment: "setLaunchTimestamp",
-    values: [BigNumberish, BigNumberish]
+    functionFragment: "setTimestamp",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "start", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "timestampSet",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
@@ -156,7 +183,10 @@ export interface TokenPreVestingInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
 
-  decodeFunctionResult(functionFragment: "cliff", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "allIncomingDepositsFinalised",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "computeNextVestingScheduleIdForHolder",
     data: BytesLike
@@ -171,6 +201,10 @@ export interface TokenPreVestingInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createVestingSchedule",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getCurrentTime",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -207,7 +241,7 @@ export interface TokenPreVestingInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "launchTimestampset",
+    functionFragment: "initialTimestamp",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -218,10 +252,14 @@ export interface TokenPreVestingInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "revoke", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setLaunchTimestamp",
+    functionFragment: "setTimestamp",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "start", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "timestampSet",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -283,7 +321,7 @@ export interface TokenPreVesting extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    cliff(overrides?: CallOverrides): Promise<[BigNumber]>;
+    allIncomingDepositsFinalised(overrides?: CallOverrides): Promise<[boolean]>;
 
     computeNextVestingScheduleIdForHolder(
       holder: string,
@@ -301,23 +339,29 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    "createVestingSchedule(address,uint256,uint256,bool,uint256)"(
+    "createVestingSchedule(address,uint256,uint256,uint256,bool,uint256,uint256)"(
       _beneficiary: string,
+      _cliff: BigNumberish,
       _duration: BigNumberish,
       _slicePeriodSeconds: BigNumberish,
       _revocable: boolean,
       _amount: BigNumberish,
+      _tge: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "createVestingSchedule(address[],uint256[],uint256[],bool[],uint256[])"(
+    "createVestingSchedule(address[],uint256[],uint256[],uint256[],bool[],uint256[],uint256[])"(
       _beneficiaries: string[],
+      _cliffs: BigNumberish[],
       _durations: BigNumberish[],
       _slicePeriodSeconds: BigNumberish[],
       _revocables: boolean[],
       _amounts: BigNumberish[],
+      _tges: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    getCurrentTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getLastVestingScheduleForHolder(
       holder: string,
@@ -355,7 +399,7 @@ export interface TokenPreVesting extends BaseContract {
 
     getWithdrawableAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    launchTimestampset(overrides?: CallOverrides): Promise<[boolean]>;
+    initialTimestamp(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -374,13 +418,14 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setLaunchTimestamp(
-      _start: BigNumberish,
-      _cliff: BigNumberish,
+    setTimestamp(
+      _timePeriodInSeconds: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     start(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    timestampSet(overrides?: CallOverrides): Promise<[boolean]>;
 
     transferOwnership(
       newOwner: string,
@@ -393,7 +438,7 @@ export interface TokenPreVesting extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  cliff(overrides?: CallOverrides): Promise<BigNumber>;
+  allIncomingDepositsFinalised(overrides?: CallOverrides): Promise<boolean>;
 
   computeNextVestingScheduleIdForHolder(
     holder: string,
@@ -411,23 +456,29 @@ export interface TokenPreVesting extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  "createVestingSchedule(address,uint256,uint256,bool,uint256)"(
+  "createVestingSchedule(address,uint256,uint256,uint256,bool,uint256,uint256)"(
     _beneficiary: string,
+    _cliff: BigNumberish,
     _duration: BigNumberish,
     _slicePeriodSeconds: BigNumberish,
     _revocable: boolean,
     _amount: BigNumberish,
+    _tge: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "createVestingSchedule(address[],uint256[],uint256[],bool[],uint256[])"(
+  "createVestingSchedule(address[],uint256[],uint256[],uint256[],bool[],uint256[],uint256[])"(
     _beneficiaries: string[],
+    _cliffs: BigNumberish[],
     _durations: BigNumberish[],
     _slicePeriodSeconds: BigNumberish[],
     _revocables: boolean[],
     _amounts: BigNumberish[],
+    _tges: BigNumberish[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  getCurrentTime(overrides?: CallOverrides): Promise<BigNumber>;
 
   getLastVestingScheduleForHolder(
     holder: string,
@@ -463,7 +514,7 @@ export interface TokenPreVesting extends BaseContract {
 
   getWithdrawableAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
-  launchTimestampset(overrides?: CallOverrides): Promise<boolean>;
+  initialTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -482,13 +533,14 @@ export interface TokenPreVesting extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setLaunchTimestamp(
-    _start: BigNumberish,
-    _cliff: BigNumberish,
+  setTimestamp(
+    _timePeriodInSeconds: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   start(overrides?: CallOverrides): Promise<BigNumber>;
+
+  timestampSet(overrides?: CallOverrides): Promise<boolean>;
 
   transferOwnership(
     newOwner: string,
@@ -501,7 +553,7 @@ export interface TokenPreVesting extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    cliff(overrides?: CallOverrides): Promise<BigNumber>;
+    allIncomingDepositsFinalised(overrides?: CallOverrides): Promise<boolean>;
 
     computeNextVestingScheduleIdForHolder(
       holder: string,
@@ -519,23 +571,29 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    "createVestingSchedule(address,uint256,uint256,bool,uint256)"(
+    "createVestingSchedule(address,uint256,uint256,uint256,bool,uint256,uint256)"(
       _beneficiary: string,
+      _cliff: BigNumberish,
       _duration: BigNumberish,
       _slicePeriodSeconds: BigNumberish,
       _revocable: boolean,
       _amount: BigNumberish,
+      _tge: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "createVestingSchedule(address[],uint256[],uint256[],bool[],uint256[])"(
+    "createVestingSchedule(address[],uint256[],uint256[],uint256[],bool[],uint256[],uint256[])"(
       _beneficiaries: string[],
+      _cliffs: BigNumberish[],
       _durations: BigNumberish[],
       _slicePeriodSeconds: BigNumberish[],
       _revocables: boolean[],
       _amounts: BigNumberish[],
+      _tges: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    getCurrentTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     getLastVestingScheduleForHolder(
       holder: string,
@@ -573,7 +631,7 @@ export interface TokenPreVesting extends BaseContract {
 
     getWithdrawableAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
-    launchTimestampset(overrides?: CallOverrides): Promise<boolean>;
+    initialTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -590,13 +648,14 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setLaunchTimestamp(
-      _start: BigNumberish,
-      _cliff: BigNumberish,
+    setTimestamp(
+      _timePeriodInSeconds: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     start(overrides?: CallOverrides): Promise<BigNumber>;
+
+    timestampSet(overrides?: CallOverrides): Promise<boolean>;
 
     transferOwnership(
       newOwner: string,
@@ -624,7 +683,7 @@ export interface TokenPreVesting extends BaseContract {
   };
 
   estimateGas: {
-    cliff(overrides?: CallOverrides): Promise<BigNumber>;
+    allIncomingDepositsFinalised(overrides?: CallOverrides): Promise<BigNumber>;
 
     computeNextVestingScheduleIdForHolder(
       holder: string,
@@ -642,23 +701,29 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "createVestingSchedule(address,uint256,uint256,bool,uint256)"(
+    "createVestingSchedule(address,uint256,uint256,uint256,bool,uint256,uint256)"(
       _beneficiary: string,
+      _cliff: BigNumberish,
       _duration: BigNumberish,
       _slicePeriodSeconds: BigNumberish,
       _revocable: boolean,
       _amount: BigNumberish,
+      _tge: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "createVestingSchedule(address[],uint256[],uint256[],bool[],uint256[])"(
+    "createVestingSchedule(address[],uint256[],uint256[],uint256[],bool[],uint256[],uint256[])"(
       _beneficiaries: string[],
+      _cliffs: BigNumberish[],
       _durations: BigNumberish[],
       _slicePeriodSeconds: BigNumberish[],
       _revocables: boolean[],
       _amounts: BigNumberish[],
+      _tges: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    getCurrentTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     getLastVestingScheduleForHolder(
       holder: string,
@@ -696,7 +761,7 @@ export interface TokenPreVesting extends BaseContract {
 
     getWithdrawableAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
-    launchTimestampset(overrides?: CallOverrides): Promise<BigNumber>;
+    initialTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -715,13 +780,14 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setLaunchTimestamp(
-      _start: BigNumberish,
-      _cliff: BigNumberish,
+    setTimestamp(
+      _timePeriodInSeconds: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     start(overrides?: CallOverrides): Promise<BigNumber>;
+
+    timestampSet(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: string,
@@ -735,7 +801,9 @@ export interface TokenPreVesting extends BaseContract {
   };
 
   populateTransaction: {
-    cliff(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    allIncomingDepositsFinalised(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     computeNextVestingScheduleIdForHolder(
       holder: string,
@@ -753,23 +821,29 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "createVestingSchedule(address,uint256,uint256,bool,uint256)"(
+    "createVestingSchedule(address,uint256,uint256,uint256,bool,uint256,uint256)"(
       _beneficiary: string,
+      _cliff: BigNumberish,
       _duration: BigNumberish,
       _slicePeriodSeconds: BigNumberish,
       _revocable: boolean,
       _amount: BigNumberish,
+      _tge: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "createVestingSchedule(address[],uint256[],uint256[],bool[],uint256[])"(
+    "createVestingSchedule(address[],uint256[],uint256[],uint256[],bool[],uint256[],uint256[])"(
       _beneficiaries: string[],
+      _cliffs: BigNumberish[],
       _durations: BigNumberish[],
       _slicePeriodSeconds: BigNumberish[],
       _revocables: boolean[],
       _amounts: BigNumberish[],
+      _tges: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    getCurrentTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getLastVestingScheduleForHolder(
       holder: string,
@@ -811,9 +885,7 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    launchTimestampset(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    initialTimestamp(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -832,13 +904,14 @@ export interface TokenPreVesting extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setLaunchTimestamp(
-      _start: BigNumberish,
-      _cliff: BigNumberish,
+    setTimestamp(
+      _timePeriodInSeconds: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     start(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    timestampSet(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: string,

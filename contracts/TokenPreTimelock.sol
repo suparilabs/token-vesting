@@ -84,42 +84,26 @@ contract TokenPreTimelock is Ownable {
         _;
     }
 
-    receive() external payable incomingDepositsStillAllowed {
-        contractBalance = contractBalance.add(msg.value);
-        emit TokensDeposited(msg.sender, msg.value);
-    }
-
-    // @dev Takes away any ability (for the contract owner) to assign any tokens to any recipients. This function is only to be called by the contract owner. Calling this function can not be undone. Calling this function must only be performed when all of the addresses and amounts are allocated (to the recipients). This function finalizes the contract owners involvement and at this point the contract's timelock functionality is non-custodial
-    function finalizeAllIncomingDeposits() public onlyOwner timestampIsSet incomingDepositsStillAllowed {
-        allIncomingDepositsFinalised = true;
+    /**
+     * @dev Returns the address of the ERC20 token managed by the vesting contract.
+     */
+    function getToken() external view returns (address) {
+        return address(_token);
     }
 
     /// @dev Sets the initial timestamp and calculates locking period variables i.e. twelveMonths etc.
     /// @param _timePeriodInSeconds amount of seconds to add to the initial timestamp i.e. we are essemtially creating the lockup period here
     function setTimestamp(uint256 _timePeriodInSeconds) public onlyOwner timestampNotSet {
         timestampSet = true;
+        allIncomingDepositsFinalised = true;
         initialTimestamp = block.timestamp;
         timePeriod = initialTimestamp.add(_timePeriodInSeconds);
-    }
-
-    /// @dev Function to withdraw Eth in case Eth is accidently sent to this contract.
-    /// @param amount of network tokens to withdraw (in wei).
-    function withdrawEth(uint256 amount) public onlyOwner noReentrant {
-        require(amount <= contractBalance, "Insufficient funds");
-        contractBalance = contractBalance.sub(amount);
-        // Transfer the specified amount of Eth to the owner of this contract
-        payable(msg.sender).transfer(amount);
     }
 
     /// @dev Allows the contract owner to allocate official ERC20 tokens to each future recipient (only one at a time).
     /// @param recipient, address of recipient.
     /// @param amount to allocate to recipient.
-    function depositTokens(address recipient, uint256 amount)
-        public
-        onlyOwner
-        timestampNotSet
-        incomingDepositsStillAllowed
-    {
+    function depositTokens(address recipient, uint256 amount) public onlyOwner incomingDepositsStillAllowed {
         require(recipient != address(0), "ERC20: transfer to the zero address");
         balances[recipient] = balances[recipient].add(amount);
         emit AllocationPerformed(recipient, amount);
@@ -131,7 +115,6 @@ contract TokenPreTimelock is Ownable {
     function bulkDepositTokens(address[] calldata recipients, uint256[] calldata amounts)
         external
         onlyOwner
-        timestampNotSet
         incomingDepositsStillAllowed
     {
         require(
@@ -180,5 +163,9 @@ contract TokenPreTimelock is Ownable {
         require(token != _token, "Token address can not be ERC20 address which was passed into the constructor");
         // Transfer the amount of the specified ERC20 tokens, to the owner of this contract
         token.safeTransfer(msg.sender, amount);
+    }
+
+    function getCurrentTime() public view virtual returns (uint256) {
+        return block.timestamp;
     }
 }

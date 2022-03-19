@@ -25,6 +25,7 @@ export interface TokenPreSaleInterface extends utils.Interface {
     "availableAtTGE()": FunctionFragment;
     "buyTokensUsingBUSD(uint256)": FunctionFragment;
     "buyTokensUsingUSDT(uint256)": FunctionFragment;
+    "cliff()": FunctionFragment;
     "coinsSold()": FunctionFragment;
     "computeTokensForBUSD(uint256)": FunctionFragment;
     "computeTokensForUSDT(uint256)": FunctionFragment;
@@ -43,18 +44,18 @@ export interface TokenPreSaleInterface extends utils.Interface {
     "setAvailableAtTGE(uint256)": FunctionFragment;
     "setBuyAmountRangeBUSD(uint256,uint256)": FunctionFragment;
     "setBuyAmountRangeUSDT(uint256,uint256)": FunctionFragment;
+    "setCliff(uint256)": FunctionFragment;
     "setDuration(uint256)": FunctionFragment;
     "setExchangePriceBUSD(uint256)": FunctionFragment;
     "setExchangePriceUSDT(uint256)": FunctionFragment;
-    "setLaunchTimeInfo(uint256,uint256)": FunctionFragment;
     "setSaleStatus(uint8)": FunctionFragment;
+    "setTimeStamp(uint256)": FunctionFragment;
     "timelock()": FunctionFragment;
     "token()": FunctionFragment;
     "transferAccidentallyLockedTokensInTimeLock(address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "vesting()": FunctionFragment;
     "withdrawBUSD()": FunctionFragment;
-    "withdrawETHFromTimeLock()": FunctionFragment;
     "withdrawFromVesting(uint256)": FunctionFragment;
     "withdrawUSDT()": FunctionFragment;
   };
@@ -73,6 +74,7 @@ export interface TokenPreSaleInterface extends utils.Interface {
     functionFragment: "buyTokensUsingUSDT",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "cliff", values?: undefined): string;
   encodeFunctionData(functionFragment: "coinsSold", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "computeTokensForBUSD",
@@ -131,6 +133,10 @@ export interface TokenPreSaleInterface extends utils.Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setCliff",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setDuration",
     values: [BigNumberish]
   ): string;
@@ -143,11 +149,11 @@ export interface TokenPreSaleInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setLaunchTimeInfo",
-    values: [BigNumberish, BigNumberish]
+    functionFragment: "setSaleStatus",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setSaleStatus",
+    functionFragment: "setTimeStamp",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "timelock", values?: undefined): string;
@@ -163,10 +169,6 @@ export interface TokenPreSaleInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "vesting", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "withdrawBUSD",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "withdrawETHFromTimeLock",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -192,6 +194,7 @@ export interface TokenPreSaleInterface extends utils.Interface {
     functionFragment: "buyTokensUsingUSDT",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "cliff", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "coinsSold", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "computeTokensForBUSD",
@@ -246,6 +249,7 @@ export interface TokenPreSaleInterface extends utils.Interface {
     functionFragment: "setBuyAmountRangeUSDT",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setCliff", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setDuration",
     data: BytesLike
@@ -259,11 +263,11 @@ export interface TokenPreSaleInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setLaunchTimeInfo",
+    functionFragment: "setSaleStatus",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setSaleStatus",
+    functionFragment: "setTimeStamp",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "timelock", data: BytesLike): Result;
@@ -279,10 +283,6 @@ export interface TokenPreSaleInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "vesting", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawBUSD",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "withdrawETHFromTimeLock",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -362,6 +362,8 @@ export interface TokenPreSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    cliff(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     coinsSold(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     computeTokensForBUSD(
@@ -422,6 +424,11 @@ export interface TokenPreSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setCliff(
+      _cliff: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setDuration(
       _duration: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -437,14 +444,13 @@ export interface TokenPreSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setLaunchTimeInfo(
-      _startTimeStamp: BigNumberish,
-      _cliffDurationForVesting: BigNumberish,
+    setSaleStatus(
+      _saleStatus: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setSaleStatus(
-      _saleStatus: BigNumberish,
+    setTimeStamp(
+      _timePeriodInSeconds: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -466,10 +472,6 @@ export interface TokenPreSale extends BaseContract {
     vesting(overrides?: CallOverrides): Promise<[string]>;
 
     withdrawBUSD(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    withdrawETHFromTimeLock(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -498,6 +500,8 @@ export interface TokenPreSale extends BaseContract {
     _usdtAmount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
   coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -559,6 +563,11 @@ export interface TokenPreSale extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setCliff(
+    _cliff: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   setDuration(
     _duration: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -574,14 +583,13 @@ export interface TokenPreSale extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setLaunchTimeInfo(
-    _startTimeStamp: BigNumberish,
-    _cliffDurationForVesting: BigNumberish,
+  setSaleStatus(
+    _saleStatus: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setSaleStatus(
-    _saleStatus: BigNumberish,
+  setTimeStamp(
+    _timePeriodInSeconds: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -603,10 +611,6 @@ export interface TokenPreSale extends BaseContract {
   vesting(overrides?: CallOverrides): Promise<string>;
 
   withdrawBUSD(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  withdrawETHFromTimeLock(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -635,6 +639,8 @@ export interface TokenPreSale extends BaseContract {
       _usdtAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
     coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -692,6 +698,8 @@ export interface TokenPreSale extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setCliff(_cliff: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
     setDuration(
       _duration: BigNumberish,
       overrides?: CallOverrides
@@ -707,14 +715,13 @@ export interface TokenPreSale extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setLaunchTimeInfo(
-      _startTimeStamp: BigNumberish,
-      _cliffDurationForVesting: BigNumberish,
+    setSaleStatus(
+      _saleStatus: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setSaleStatus(
-      _saleStatus: BigNumberish,
+    setTimeStamp(
+      _timePeriodInSeconds: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -736,8 +743,6 @@ export interface TokenPreSale extends BaseContract {
     vesting(overrides?: CallOverrides): Promise<string>;
 
     withdrawBUSD(overrides?: CallOverrides): Promise<void>;
-
-    withdrawETHFromTimeLock(overrides?: CallOverrides): Promise<void>;
 
     withdrawFromVesting(
       _amount: BigNumberish,
@@ -777,6 +782,8 @@ export interface TokenPreSale extends BaseContract {
       _usdtAmount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    cliff(overrides?: CallOverrides): Promise<BigNumber>;
 
     coinsSold(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -838,6 +845,11 @@ export interface TokenPreSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setCliff(
+      _cliff: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setDuration(
       _duration: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -853,14 +865,13 @@ export interface TokenPreSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setLaunchTimeInfo(
-      _startTimeStamp: BigNumberish,
-      _cliffDurationForVesting: BigNumberish,
+    setSaleStatus(
+      _saleStatus: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setSaleStatus(
-      _saleStatus: BigNumberish,
+    setTimeStamp(
+      _timePeriodInSeconds: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -882,10 +893,6 @@ export interface TokenPreSale extends BaseContract {
     vesting(overrides?: CallOverrides): Promise<BigNumber>;
 
     withdrawBUSD(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    withdrawETHFromTimeLock(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -915,6 +922,8 @@ export interface TokenPreSale extends BaseContract {
       _usdtAmount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    cliff(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     coinsSold(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -976,6 +985,11 @@ export interface TokenPreSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    setCliff(
+      _cliff: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     setDuration(
       _duration: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -991,14 +1005,13 @@ export interface TokenPreSale extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setLaunchTimeInfo(
-      _startTimeStamp: BigNumberish,
-      _cliffDurationForVesting: BigNumberish,
+    setSaleStatus(
+      _saleStatus: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setSaleStatus(
-      _saleStatus: BigNumberish,
+    setTimeStamp(
+      _timePeriodInSeconds: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1020,10 +1033,6 @@ export interface TokenPreSale extends BaseContract {
     vesting(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     withdrawBUSD(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawETHFromTimeLock(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

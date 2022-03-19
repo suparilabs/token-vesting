@@ -30,6 +30,7 @@ contract TokenPreSale is Ownable {
     uint256 public exchangePriceUSDT = 120000000000000000;
     uint256 public exchangePriceBUSD = 120000000000000000;
     uint256 public duration = 18 * 30 days;
+    uint256 public cliff = 3 * 30 days;
     uint256 public minBuyAmountUSDT = 10000000000000000000;
     uint256 public maxBuyAmountUSDT = 10000000000000000000000;
     uint256 public minBuyAmountBUSD = 10000000000000000000;
@@ -75,9 +76,13 @@ contract TokenPreSale is Ownable {
         duration = _duration;
     }
 
-    function setLaunchTimeInfo(uint256 _startTimeStamp, uint256 _cliffDurationForVesting) external onlyOwner {
-        vesting.setLaunchTimestamp(_startTimeStamp, _cliffDurationForVesting);
-        timelock.setTimestamp(_startTimeStamp);
+    function setCliff(uint256 _cliff) external onlyOwner {
+        cliff = _cliff;
+    }
+
+    function setTimeStamp(uint256 _timePeriodInSeconds) external onlyOwner {
+        vesting.setTimestamp(_timePeriodInSeconds);
+        timelock.setTimestamp(_timePeriodInSeconds);
     }
 
     function setSaleStatus(SaleStatus _saleStatus) external onlyOwner {
@@ -86,11 +91,6 @@ contract TokenPreSale is Ownable {
 
     function setAvailableAtTGE(uint256 _availableAtTGE) external onlyOwner {
         availableAtTGE = _availableAtTGE;
-    }
-
-    function withdrawETHFromTimeLock() public onlyOwner {
-        timelock.withdrawEth(payable(timelock).balance);
-        payable(msg.sender).transfer(address(this).balance);
     }
 
     function transferAccidentallyLockedTokensInTimeLock(IERC20 _token, uint256 _amount) external onlyOwner {
@@ -127,7 +127,7 @@ contract TokenPreSale is Ownable {
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
-        vesting.createVestingSchedule(msg.sender, duration, 1, false, _vestedTokenAmount);
+        vesting.createVestingSchedule(msg.sender, cliff, duration, 1, false, _vestedTokenAmount, availableAtTGE);
     }
 
     function buyTokensUsingUSDT(uint256 _usdtAmount) external onSale {
@@ -150,7 +150,7 @@ contract TokenPreSale is Ownable {
         } // vest rest of the tokens
         require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
 
-        vesting.createVestingSchedule(msg.sender, duration, 1, false, _vestedTokenAmount);
+        vesting.createVestingSchedule(msg.sender, cliff, duration, 1, false, _vestedTokenAmount, availableAtTGE);
     }
 
     function computeTokensForBUSD(uint256 _busdAmount) public view returns (uint256) {
@@ -194,9 +194,6 @@ contract TokenPreSale is Ownable {
         uint256 _withdrawableAmount = vesting.getWithdrawableAmount();
         if (_withdrawableAmount > 0) {
             withdrawFromVesting(vesting.getWithdrawableAmount());
-        }
-        if (payable(timelock).balance > 0) {
-            withdrawETHFromTimeLock();
         }
         withdrawBUSD();
         withdrawUSDT();
