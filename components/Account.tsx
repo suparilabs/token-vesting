@@ -131,7 +131,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
   //     </div>
   //   );
   // }
-  console.log(chainId);
 
   return (
     <>

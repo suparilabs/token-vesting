@@ -27,7 +27,7 @@ export function useStart(vesting, address?: string | null, suspense = false): SW
     { suspense },
   );
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
-  console.log("Result:", result.data);
+  // console.log("Result:", result.data);
   // const startdate: number = BigNumber.from(result.data[3]).toNumber();
   // const cliff: number = BigNumber.from(result.data[2]).toNumber();
   // const duration: number = BigNumber.from(result.data[4]).toNumber();

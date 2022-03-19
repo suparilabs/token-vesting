@@ -2,7 +2,7 @@ import { useWeb3React } from "@web3-react/core";
 import { BigNumber, Contract } from "ethers";
 import useSWR, { SWRResponse } from "swr";
 import { addresses } from "../constants";
-import { TokenSale__factory, ERC20__factory } from "../src/types";
+import { TokenSale__factory, ERC20__factory, TokenSale } from "../src/types";
 import { DataType } from "../utils";
 import { useContract } from "./useContract";
 
@@ -47,14 +47,12 @@ function getVestingContractAddress(contract: Contract): (address: string) => Pro
 }
 
 export function useVestingContractAddress(chainId: number, suspense = false): SWRResponse<any, any> {
-  // const { chainId } = useWeb3React();
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi);
+  const contract = <TokenSale>useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi);
   const result: any = useSWR(
     contract ? [chainId, "vesting", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
     getVestingContractAddress(contract as Contract),
     { suspense },
   );
-  //let res: any = BigNumber.from(result.data).toNumber();
   return result;
 }
 
