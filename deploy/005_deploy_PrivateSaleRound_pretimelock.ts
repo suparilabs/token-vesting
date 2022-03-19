@@ -27,23 +27,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
-  // if (contractTx.newlyDeployed) {
-  //   const tokenSale = await ethers.getContract("TokenSale");
-  //   if (!["31337", "1337"].includes(chainId)) {
-  //     await waitforme(20000);
-
-  //     await hre.run("verify:verify", {
-  //       address: tokenSale.address,
-  //       constructorArguments: [
-  //         tokenAddress,
-  //         coinAddress.USDT[chainId],
-  //         coinAddress.BUSD[chainId],
-  //         exPriceUSDT,
-  //         exPriceBUSD,
-  //       ],
-  //     });
-  //   }
-  // }
 };
 export default func;
 func.tags = ["PrivateSalePreTimeLock"];
