@@ -7,9 +7,9 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuar
 import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./Token.sol";
-import "./TokenTimelock.sol";
-import "./TokenVesting.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { TokenTimelock } from "./TokenTimelock.sol";
+import { TokenVesting } from "./TokenVesting.sol";
 
 /**
  * @title TokenSale Contract
