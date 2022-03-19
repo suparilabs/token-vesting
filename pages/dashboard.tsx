@@ -10,8 +10,8 @@ import { toast } from "react-toastify";
 import { useCreateBulkVestingSchedule } from "../hooks/useTokenPreVesting";
 import { useBulkDepositTokens } from "../hooks/useTokenPreTimelock";
 
-function Dashboard():JSX.Element {
-  const { chainId } = useWeb3React();
+function Dashboard(): JSX.Element {
+  const { chainId, active } = useWeb3React();
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<any>();
   const [availableTge, setAvailableTge] = React.useState<string>("0");
@@ -256,10 +256,20 @@ function Dashboard():JSX.Element {
                         <div className="card shadow-lg card-1">
                           <div className="row justify-content-end mb-5">
                             <div className="col-lg-12 col-auto ">
-                              <button type="button" className="btn btn-primary btn-block" onClick={handleStartSale}>
+                              <button
+                                type="button"
+                                className="btn btn-primary btn-block"
+                                disabled={!active}
+                                onClick={handleStartSale}
+                              >
                                 <small className="font-weight-bold">Start</small>
                               </button>
-                              <button type="button" className="btn btn-danger btn-block" onClick={handleEndSale}>
+                              <button
+                                type="button"
+                                className="btn btn-danger btn-block"
+                                onClick={handleEndSale}
+                                disabled={!active}
+                              >
                                 <small className="font-weight-bold">Stop</small>
                               </button>
                               {/* <button type="button" className="btn btn-success btn-block">
@@ -275,7 +285,7 @@ function Dashboard():JSX.Element {
                               <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
                                 <label className="form-control-label px-3">
-                                  Available on tge 
+                                  Available on tge
                                   <span className="text-danger"> *(in %)</span>
                                 </label>{" "}
                                 <input
@@ -317,7 +327,7 @@ function Dashboard():JSX.Element {
                               </div> */}
                             </div>
                             {/* <div className="row justify-content-center text-left"> */}
-                              {/* <div className="form-group col-sm-6 flex-column d-flex">
+                            {/* <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
                                 <label className="form-control-label px-3">
                                   Duration<span className="text-danger"> *(in seconds)</span>

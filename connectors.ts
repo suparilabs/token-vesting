@@ -2,6 +2,7 @@ import { NetworkConnector } from "@web3-react/network-connector";
 import { InjectedConnector } from "@web3-react/injected-connector";
 
 import { INFURA_PREFIXES } from "./utils";
+import { desiredChain } from "./constants";
 
 export function getNetwork(defaultChainId = 1): NetworkConnector {
   return new NetworkConnector({
@@ -21,4 +22,4 @@ export function getNetwork(defaultChainId = 1): NetworkConnector {
   });
 }
 
-export const injected = new InjectedConnector({ supportedChainIds: [1, 3, 4, 5, 42, 1337, 31337, 97, 56] });
+export const injected = new InjectedConnector({ supportedChainIds: [desiredChain.chainId] });

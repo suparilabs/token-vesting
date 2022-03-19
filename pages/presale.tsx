@@ -257,8 +257,16 @@ function Presale(): JSX.Element {
   const { account, chainId } = useWeb3React();
   const { data: busd } = useBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: usdt } = useUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const { data: busdBalance } = useTokenBalance(chainId as number, account, busd as string);
-  const { data: usdtBalance } = useTokenBalance(chainId as number, account, usdt as string);
+  const { data: busdBalance } = useTokenBalance(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    account,
+    busd as string,
+  );
+  const { data: usdtBalance } = useTokenBalance(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    account,
+    usdt as string,
+  );
   const { data: ethBalance } = useETHBalance(account);
   const [enoughBusd, setEnoughBusd] = React.useState<boolean>(false);
   const [enoughUsdt, setEnoughUsdt] = React.useState<boolean>(false);
@@ -292,15 +300,17 @@ function Presale(): JSX.Element {
           minutes: Math.floor((difference / 1000 / 60) % 60),
           seconds: Math.floor((difference / 1000) % 60),
         };
-        remaining = Object.keys(parts).map(part => {
-          return `${parts[part]}`;
-        }).join(" : ");
+        remaining = Object.keys(parts)
+          .map(part => {
+            return `${parts[part]}`;
+          })
+          .join(" : ");
       }
       setTimer(remaining);
-    }
+    };
     setInterval(countDownTimer, 1000);
   }
- 
+
   return (
     <div>
       {/* <!-- Start Page --> */}

@@ -64,5 +64,13 @@ export const addresses: SaleAddressType = {
 
 export const desiredChain = {
   chainId: 97,
-  network: "bsctestnet",
+  chainName: "BSC Testnet",
+  nativeCurrency: {
+    name: "BNB",
+    symbol: "BNB", // 2-6 characters long
+    decimals: 18,
+  },
+  rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+  blockExplorerUrls: ["https://testnet.bscscan.com/"],
+  iconUrls: [""], // Currently ignored.
 };

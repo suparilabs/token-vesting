@@ -37,10 +37,12 @@ export const COIN_SYMBOLS: { [key: number]: string } = {
 
 const ETHERSCAN_PREFIXES = {
   1: "",
-  3: "ropsten.",
-  4: "rinkeby.",
-  5: "goerli.",
-  42: "kovan.",
+  3: "ropsten.etherscan",
+  4: "rinkeby.etherscan.",
+  5: "goerli.etherscan.",
+  42: "kovan.etherscan.",
+  97: "testnet..bscscan.",
+  56: "bscscan.",
 };
 
 export const parseBalance = (balance: BigNumberish, decimals = 18, decimalstoDisplay = 3) =>
@@ -51,17 +53,18 @@ export enum DataType {
   ETHBalance,
   Address,
   TokenBalance,
+  Symbol,
 }
 
 export function formatEtherscanLink(type: "Account" | "Transaction", data: [number, string]) {
   switch (type) {
     case "Account": {
       const [chainId, address] = data;
-      return `https://${ETHERSCAN_PREFIXES[chainId]}etherscan.io/address/${address}`;
+      return `https://${ETHERSCAN_PREFIXES[chainId]}io/address/${address}`;
     }
     case "Transaction": {
       const [chainId, hash] = data;
-      return `https://${ETHERSCAN_PREFIXES[chainId]}etherscan.io/tx/${hash}`;
+      return `https://${ETHERSCAN_PREFIXES[chainId]}io/tx/${hash}`;
     }
   }
 }
