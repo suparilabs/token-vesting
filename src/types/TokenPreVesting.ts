@@ -270,11 +270,13 @@ export interface TokenPreVestingInterface extends utils.Interface {
     "OwnershipTransferred(address,address)": EventFragment;
     "Released(uint256)": EventFragment;
     "Revoked()": EventFragment;
+    "VestingScheduleCreated(address,bytes32)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Released"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Revoked"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "VestingScheduleCreated"): EventFragment;
 }
 
 export type OwnershipTransferredEvent = TypedEvent<
@@ -292,6 +294,14 @@ export type ReleasedEventFilter = TypedEventFilter<ReleasedEvent>;
 export type RevokedEvent = TypedEvent<[], {}>;
 
 export type RevokedEventFilter = TypedEventFilter<RevokedEvent>;
+
+export type VestingScheduleCreatedEvent = TypedEvent<
+  [string, string],
+  { beneficiary: string; vestingScheduleId: string }
+>;
+
+export type VestingScheduleCreatedEventFilter =
+  TypedEventFilter<VestingScheduleCreatedEvent>;
 
 export interface TokenPreVesting extends BaseContract {
   contractName: "TokenPreVesting";
@@ -680,6 +690,15 @@ export interface TokenPreVesting extends BaseContract {
 
     "Revoked()"(): RevokedEventFilter;
     Revoked(): RevokedEventFilter;
+
+    "VestingScheduleCreated(address,bytes32)"(
+      beneficiary?: null,
+      vestingScheduleId?: null
+    ): VestingScheduleCreatedEventFilter;
+    VestingScheduleCreated(
+      beneficiary?: null,
+      vestingScheduleId?: null
+    ): VestingScheduleCreatedEventFilter;
   };
 
   estimateGas: {

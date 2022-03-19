@@ -36,28 +36,30 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         uint256 tge;
     }
 
-    // Timestamp related variables
-    uint256 public initialTimestamp;
-    bool public timestampSet;
-    uint256 public start;
-
     // Contract owner access
     bool public allIncomingDepositsFinalised;
 
-    IERC20 private immutable _token;
+    // Timestamp related variables
+    bool public timestampSet;
+    uint256 public initialTimestamp;
+    uint256 public start;
+
     bytes32[] private vestingSchedulesIds;
-    mapping(bytes32 => VestingSchedule) private vestingSchedules;
     uint256 private vestingSchedulesTotalAmount;
+    mapping(bytes32 => VestingSchedule) private vestingSchedules;
     mapping(address => uint256) private holdersVestingCount;
+
+    IERC20 private immutable _token;
 
     event Released(uint256 amount);
     event Revoked();
+    event VestingScheduleCreated(address beneficiary, bytes32 vestingScheduleId);
 
     /**
      * @dev Throws if allIncomingDepositsFinalised is true.
      */
     modifier incomingDepositsStillAllowed() {
-        require(allIncomingDepositsFinalised == false, "Incoming deposits have been finalised.");
+        require(allIncomingDepositsFinalised == false, "TokenPreVesting: Incoming deposits have been finalised.");
         _;
     }
 
@@ -76,12 +78,16 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         require(timestampSet == false, "TokenPreVesting: launch timestamp is set");
         _;
     }
+
     /**
      * @dev Reverts if the vesting schedule does not exist or has been revoked.
      */
     modifier onlyIfVestingScheduleNotRevoked(bytes32 vestingScheduleId) {
-        require(vestingSchedules[vestingScheduleId].initialized == true);
-        require(vestingSchedules[vestingScheduleId].revoked == false);
+        require(
+            vestingSchedules[vestingScheduleId].initialized == true,
+            "TokenPreVesting: Vesting schedule does not exists"
+        );
+        require(vestingSchedules[vestingScheduleId].revoked == false, "TokenPreVesting: Vesting schedule is revoked");
         _;
     }
 
@@ -95,8 +101,11 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         _token = IERC20(token_);
     }
 
-    function setTimestamp(uint256 _timePeriodInSeconds) external onlyOwner {
-        require(!timestampSet, "TokenPreVesting: already launched!");
+    /**
+     * @dev set timestamp and finalize deposits
+     * @param _timePeriodInSeconds time period in seconds
+     */
+    function setTimestamp(uint256 _timePeriodInSeconds) external onlyOwner onlyIfLaunchTimestampNotSet {
         timestampSet = true;
         allIncomingDepositsFinalised = true;
         initialTimestamp = block.timestamp;
@@ -190,6 +199,7 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
         vestingSchedulesIds.push(vestingScheduleId);
         uint256 currentVestingCount = holdersVestingCount[_beneficiary];
         holdersVestingCount[_beneficiary] = currentVestingCount.add(1);
+        emit VestingScheduleCreated(_beneficiary, vestingScheduleId);
     }
 
     /**
@@ -217,7 +227,7 @@ contract TokenPreVesting is Ownable, ReentrancyGuard {
                 _durations.length == _slicePeriodSeconds.length &&
                 _slicePeriodSeconds.length == _revocables.length &&
                 _revocables.length == _amounts.length,
-            ""
+            "TokenPreVesting: Length mismatch"
         );
 
         //looping through beneficiaries

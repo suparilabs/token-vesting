@@ -17,12 +17,10 @@ import { TokenPreVesting } from "./TokenPreVesting.sol";
 
 contract TokenPreSale is Ownable {
     using SafeMath for uint256;
+
     IERC20 public token; // the token being sold
 
     uint256 public coinsSold;
-
-    address public immutable USDT;
-    address public immutable BUSD;
 
     event Sold(address buyer, uint256 amount);
 
@@ -30,9 +28,9 @@ contract TokenPreSale is Ownable {
     uint256 public exchangePriceBUSD = 120000000000000000;
     uint256 public duration = 18 * 30 days;
     uint256 public cliff = 3 * 30 days;
-    uint256 public minBuyAmountUSDT = 10000000000000000000;
+    uint256 public minBuyAmountUSDT = 1000000000000000000;
     uint256 public maxBuyAmountUSDT = 10000000000000000000000;
-    uint256 public minBuyAmountBUSD = 10000000000000000000;
+    uint256 public minBuyAmountBUSD = 1000000000000000000;
     uint256 public maxBuyAmountBUSD = 10000000000000000000000;
     TokenPreVesting public vesting;
     TokenPreTimelock public timelock;
@@ -45,6 +43,8 @@ contract TokenPreSale is Ownable {
     }
 
     SaleStatus public saleStatus;
+    address public immutable USDT;
+    address public immutable BUSD;
 
     constructor(
         IERC20 _token,
@@ -59,7 +59,7 @@ contract TokenPreSale is Ownable {
     }
 
     modifier onSale() {
-        require(saleStatus == SaleStatus.Start, "1");
+        require(saleStatus == SaleStatus.Start, "TokenPreSale: Sale not started");
         _;
     }
 
@@ -109,45 +109,68 @@ contract TokenPreSale is Ownable {
 
     function buyTokensUsingBUSD(uint256 _busdAmount) external onSale {
         uint256 _balanceBefore = IERC20(BUSD).balanceOf(address(this));
-        require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount), "2");
+        require(IERC20(BUSD).transferFrom(msg.sender, address(this), _busdAmount), "TokenPreSale: BUSD -> this");
         uint256 _balanceAfter = IERC20(BUSD).balanceOf(address(this));
         uint256 _actualBUSDAmount = _balanceAfter.sub(_balanceBefore);
-        require(_actualBUSDAmount >= minBuyAmountBUSD && _actualBUSDAmount <= maxBuyAmountBUSD, "3");
+        require(
+            _actualBUSDAmount >= minBuyAmountBUSD && _actualBUSDAmount <= maxBuyAmountBUSD,
+            "TokenPreSale: BUSD out of range"
+        );
         uint256 _numberOfTokens = computeTokensForBUSD(_actualBUSDAmount);
-        require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
+        require(
+            token.allowance(owner(), address(this)) >= _numberOfTokens,
+            "TokenPreSale: insufficient token approval"
+        );
         emit Sold(msg.sender, _numberOfTokens);
         coinsSold += _numberOfTokens;
         uint256 _nonVestedTokenAmount = _numberOfTokens.mul(availableAtTGE).div(10000);
         uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            require(token.transferFrom(owner(), address(timelock), _nonVestedTokenAmount));
+            require(
+                token.transferFrom(owner(), address(timelock), _nonVestedTokenAmount),
+                "TokenPreSale: token -> tokenpretimelock"
+            );
             timelock.depositTokens(msg.sender, _nonVestedTokenAmount);
         } // vest rest of the tokens
-        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
+        require(
+            token.transferFrom(owner(), address(vesting), _vestedTokenAmount),
+            "TokenPreSale: token -> tokenprevesting"
+        );
 
         vesting.createVestingSchedule(msg.sender, cliff, duration, 1, false, _vestedTokenAmount, availableAtTGE);
     }
 
     function buyTokensUsingUSDT(uint256 _usdtAmount) external onSale {
         uint256 _balanceBefore = IERC20(USDT).balanceOf(address(this));
-        require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount), "2");
+        require(IERC20(USDT).transferFrom(msg.sender, address(this), _usdtAmount), "TokenPreSale: USDT -> this");
         uint256 _balanceAfter = IERC20(USDT).balanceOf(address(this));
         uint256 _actualUSDTAmount = _balanceAfter.sub(_balanceBefore);
-        require(_actualUSDTAmount >= minBuyAmountUSDT && _actualUSDTAmount <= maxBuyAmountUSDT, "3"); // BUSD has 18 ethers
+        require(
+            _actualUSDTAmount >= minBuyAmountUSDT && _actualUSDTAmount <= maxBuyAmountUSDT,
+            "TokenPreSale: USDT out of range"
+        );
         uint256 _numberOfTokens = computeTokensForUSDT(_actualUSDTAmount);
-        require(token.allowance(owner(), address(this)) >= _numberOfTokens, "4");
+        require(
+            token.allowance(owner(), address(this)) >= _numberOfTokens,
+            "TokenPreSale: insufficient token approval"
+        );
         emit Sold(msg.sender, _numberOfTokens);
         coinsSold += _numberOfTokens;
         uint256 _nonVestedTokenAmount = _numberOfTokens.mul(availableAtTGE).div(10000);
         uint256 _vestedTokenAmount = _numberOfTokens.sub(_nonVestedTokenAmount);
         // send some pct of tokens to buyer right away
         if (_nonVestedTokenAmount > 0) {
-            //require(token.transferFrom(owner(), msg.sender, _nonVestedTokenAmount), "5");
-            require(token.transferFrom(owner(), address(timelock), _nonVestedTokenAmount));
+            require(
+                token.transferFrom(owner(), address(timelock), _nonVestedTokenAmount),
+                "TokenPreSale: token -> tokenpretimelock"
+            );
             timelock.depositTokens(msg.sender, _nonVestedTokenAmount);
         } // vest rest of the tokens
-        require(token.transferFrom(owner(), address(vesting), _vestedTokenAmount), "6");
+        require(
+            token.transferFrom(owner(), address(vesting), _vestedTokenAmount),
+            "TokenPreSale: token -> tokenprevesting"
+        );
 
         vesting.createVestingSchedule(msg.sender, cliff, duration, 1, false, _vestedTokenAmount, availableAtTGE);
     }
@@ -187,8 +210,6 @@ contract TokenPreSale is Ownable {
 
     function endSale() external onlyOwner {
         // Send unsold tokens to owner.
-        // require(tokenContract.transfer(ow, tokenContract.balanceOf(address(this))));
-        // payable(address(vesting)).transfer(address(this).balance);
         saleStatus = SaleStatus.Pause;
         uint256 _withdrawableAmount = vesting.getWithdrawableAmount();
         if (_withdrawableAmount > 0) {

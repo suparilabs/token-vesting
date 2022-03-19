@@ -24,7 +24,6 @@ export interface TokenPreTimelockInterface extends utils.Interface {
     "alreadyWithdrawn(address)": FunctionFragment;
     "balances(address)": FunctionFragment;
     "bulkDepositTokens(address[],uint256[])": FunctionFragment;
-    "contractBalance()": FunctionFragment;
     "depositTokens(address,uint256)": FunctionFragment;
     "getCurrentTime()": FunctionFragment;
     "getToken()": FunctionFragment;
@@ -51,10 +50,6 @@ export interface TokenPreTimelockInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "bulkDepositTokens",
     values: [string[], BigNumberish[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "contractBalance",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "depositTokens",
@@ -110,10 +105,6 @@ export interface TokenPreTimelockInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "balances", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "bulkDepositTokens",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "contractBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -242,8 +233,6 @@ export interface TokenPreTimelock extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    contractBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     depositTokens(
       recipient: string,
       amount: BigNumberish,
@@ -301,8 +290,6 @@ export interface TokenPreTimelock extends BaseContract {
     amounts: BigNumberish[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  contractBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   depositTokens(
     recipient: string,
@@ -364,8 +351,6 @@ export interface TokenPreTimelock extends BaseContract {
       amounts: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
-
-    contractBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     depositTokens(
       recipient: string,
@@ -459,8 +444,6 @@ export interface TokenPreTimelock extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    contractBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
     depositTokens(
       recipient: string,
       amount: BigNumberish,
@@ -527,8 +510,6 @@ export interface TokenPreTimelock extends BaseContract {
       amounts: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    contractBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     depositTokens(
       recipient: string,
