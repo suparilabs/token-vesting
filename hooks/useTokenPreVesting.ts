@@ -146,3 +146,16 @@ export function useSetTimeStamp(vesting: string, suspense = false): SWRResponse<
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
+
+function getStart(contract: TokenPreVesting): () => Promise<string> {
+  return async (): Promise<string> => contract.start().then((result: BigNumber) => result.toString());
+}
+
+export function useStart(vesting: string, suspense = false): SWRResponse<string, any> {
+  const contract = <TokenPreVesting>useContract(vesting, TokenPreVesting__factory.abi, true);
+  const result: any = useSWR(contract ? [vesting, "start", Boolean] : null, getStart(contract), {
+    suspense,
+  });
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
+  return result;
+}
