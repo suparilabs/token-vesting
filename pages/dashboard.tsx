@@ -306,32 +306,32 @@ function Dashboard(): JSX.Element {
                         data-wow-duration="2s"
                       >
                         <div className="card shadow-lg card-1">
-                          <div className="row justify-content-end mb-5">
-                            <div className="col-lg-12 col-auto ">
-                              <button
+                          {/* <div className="row justify-content-end mb-5"> */}
+                            {/* <div className="col-lg-12 col-auto "> */}
+                              {/* <button
                                 type="button"
                                 className="btn btn-primary btn-block"
                                 disabled={!active}
                                 onClick={handleStartSale}
                               >
                                 <small className="font-weight-bold">Start</small>
-                              </button>
-                              <button
+                              </button> */}
+                              {/* <button
                                 type="button"
                                 className="btn btn-danger btn-block"
                                 onClick={handleEndSale}
                                 disabled={!active}
                               >
                                 <small className="font-weight-bold">Stop</small>
-                              </button>
+                              </button> */}
                               {/* <button type="button" className="btn btn-success btn-block">
                                 <small className="font-weight-bold">Transfer Ownership</small>
                               </button>
                               <button type="button" className="btn btn-primary btn-block" onClick={dispCsvData}>
                                 <small className="font-weight-bold">Display CSV data</small>
                               </button> */}
-                            </div>
-                          </div>
+                            {/* </div> */}
+                          {/* </div> */}
                           <div className="card-body inner-card border">
                             <div className="row justify-content-between text-left">
                               <div className="form-group col-sm-6 flex-column d-flex">
@@ -862,8 +862,8 @@ function Dashboard(): JSX.Element {
                                 <input
                                   type="text"
                                   className="form-control form-control-sm"
-                                  placeholder="start of pause"
-                                  aria-label="start of pause"
+                                  placeholder="start or pause"
+                                  aria-label="start or pause"
                                   aria-describedby="basic-addon2"
                                 />
                                 <div className="input-group-append">
