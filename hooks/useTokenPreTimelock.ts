@@ -15,16 +15,6 @@ export function useBulkDepositTokens(tokenPreTimeLockAddress: string, address: s
   };
 }
 
-//read calls from tokenpretimelock seed
-// Incoming Deposits Allowed : LIVE
-// Contract Address : 0x
-// owner : 0x
-// token : 0x
-// timestampset : false
-// initialtimestamp : March 1 , 1970
-// timeperiod : 1 month
-// SEED PRE TIMELOCK : 0xFA4eB82E4e25111c46EED6DED56E45e9233bF001
-
 //Fetching owner --
 export function usePreTimelockFetchOwner(
   contractAddress: string,

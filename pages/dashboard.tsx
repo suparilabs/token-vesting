@@ -349,6 +349,11 @@ function Dashboard(): JSX.Element {
     setNewOwner(e.target.value);
   };
 
+  // const onChange = e => {
+  //   e.preventDefault();
+  //   setNewOwner(e.target.value);
+  // };
+
   return (
     <div>
       {/* <!-- Section --> */}
@@ -418,7 +423,7 @@ function Dashboard(): JSX.Element {
                                   name="availableontge"
                                   placeholder="Available on tge"
                                   value={availableTge}
-                                  onChange={e => onChangeTime(e)}
+                                  onChange={e => onChangeTGE(e)}
                                 />{" "}
                               </div>
                               <div className="form-group col-sm-6 flex-column d-flex">
