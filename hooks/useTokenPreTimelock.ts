@@ -65,7 +65,6 @@ function getTimestampStatus(contract: TokenPreTimelock): (address: string) => Pr
 }
 
 //Timetamp initial value
-
 export function useTimestampInitialStatus(
   contractAddress: string,
   chainId: number,
@@ -108,7 +107,7 @@ export function useSetTimestampPreTimelock(contractAddress: string, chainId: num
 }
 
 //transfer ownership
-export function useTransferOwnership(contractAddress: string, newOwnerAddress: string, chainId: number): any {
+export function useTransferOwnershipTimelock(contractAddress: string, newOwnerAddress: string, chainId: number): any {
   const contract = <TokenPreTimelock>useContract(contractAddress, TokenPreTimelock__factory.abi, true);
   return async () => {
     return (contract as Contract).transferOwnership(newOwnerAddress);

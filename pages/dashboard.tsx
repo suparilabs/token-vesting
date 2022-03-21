@@ -7,7 +7,22 @@ import { useStartSale, useEndSale } from "../hooks/useTokenPreSale";
 import { useTokenTransfer } from "../hooks/useTokenTransfer";
 import { addresses, desiredChain } from "../constants";
 import { toast } from "react-toastify";
-import { useCreateBulkVestingSchedule, useSetTimeStamp } from "../hooks/useTokenPreVesting";
+import { 
+  useCreateBulkVestingSchedule, 
+  useSetTimeStamp,
+  useTimestampInitialStatusVesting,
+  useTimestampStatusVesting,
+  usePreVestingToken,
+  usePreVestingFetchOwner,
+  useStartPreVesting,
+  useVestingScheduleTotalAmt,
+  useVestingScheduleTotalCount,
+  useWithdrawableAmt,
+  useSetTimestampPreVesting, 
+  useTransferOwnershipVesting,
+  useVestingWithdraw,
+  useRevoke
+ } from "../hooks/useTokenPreVesting";
 import { 
   useBulkDepositTokens, 
   usePreTimelockFetchOwner,
@@ -16,7 +31,7 @@ import {
   useTimestampInitialStatus,
   useTimeperiodValue,
   useSetTimestampPreTimelock,
-  useTransferOwnership
+  useTransferOwnershipTimelock
  } from "../hooks/useTokenPreTimelock";
 
 import { useTokenBalance } from "../hooks/useTokenBalance";
@@ -41,10 +56,12 @@ function Dashboard(): JSX.Element {
   const [round, setRound] = React.useState<string>();
   const [timePeriod, setTimePeriod] = React.useState<any>();
   const [newOwner, setNewOwner] = React.useState<string>("");
+  const [withdrawAmt, setWithdrawAmt] = React.useState<any>();
+  const [isValidAmt, setIsValidAmt] = React.useState<boolean>(true);
   //hooks for seed round
   const [beneficiaries, setBeneficiaries] = React.useState<any>([]);
   const [totalNonVestingAmt, setTotalNonVestingAmt] = React.useState<string>("0");
-
+  const [scheduleID, setScheduleID] = React.useState<any>();
   const [totalVestingAmt, setTotalVestingAmt] = React.useState<any>("0");
   const [nonVestingAmt, setNonVestingAmt] = React.useState<any>("0");
   const [vestingAmt, setVestingAmt] = React.useState<any>([]);
@@ -124,6 +141,8 @@ function Dashboard(): JSX.Element {
   );
   //contract addresses 
   const seedPreTimelockAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].SEED_PRE_TIME_LOCK;
+  const seedTokenPreVesting = addresses[chainId != undefined ? chainId : desiredChain.chainId].SEED_PRE_VESTING;
+
   //web3
   const handleSendTGETokensNow = async e => {
     e.preventDefault();
@@ -178,20 +197,32 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  //SEED ROUND _ READ CALLS 
+  //SEED ROUND _ READ CALLS: PRETIMELOCK 
   const {data: ownerAddressSeedPretimelock} = usePreTimelockFetchOwner(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: tokenAddressSeedPretimelock} = usePreTimelockToken(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatus} = useTimestampStatus(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatus} = useTimestampInitialStatus(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampStatusTimelock} = useTimestampStatus(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampInitialStatusTimelock} = useTimestampInitialStatus(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timePeriodValue} = useTimeperiodValue(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   
-
-  //SEED ROUND _ WRITE CALLS
+  //SEED ROUND _ READ CALLS: PREVESTING
+  const {data: ownerAddressSeedPrevesting} = usePreVestingFetchOwner(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: tokenAddressSeedPrevesting} = usePreVestingToken(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampStatusVesting} = useTimestampStatusVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampInitialStatusVesting} = useTimestampInitialStatusVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: startTime}  = useStartPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingTotalAmount} = useVestingScheduleTotalAmt(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingTotalCount} = useVestingScheduleTotalCount(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingWithdrawableAmt} = useWithdrawableAmt(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  //SEED ROUND _ PRETIMELOCK WRITE CALLS
   const setPreTimelockTimestamp = useSetTimestampPreTimelock(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnership = useTransferOwnership(seedPreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setTransferOwnershipTimelock = useTransferOwnershipTimelock(seedPreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  //SEED ROUND _ PREVESTING WRITE CALLS 
+  const setPreVestingTimestamp = useSetTimestampPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
+  const setTransferOwnershipVesting = useTransferOwnershipVesting(seedTokenPreVesting, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setVestingWithdraw = useVestingWithdraw(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setRevokeParams = useRevoke(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
 
-
-  const setTimestampHandler = async(e) => {
+  const setTimestampHandlerTimelock = async(e) => {
     if(timePeriod != undefined) {
       const txTimestamp =  await setPreTimelockTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
@@ -200,9 +231,45 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const transferOwnershipHandler = async(e) => {
+  const setRevokeParam = async(e) => {
+    if(timePeriod != undefined) {
+      const txWithdraw =  await setRevokeParams();
+      await notifySetTimestamp(txWithdraw.wait(1));
+    } else {
+      setTimePeriod(0);
+    }
+  };
+
+  const setTimestampHandlerVesting = async(e) => {
+    if(timePeriod != undefined) {
+      const txTimestamp =  await setPreVestingTimestamp();
+      await notifySetTimestamp(txTimestamp.wait(1));
+    } else {
+      setTimePeriod(0);
+    }
+  };
+
+  const setWithdrawVesting = async(e) => {
+    if(timePeriod != undefined) {
+      const txWithdraw =  await setVestingWithdraw();
+      await notifySetTimestamp(txWithdraw.wait(1));
+    } else {
+      setTimePeriod(0);
+    }
+  };
+
+  const transferOwnershipHandlerTimelock = async(e) => {
     if(newOwner != "" || newOwner != undefined) {
-      const txTransferOwnership = await setTransferOwnership();
+      const txTransferOwnership = await setTransferOwnershipTimelock();
+      await notifyTransferOwnership(txTransferOwnership.wait(1));
+    } else { 
+      setNewOwner("0x");
+    }
+  };
+
+  const transferOwnershipHandlerVesting = async(e) => {
+    if(newOwner != "" || newOwner != undefined) {
+      const txTransferOwnership = await setTransferOwnershipVesting();
       await notifyTransferOwnership(txTransferOwnership.wait(1));
     } else { 
       setNewOwner("0x");
@@ -341,12 +408,27 @@ function Dashboard(): JSX.Element {
   const onChangeTime = e => {
     e.preventDefault();
     setTimePeriod(e.target.value);
-    setIsValidDuration(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
   };
 
   const onChangeNewAddress = e => {
     e.preventDefault();
     setNewOwner(e.target.value);
+  };
+
+  const onChangeRevoke = e => {
+    e.preventDefault();
+    setScheduleID(e.target.value);
+  };
+
+  const onChangeNewAmt = e => {
+    e.preventDefault();
+    setWithdrawAmt(e.target.value);
+    setIsValidAmt(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
+  };
+
+  const onChangeWithdraw = e => {
+    e.preventDefault();
+    setWithdrawAmt(e.target.value);
   };
 
   // const onChange = e => {
@@ -549,8 +631,8 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">Contract Address : {seedPreTimelockAddress}</li>
                             <li className="list-group-item">owner : {ownerAddressSeedPretimelock}</li>
                             <li className="list-group-item">token : {tokenAddressSeedPretimelock}</li>
-                            <li className="list-group-item">timestampset : {timestampStatus}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatus}</li>
+                            <li className="list-group-item">timestampset : {timestampStatusTimelock as boolean}</li>
+                            <li className="list-group-item">initial timestamp : {timestampInitialStatusTimelock}</li>
                             <li className="list-group-item">timeperiod : {timePeriodValue}</li>
                             <li className="list-group-item">
                               <div className="input-group">
@@ -564,7 +646,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeTime(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerTimelock}>
                                     set Time Stamp
                                   </button>
                                 </div>
@@ -582,7 +664,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeNewAddress(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerTimelock}>
                                     transfer Ownership
                                   </button>
                                 </div>
@@ -613,15 +695,15 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">
                               Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
                             </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">start : March 1 , 1970</li>
-                            <li className="list-group-item">vestingschedulestotalamount : 1234 SERA</li>
-                            <li className="list-group-item">vesting schedule count : 12</li>
-                            <li className="list-group-item">withdrawable amount : 1200 SERA</li>
+                            <li className="list-group-item">Contract Address : {seedTokenPreVesting}</li>
+                            <li className="list-group-item">owner : {ownerAddressSeedPrevesting}</li>
+                            <li className="list-group-item">token : {tokenAddressSeedPrevesting}</li>
+                            <li className="list-group-item">timestampset : {timestampStatusVesting as boolean}</li>
+                            <li className="list-group-item">initial timestamp : {timestampInitialStatusVesting}</li>
+                            <li className="list-group-item">start : {startTime}</li>
+                            <li className="list-group-item">vesting schedules total amount : {prevestingTotalAmount} SERA</li>
+                            <li className="list-group-item">vesting schedule count : {prevestingTotalCount}</li>
+                            <li className="list-group-item">withdrawable amount : {prevestingWithdrawableAmt}</li>
                             <li className="list-group-item">
                               <div className="input-group">
                                 <input
@@ -630,9 +712,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="timestamp in seconds"
                                   aria-label="timestamp in seconds"
                                   aria-describedby="basic-addon2"
+                                  value={timePeriod}
+                                  onChange={e => onChangeTime(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerVesting}>
                                     set Time Stamp
                                   </button>
                                 </div>
@@ -646,9 +730,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="new owner"
                                   aria-label="new owner"
                                   aria-describedby="basic-addon2"
+                                  value={newOwner}
+                                  onChange={e => onChangeNewAddress(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerVesting}>
                                     transfer Ownership
                                   </button>
                                 </div>
@@ -662,9 +748,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="token amount"
                                   aria-label="token amount"
                                   aria-describedby="basic-addon2"
+                                  value={withdrawAmt}
+                                  onChange={e => onChangeNewAmt(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setWithdrawVesting}>
                                     Withdraw
                                   </button>
                                 </div>
@@ -678,9 +766,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="vesting schedule id"
                                   aria-label="vesting schedule id"
                                   aria-describedby="basic-addon2"
+                                  value={scheduleID}
+                                  onChange={e => onChangeRevoke(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokeParam}>
                                     REVOKE
                                   </button>
                                 </div>

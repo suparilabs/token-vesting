@@ -146,3 +146,179 @@ export function useSetTimeStamp(vesting: string, suspense = false): SWRResponse<
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
+
+//Fetching owner --
+export function usePreVestingFetchOwner(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "vestingOwner", contractAddress, DataType.Address] : null,
+    getOwner(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getOwner(contract: TokenPreVesting): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.owner().then((result: string) => result.toString());
+}
+
+//Fetching Token ---
+export function usePreVestingToken(contractAddress: string, chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "vestingToken", contractAddress, DataType.Address] : null,
+    getToken(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getToken(contract: TokenPreVesting): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.getToken().then((result: string) => result.toString());
+}
+
+// Timestamp
+export function useTimestampStatusVesting(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "vestingTimestamp", contractAddress, DataType.Address] : null,
+    getTimestampStatus(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getTimestampStatus(contract: TokenPreVesting): (address: string) => Promise<boolean> {
+  return async (): Promise<boolean> => contract.timestampSet().then((result: any) => result);
+}
+
+// Initial Timestamp
+export function useTimestampInitialStatusVesting(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "vestingInitialStatus", contractAddress, DataType.Address] : null,
+    getTimestampInitialStatus(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getTimestampInitialStatus(contract: TokenPreVesting): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.initialTimestamp().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//Start
+export function useStartPreVesting(contractAddress: string, chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "vestingStart", contractAddress, DataType.Address] : null,
+    getStartTime(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getStartTime(contract: TokenPreVesting): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.start().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//Vesting schedules total amount
+export function useVestingScheduleTotalAmt(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "vestingTotalAmount", contractAddress, DataType.Address] : null,
+    getVestingSchedulesTotalAmt(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getVestingSchedulesTotalAmt(contract: TokenPreVesting): (address: string) => Promise<any> {
+  return async (): Promise<any> =>
+    contract.getVestingSchedulesTotalAmount().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//Vesting schedules total count
+export function useVestingScheduleTotalCount(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "vestingTotalCount", contractAddress, DataType.Address] : null,
+    getVestingSchedulesCount(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getVestingSchedulesCount(contract: TokenPreVesting): (address: string) => Promise<any> {
+  return async (): Promise<any> =>
+    contract.getVestingSchedulesCount().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//Withdrawable amount
+export function useWithdrawableAmt(contractAddress: string, chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "vestingWithdrawableAmt", contractAddress, DataType.Address] : null,
+    getWithdrawAmt(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getWithdrawAmt(contract: TokenPreVesting): (address: string) => Promise<any> {
+  return async (): Promise<any> =>
+    contract.getWithdrawableAmount().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//WRITE CALLS
+//setting timeperiod value in setTimestamp function
+export function useSetTimestampPreVesting(contractAddress: string, chainId: number, timePeriod: number): any {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
+  return async () => {
+    return (contract as Contract).setTimestamp(timePeriod);
+  };
+}
+
+//transfer ownership
+export function useTransferOwnershipVesting(contractAddress: string, newOwnerAddress: string, chainId: number): any {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
+  return async () => {
+    return (contract as Contract).transferOwnership(newOwnerAddress);
+  };
+}
+
+//withdraw
+export function useVestingWithdraw(contractAddress: string, amount: number, chainId: number): any {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
+  return async () => {
+    return (contract as Contract).withdraw(amount);
+  };
+}
+
+//revoke
+export function useRevoke(contractAddress: string, vestingScheduleId: string, chainId: number): any {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
+  return async () => {
+    return (contract as Contract).revoke(vestingScheduleId);
+  };
+}
