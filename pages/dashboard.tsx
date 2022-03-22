@@ -269,8 +269,8 @@ function Dashboard(): JSX.Element {
   const {data: maxBusd} = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: availableAtTGE} = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
   //IDO ROUND _ WRITE CALLS: PRESALE
-  const {data: setExchangePriceUsdt} = useSetExchangePriceUsdt(priceUsdt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: setExchangePriceBusd} = useSetExchangePriceBusd(priceBusd, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setExchangePriceUsdt = useSetExchangePriceUsdt(priceUsdt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setExchangePriceBusd= useSetExchangePriceBusd(priceBusd, chainId == undefined ? desiredChain.chainId : (chainId as number));
   //SEED ROUND _ READ CALLS: PREVESTING
   const {data: ownerAddressSeedPrevesting} = usePreVestingFetchOwner(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: tokenAddressSeedPrevesting} = usePreVestingToken(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));

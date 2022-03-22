@@ -53,7 +53,7 @@ export function useSetCliffPeriod(chainId: number, cliff: number): any {
 export function useSetDuration(chainId: number, duration: number): any {
   const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
   return async () => {
-    return (contract as Contract).setAvailableAtTGE(duration);
+    return (contract as Contract).setDuration(duration);
   };
 }
 
