@@ -168,3 +168,223 @@ export function useTxApprove(token: string, amount: BigNumber, chainId: number):
       .then((result: boolean) => result);
   };
 }
+
+//DASHBOARD FUNCTIONALITY _ IDO TOKEN PRESALE
+function getPreSaleTokenAddress(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.token().then((result: string) => result.toString());
+}
+
+export function useTokenPreSaleAddress(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract ? [chainId, "tokenPresale", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
+    getPreSaleTokenAddress(contract),
+    { suspense },
+  );
+  return result;
+}
+
+//Fetching owner --
+export function usePreSaleFetchOwner(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreSale>useContract(contractAddress, TokenPreSale__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "tokenPreSaleOwner", contractAddress, DataType.Address] : null,
+    getOwner(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getOwner(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.owner().then((result: string) => result.toString());
+}
+
+//Coins Sold
+export function usePreSaleCoinsSoldInfo(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreSale>useContract(contractAddress, TokenPreSale__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "tokenPreSaleCoinsSold", contractAddress, DataType.Address] : null,
+    getCoinsSold(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getCoinsSold(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.coinsSold().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//Exchange Prices
+export function useExchangePriceUsdt(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract
+      ? [chainId, "tokenPreSaleExchangePriceUsdt", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      : null,
+    getExhangePriceUSDT(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getExhangePriceUSDT(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> =>
+    contract.exchangePriceUSDT().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+export function useExchangePriceBusd(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract
+      ? [chainId, "tokenPreSaleExchangePriceBusd", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      : null,
+    getExhangePriceBUSD(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getExhangePriceBUSD(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> =>
+    contract.exchangePriceBUSD().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//get duration
+export function useDuration(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract
+      ? [chainId, "tokenPreSaleDuration", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      : null,
+    getDuration(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getDuration(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.duration().then((result: any) => BigNumber.from(result).toNumber());
+}
+//get cliff
+export function useCliff(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract ? [chainId, "tokenPreSaleCliff", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
+    getCliff(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getCliff(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.cliff().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//get min buy amt
+export function useMinBuyAmountUSDT(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract
+      ? [chainId, "tokenPreSaleMinUsdt", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      : null,
+    getMinBuyAmtUsdt(contract),
+    { suspense },
+  );
+  return result;
+}
+export function useMaxBuyAmountUSDT(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract
+      ? [chainId, "tokenPreSaleMaxUsdt", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      : null,
+    getMaxBuyAmtUsdt(contract),
+    { suspense },
+  );
+  return result;
+}
+export function useMinBuyAmountBusd(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract
+      ? [chainId, "tokenPreSaleMinBusd", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      : null,
+    getMinBuyAmtBusd(contract),
+    { suspense },
+  );
+  return result;
+}
+
+export function useMaxBuyAmountBusd(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract
+      ? [chainId, "tokenPreSaleMaxBusd", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      : null,
+    getMaxBuyAmtBusd(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getMinBuyAmtUsdt(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.minBuyAmountUSDT().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+function getMaxBuyAmtUsdt(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.maxBuyAmountUSDT().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+function getMinBuyAmtBusd(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.minBuyAmountBUSD().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+function getMaxBuyAmtBusd(contract: TokenPreSale): (address: string) => Promise<any> {
+  return async (): Promise<any> => contract.maxBuyAmountBUSD().then((result: any) => BigNumber.from(result).toNumber());
+}
+
+//setExchangePriceUSDT
+export function useSetExchangePriceUsdt(price: number, chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return (contract as Contract).setExchangePriceUSDT(price).then((result: any) => result);
+  };
+}
+
+//setExchangePriceBUSD
+export function useSetExchangePriceBusd(price: number, chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return (contract as Contract).setExchangePriceBUSD(price).then((result: any) => result);
+  };
+}

@@ -137,7 +137,6 @@ contract TokenPreSale is Ownable {
             token.transferFrom(owner(), address(vesting), _vestedTokenAmount),
             "TokenPreSale: token -> tokenprevesting"
         );
-
         vesting.createVestingSchedule(msg.sender, cliff, duration, 1, false, _vestedTokenAmount, availableAtTGE);
     }
 
