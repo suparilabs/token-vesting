@@ -247,7 +247,6 @@ function Dashboard(): JSX.Element {
   const {data: timePeriodPrivateValue} = useTimeperiodValue(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   //IDO ROUND _ READ CALLS: PRETIMELOCK
   const {data: ownerAddressIDOPretimelock} = usePreTimelockFetchOwner(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressIDOTokenPretimelock} = usePreTimelockToken(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timestampStatusIDOTimelock} = useTimestampStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timestampInitialStatusIDOTimelock} = useTimestampInitialStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timePeriodIDOTimelockValue} = useTimeperiodValue(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -290,6 +289,16 @@ function Dashboard(): JSX.Element {
   const {data: prevestingPrivateTotalAmount} = useVestingScheduleTotalAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: prevestingPrivateTotalCount} = useVestingScheduleTotalCount(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: prevestingPrivateWithdrawableAmt} = useWithdrawableAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+
+  //IDO ROUND _ READ CALLS: PREVESTING
+  const {data: ownerAddressIDOPrevesting} = usePreVestingFetchOwner(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: tokenAddressIDOPrevesting} = usePreVestingToken(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampStatusIDOVesting} = useTimestampStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampInitialStatusIDOVesting} = useTimestampInitialStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: startTimeIDO}  = useStartPreVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingIDOTotalAmount} = useVestingScheduleTotalAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingIDOTotalCount} = useVestingScheduleTotalCount(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingIDOWithdrawableAmt} = useWithdrawableAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
 
   //SEED ROUND _ PRETIMELOCK WRITE CALLS
   const setPreTimelockTimestamp = useSetTimestampPreTimelock(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
@@ -1119,7 +1128,7 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">BUSD : {tokenBUSD}</li>
                             <li className="list-group-item">coinsSold : {coinsSold}</li>
                             <li className="list-group-item">exchangePriceUSDT : {valueExchangePriceUsdt !== undefined ? valueExchangePriceUsdt : 0}</li>
-                            <li className="list-group-item">exchangePriceBUSD : {valueExchangePriceBusd !== undefined ? valueExchangePriceUsdt : 0}</li>
+                            <li className="list-group-item">exchangePriceBUSD : {valueExchangePriceBusd !== undefined ? valueExchangePriceBusd : 0}</li>
                             <li className="list-group-item">duration : {getPreSaleDuration}</li>
                             <li className="list-group-item">cliff : {getPreSaleCliff}</li>
                             <li className="list-group-item">minBuyAmountUSDT : {minUsdt !== undefined ? minUsdt : 0} USDT</li>
@@ -1361,12 +1370,12 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">
                               Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
                             </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">timeperiod : 1 month</li>
+                            <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
+                            <li className="list-group-item">owner : {ownerAddressIDOPretimelock}</li>
+                            <li className="list-group-item">token : {tokenAddressIDOPretimelock}</li>
+                            <li className="list-group-item">timestampset : {timestampStatusIDOTimelock !== undefined ? timestampStatusIDOTimelock.toString() : 0}</li>
+                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOTimelock !== undefined ? timestampInitialStatusIDOTimelock : 0}</li>
+                            <li className="list-group-item">timeperiod : {timePeriodIDOTimelockValue !== undefined ? timePeriodIDOTimelockValue : 0}</li>
                           </ul>
                           </div>
 
@@ -1376,15 +1385,15 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">
                               Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
                             </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">start : March 1 , 1970</li>
-                            <li className="list-group-item">vestingschedulestotalamount : 1234 SERA</li>
-                            <li className="list-group-item">vesting schedule count : 12</li>
-                            <li className="list-group-item">withdrawable amount : 1200 SERA</li>
+                            <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
+                            <li className="list-group-item">owner : {ownerAddressIDOPrevesting}</li>
+                            <li className="list-group-item">token : {tokenAddressIDOPrevesting}</li>
+                            <li className="list-group-item">timestampset : {timestampStatusIDOVesting.toString()}</li>
+                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOVesting}</li>
+                            <li className="list-group-item">start : {startTimeIDO}</li>
+                            <li className="list-group-item">vestingschedulestotalamount : {prevestingIDOTotalAmount} SERA</li>
+                            <li className="list-group-item">vesting schedule count : {prevestingIDOTotalCount}</li>
+                            <li className="list-group-item">withdrawable amount : {prevestingIDOWithdrawableAmt} SERA</li>
                           </ul>
                           </div>
                         </div>
