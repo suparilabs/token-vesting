@@ -3,6 +3,8 @@ import Papa from "papaparse";
 import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import BN from "bignumber.js";
+import { secondsToDhms } from "../utils";
+import moment from "moment";
 import { 
   useUSDT,
   useBUSD,
@@ -344,7 +346,7 @@ function Dashboard(): JSX.Element {
   const {data: timestampInitialStatusPrivateTimelock} = useTimestampInitialStatus(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timePeriodPrivateValue} = useTimeperiodValue(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: incomingDepositStatusPPT} = useIncomingDepositsFinalised(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-
+  
   //PRIVATE ROUND _ PRETIMELOCK WRITE CALLS
   const setPreTimelockPrivateTimestamp = useSetTimestampPreTimelock(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
   const setTransferOwnershipPrivateTimelock = useTransferOwnershipTimelock(privatePreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -1099,8 +1101,8 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">owner : {ownerAddressSeedPretimelock}</li>
                             <li className="list-group-item">token : {tokenAddressSeedPretimelock}</li>
                             <li className="list-group-item">timestampset : {timestampStatusSeedTimelock != undefined ? timestampStatusSeedTimelock.toString(): false}</li>
-                            <li className="list-group-item">initial timestamp : {timestampInitialStatusSeedTimelock}</li>
-                            <li className="list-group-item">timeperiod : {timePeriodValue}</li>
+                            <li className="list-group-item">initial timestamp : {moment.unix(timestampInitialStatusSeedTimelock).format("MMMM DD, YYYY")}</li>
+                            <li className="list-group-item">timeperiod : {secondsToDhms(timePeriodValue)}</li>
                             <li className="list-group-item">
                               <div className="input-group">
                                 <input
@@ -1183,8 +1185,8 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">owner : {ownerAddressSeedPrevesting}</li>
                             <li className="list-group-item">token : {tokenAddressSeedPrevesting}</li>
                             <li className="list-group-item">timestampset : {timestampStatusSeedVesting != undefined? timestampStatusSeedVesting.toString() : false}</li>
-                            <li className="list-group-item">initial timestamp : {timestampInitialStatusVesting}</li>
-                            <li className="list-group-item">start : {startTime}</li>
+                            <li className="list-group-item">initial timestamp : {moment.unix(timestampInitialStatusVesting).format("MMMM DD, YYYY")}</li>
+                            <li className="list-group-item">start : {moment.unix(startTime).format("MMMM DD, YYYY")}</li>
                             <li className="list-group-item">vesting schedules total amount : {prevestingTotalAmount} SERA</li>
                             <li className="list-group-item">vesting schedule count : {prevestingTotalCount}</li>
                             <li className="list-group-item">withdrawable amount : {prevestingWithdrawableAmt}</li>
@@ -1279,8 +1281,9 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">owner : {ownerAddressPrivatePretimelock}</li>
                             <li className="list-group-item">token : {tokenAddressPrivatePretimelock}</li>
                             <li className="list-group-item">timestampset : {timestampStatusPrivateTimelock != undefined ? timestampStatusPrivateTimelock.toString() : false}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusPrivateTimelock}</li>
-                            <li className="list-group-item">timeperiod : {timePeriodPrivateValue}</li>
+                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusPrivateTimelock != undefined ? moment.unix(timestampInitialStatusPrivateTimelock).format("MMMM DD, YYYY") : 0}</li>
+                            <li className="list-group-item">timeperiod : {timePeriodPrivateValue != undefined ? secondsToDhms(timePeriodPrivateValue) : timePeriodPrivateValue.toString()}</li>
+                          
                             <li className="list-group-item">
                               <div className="input-group">
                                 <input
@@ -1363,8 +1366,8 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">owner : {ownerAddressPrivatePrevesting}</li>
                             <li className="list-group-item">token : {tokenAddressPrivatePrevesting}</li>
                             <li className="list-group-item">timestampset : {timestampStatusPrivateVesting != undefined ? timestampStatusPrivateVesting.toString() : false}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusPrivateVesting}</li>
-                            <li className="list-group-item">start : {startTimePrivate}</li>
+                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusPrivateVesting != undefined ? moment.unix(timestampInitialStatusPrivateVesting).format("MMMM DD, YYYY") : 0}</li>
+                            <li className="list-group-item">start : {startTimePrivate != undefined ? moment.unix(startTimePrivate).format("MMMM DD, YYYY") : 0}</li>
                             <li className="list-group-item">vestingschedulestotalamount : {prevestingPrivateTotalAmount} SERA</li>
                             <li className="list-group-item">vesting schedule count : {prevestingPrivateTotalCount}</li>
                             <li className="list-group-item">withdrawable amount : {prevestingPrivateWithdrawableAmt} SERA</li>
@@ -1460,8 +1463,8 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">coinsSold : {coinsSold}</li>
                             <li className="list-group-item">exchangePriceUSDT : {valueExchangePriceUsdt !== undefined ? valueExchangePriceUsdt : 0}</li>
                             <li className="list-group-item">exchangePriceBUSD : {valueExchangePriceBusd !== undefined ? valueExchangePriceBusd : 0}</li>
-                            <li className="list-group-item">duration : {getPreSaleDuration}</li>
-                            <li className="list-group-item">cliff : {getPreSaleCliff}</li>
+                            <li className="list-group-item">duration : {secondsToDhms(getPreSaleDuration)}</li>
+                            <li className="list-group-item">cliff : {secondsToDhms(getPreSaleCliff)}</li>
                             <li className="list-group-item">minBuyAmountUSDT : {minUsdt !== undefined ? minUsdt : 0} USDT</li>
                             <li className="list-group-item">maxBuyAmountUSDT : {maxUsdt !== undefined ? maxUsdt : 0} USDT</li>
                             <li className="list-group-item">minBuyAmountBUSD : {minBusd !== undefined ? minBusd : 0} BUSD</li>
@@ -1744,8 +1747,8 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">owner : {ownerAddressIDOPretimelock}</li>
                             <li className="list-group-item">token : {tokenAddressIDOPretimelock}</li>
                             <li className="list-group-item">timestampset : {timestampStatusIDOTimelock !== undefined ? timestampStatusIDOTimelock.toString() : 0}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOTimelock !== undefined ? timestampInitialStatusIDOTimelock : 0}</li>
-                            <li className="list-group-item">timeperiod : {timePeriodIDOTimelockValue !== undefined ? timePeriodIDOTimelockValue : 0}</li>
+                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOTimelock !== undefined ? moment.unix(timestampInitialStatusIDOTimelock).format("MMMM DD, YYYY") : 0}</li>
+                            <li className="list-group-item">timeperiod : {timePeriodIDOTimelockValue !== undefined ? secondsToDhms(timePeriodIDOTimelockValue) : 0}</li>
                           </ul>
                           </div>
 
@@ -1765,8 +1768,8 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">owner : {ownerAddressIDOPrevesting}</li>
                             <li className="list-group-item">token : {tokenAddressIDOPrevesting}</li>
                             <li className="list-group-item">timestampset : {timestampStatusIDOVesting !== undefined ? timestampStatusIDOVesting.toString() : 0}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOVesting}</li>
-                            <li className="list-group-item">start : {startTimeIDO}</li>
+                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOVesting != undefined ? moment.unix(timestampInitialStatusIDOVesting).format("MMMM DD, YYYY") : 0}</li>
+                            <li className="list-group-item">start : {startTimeIDO != undefined ? moment.unix(startTimeIDO).format("MMMM DD, YYYY") : 0}</li>
                             <li className="list-group-item">vestingschedulestotalamount : {prevestingIDOTotalAmount} SERA</li>
                             <li className="list-group-item">vesting schedule count : {prevestingIDOTotalCount}</li>
                             <li className="list-group-item">withdrawable amount : {prevestingIDOWithdrawableAmt} SERA</li>
