@@ -388,3 +388,61 @@ export function useSetExchangePriceBusd(price: number, chainId: number): any {
     return (contract as Contract).setExchangePriceBUSD(price).then((result: any) => result);
   };
 }
+
+//setBuyAmountRangeBUSD
+export function useSetBuyAmountRangeBUSD(min: number, max: number, chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return (contract as Contract).setBuyAmountRangeBUSD(min, max).then((result: any) => result);
+  };
+}
+
+//setBuyAmountRangeUSDT
+export function useSetBuyAmountRangeUSDT(min: number, max: number, chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return (contract as Contract).setBuyAmountRangeUSDT(min, max).then((result: any) => result);
+  };
+}
+
+//Withdraw BUSD
+export function useWithdrawBUSD(chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return (contract as Contract).withdrawBUSD().then((result: any) => result);
+  };
+}
+
+//Withdraw USDT
+export function useWithdrawUSDT(chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return (contract as Contract).withdrawUSDT().then((result: any) => result);
+  };
+}
+//Withdraw from vesting
+export function useWithdrawFromVesting(amount: number, chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return (contract as Contract).withdrawFromVesting(amount).then((result: any) => result);
+  };
+}
+//Revoke
+export function useRevokePreSale(vestingScheduleId: number, chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return (contract as Contract).revoke(vestingScheduleId).then((result: any) => result);
+  };
+}

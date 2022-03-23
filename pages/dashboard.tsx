@@ -23,7 +23,16 @@ import {
   useMinBuyAmountBusd,
   useMaxBuyAmountBusd,
   useSetExchangePriceUsdt,
-  useSetExchangePriceBusd
+  useSetExchangePriceBusd,
+  useSetDuration,
+  useSetCliffPeriod,
+  useSetAvailableAtTGE,
+  useSetBuyAmountRangeBUSD,
+  useSetBuyAmountRangeUSDT,
+  useWithdrawBUSD,
+  useWithdrawUSDT,
+  useWithdrawFromVesting,
+  useRevokePreSale
  } from "../hooks/useTokenPreSale";
 import { useTokenTransfer } from "../hooks/useTokenTransfer";
 import { addresses, desiredChain } from "../constants";
@@ -69,11 +78,14 @@ function Dashboard(): JSX.Element {
   const [isValidTGE, setIsValidTGE] = React.useState<boolean>(true);
   const [isValidDuration, setIsValidDuration] = React.useState<boolean>(true);
   const [isValidCliff, setIsValidCliff] = React.useState<boolean>(true);
+  const [isValidAmount, setIsValidAmount] = React.useState<boolean>(true);
   const [enoughTokenBalance, setEnoughTokenBalance] = React.useState<boolean>(false);
   const [availableTge, setAvailableTge] = React.useState<string>("0");
   const [tges, setTges] = React.useState<any>([]);
   const [duration, setDuration] = React.useState<string>("0");
   const [cliff, setCliff] = React.useState<string>("0");
+  const [preSaleCliff, setPreSaleCliff] = React.useState<any>();
+  const [preSaleDuration, setPreSaleDuration] = React.useState<any>();
   const [cliffs, setCliffs] = React.useState<any>([]);
   const [round, setRound] = React.useState<string>();
   const [timePeriod, setTimePeriod] = React.useState<any>();
@@ -83,6 +95,13 @@ function Dashboard(): JSX.Element {
   const [tokenAmt, setTokenAmt] = React.useState<any>();
   const [priceUsdt, setPriceUsdt] = React.useState<any>();
   const [priceBusd, setPriceBusd] = React.useState<any>();
+  const [tgeValue, setTgeValue] = React.useState<any>();
+  const [saleStatus, setSaleStatus] = React.useState<any>();
+  const [minBusdValue, setMinBusdValue] = React.useState<any>();
+  const [maxBusdValue, setMaxBusdValue] = React.useState<any>();
+  const [minUsdtValue, setMinUsdtValue] = React.useState<any>();
+  const [maxUsdtValue, setMaxUsdtValue] = React.useState<any>();
+  const [tokenAmtWithdraw, setTokenAmtWithdraw] = React.useState<any>();
   //hooks for seed round
   const [beneficiaries, setBeneficiaries] = React.useState<any>([]);
   const [totalNonVestingAmt, setTotalNonVestingAmt] = React.useState<string>("0");
@@ -93,9 +112,7 @@ function Dashboard(): JSX.Element {
   const [durations, setDurations] = React.useState<any>([]);
   const [revocables, setRevocables] = React.useState<any>([]);
   const [slice, setSlice] = React.useState<any>([]);
-  //start and end sale
-  const handleStartSale = useStartSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const handleEndSale = useEndSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
+
   //FOR SEED ROUND
   const sendTokenToPreTimeLockForSeed = useTokenTransfer(
     chainId != undefined
@@ -192,6 +209,14 @@ function Dashboard(): JSX.Element {
     });
   };
 
+  const notifySaleStatus = async (promiseObj) => {
+    await toast.promise(promiseObj, {
+      pending: `Sale status getting updated`,
+      success: `Sale status updated👌`,
+      error: `Failed to update the sale status 🤯"`,
+    });
+  };
+
   const notifyBulkDepositTokens = async (promiseObj, roundName) => {
     await toast.promise(promiseObj, {
       pending: `Create token lock schedule on pre time lock for ${roundName} round`,
@@ -224,6 +249,14 @@ function Dashboard(): JSX.Element {
     });
   };
 
+  const notifySetEndSale = async (promiseObj) => {
+    await toast.promise(promiseObj, {
+      pending: `Ending Sale...`,
+      success: `Sale has ENDED👌`,
+      error: `Failed to end the sale 🤯"`,
+    });
+  };
+
   const notifyTransferOwnership = async (promiseObj) => {
     await toast.promise(promiseObj, {
       pending: `Transferring Ownership...`,
@@ -232,6 +265,37 @@ function Dashboard(): JSX.Element {
     });
   };
 
+  const notifySetBuyAmountBusd = async (promiseObj) => {
+    await toast.promise(promiseObj, {
+      pending: `Setting Busd`,
+      success: `BUSD is successfully SET👌`,
+      error: `Failed to set the value 🤯"`,
+    });
+  };
+
+  const notifySetBuyAmountUsdt = async (promiseObj) => {
+    await toast.promise(promiseObj, {
+      pending: `Setting Busd`,
+      success: `TGE value is successfully set👌`,
+      error: `Failed to set the value 🤯"`,
+    });
+  };
+
+  const notifySetAvailableAtTge = async (promiseObj) => {
+    await toast.promise(promiseObj, {
+      pending: `Setting TGE Value...`,
+      success: `TGE value is successfully set👌`,
+      error: `Failed to set the value 🤯"`,
+    });
+  };
+
+  const notifyWhenWithdraw = async (promiseObj) => {
+    await toast.promise(promiseObj, {
+      pending: `Withdraw in progress...`,
+      success: `Withdraw has successfully being made👌`,
+      error: `Failed to withdraw 🤯"`,
+    });
+  };
   //SEED ROUND _ READ CALLS: PRETIMELOCK 
   const {data: ownerAddressSeedPretimelock} = usePreTimelockFetchOwner(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: tokenAddressSeedPretimelock} = usePreTimelockToken(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -267,9 +331,23 @@ function Dashboard(): JSX.Element {
   const {data: minBusd} = useMinBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: maxBusd} = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: availableAtTGE} = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  
   //IDO ROUND _ WRITE CALLS: PRESALE
   const setExchangePriceUsdt = useSetExchangePriceUsdt(priceUsdt, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const setExchangePriceBusd= useSetExchangePriceBusd(priceBusd, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setPresaleDuration = useSetDuration(chainId == undefined ? desiredChain.chainId : (chainId as number), preSaleDuration);
+  const setPresaleCliff = useSetCliffPeriod(chainId == undefined ? desiredChain.chainId : (chainId as number), preSaleCliff);
+  const setPreSaleTimestamp = useSetTimestampPreTimelock(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
+  const availableAtTGEVal = useSetAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number), tgeValue * 100);
+  const startSale = useStartSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const endSale = useEndSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setBuyAmountBUSD = useSetBuyAmountRangeBUSD(minBusdValue, maxBusdValue, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setBuyAmountUSDT = useSetBuyAmountRangeUSDT(minUsdtValue, maxUsdtValue, chainId == undefined ? desiredChain.chainId : (chainId as number))
+  const withdrawUSDT = useWithdrawUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const withdrawBUSD = useWithdrawBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const withdrawFromVesting = useWithdrawFromVesting(tokenAmtWithdraw != undefined ? tokenAmtWithdraw : 0, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const revokePresale = useRevokePreSale(scheduleID != undefined ? scheduleID : 0, chainId == undefined ? desiredChain.chainId : (chainId as number));
+
   //SEED ROUND _ READ CALLS: PREVESTING
   const {data: ownerAddressSeedPrevesting} = usePreVestingFetchOwner(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: tokenAddressSeedPrevesting} = usePreVestingToken(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -317,62 +395,72 @@ function Dashboard(): JSX.Element {
   const setTransferOwnershipPrivateVesting = useTransferOwnershipVesting(seedTokenPreVesting, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const setVestingPrivateWithdraw = useVestingWithdraw(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const setRevokePrivateParams = useRevoke(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
-
+ 
   const setPreVestingPrivateTimestampHandler = async(e) => {
-    if(timePeriod != undefined) {
+    if(timePeriod != undefined || timePeriod != "") {
       const txTimestamp =  await setPreVestingPrivateTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
-  const setTransferOwnershipPrivateVestingHandler = async(e) => {
-    if(timePeriod != undefined) {
-      const txTimestamp =  await setTransferOwnershipPrivateVesting();
-      await notifySetTimestamp(txTimestamp.wait(1));
+  
+  const setPreSaleCliffHandler = async(e) => {
+    if(preSaleCliff != undefined) {
+      const txCliffPeriod =  await setPresaleCliff();
+      await notifySetTimestamp(txCliffPeriod.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
-  const setVestingPrivateWithdrawHandler = async(e) => {
-    if(timePeriod != undefined) {
-      const txTimestamp =  await setVestingPrivateWithdraw();
-      await notifySetTimestamp(txTimestamp.wait(1));
+
+  const setTransferOwnershipPrivateVestingHandler = async(e) => {
+    if(newOwner != undefined || newOwner != "") {
+      const txTransfer =  await setTransferOwnershipPrivateVesting();
+      await notifySetTimestamp(txTransfer.wait(1));
     } else {
-      setTimePeriod(0);
+      setNewOwner('0x');
+    }
+  };
+
+  const setVestingPrivateWithdrawHandler = async(e) => {
+    if(withdrawAmt != undefined || withdrawAmt != "") {
+      const txWithdraw =  await setVestingPrivateWithdraw();
+      await notifySetTimestamp(txWithdraw.wait(1));
+    } else {
+      setWithdrawAmt(0);
     }
   };
 
   const setRevokePrivateParamsHandler = async(e) => {
-    if(timePeriod != undefined) {
-      const txTimestamp =  await setRevokePrivateParams();
-      await notifySetTimestamp(txTimestamp.wait(1));
+    if(scheduleID != undefined || scheduleID != "") {
+      const txRevoke =  await setRevokePrivateParams();
+      await notifySetTimestamp(txRevoke.wait(1));
     } else {
-      setTimePeriod(0);
+      setScheduleID(0);
     }
   };
 
   const setExchangePriceUsdtHandler = async(e) => {
-    if(timePeriod != undefined) {
+    if(priceUsdt != undefined || priceUsdt != "") {
       const txExchange =  await setExchangePriceUsdt();
       await notifySetExchangePrice(txExchange.wait(1));
     } else {
-      setTimePeriod(0);
+      setPriceUsdt(0);
     }
   };
 
   const setExchangePriceBusdHandler = async(e) => {
-    if(timePeriod != undefined) {
+    if(priceBusd != undefined || priceBusd != "") {
       const txExchange =  await setExchangePriceBusd();
       await notifySetExchangePrice(txExchange.wait(1));
     } else {
-      setTimePeriod(0);
+      setPriceBusd(0);
     }
   };
 
   const setTimestampHandlerTimelock = async(e) => {
-    if(timePeriod != undefined) {
+    if(timePeriod != undefined || timePeriod != "") {
       const txTimestamp =  await setPreTimelockTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
     } else {
@@ -381,7 +469,7 @@ function Dashboard(): JSX.Element {
   };
 
   const setTimestampHandlerPrivateTimelock = async(e) => {
-    if(timePeriod != undefined) {
+    if(timePeriod != undefined || timePeriod != "") {
       const txTimestamp =  await setPreTimelockPrivateTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
     } else {
@@ -390,16 +478,25 @@ function Dashboard(): JSX.Element {
   };
 
   const setRevokeParam = async(e) => {
-    if(timePeriod != undefined) {
-      const txWithdraw =  await setRevokeSeedParams();
-      await notifySetTimestamp(txWithdraw.wait(1));
+    if(scheduleID != undefined || scheduleID != "") {
+      const txRevoke =  await setRevokeSeedParams();
+      await notifySetTimestamp(txRevoke.wait(1));
     } else {
-      setTimePeriod(0);
+      setScheduleID(0);
+    }
+  };
+
+  const setRevokeParamPresale = async(e) => {
+    if(scheduleID != undefined || scheduleID != "") {
+      const txRevoke =  await revokePresale();
+      await notifySetTimestamp(txRevoke.wait(1));
+    } else {
+      setScheduleID(0);
     }
   };
 
   const setTimestampHandlerVesting = async(e) => {
-    if(timePeriod != undefined) {
+    if(timePeriod != undefined || timePeriod != "") {
       const txTimestamp =  await setPreVestingSeedTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
     } else {
@@ -407,8 +504,17 @@ function Dashboard(): JSX.Element {
     }
   };
 
+  const setPresaleDurationHandler = async(e) => {
+    if(preSaleDuration != undefined || preSaleDuration != "") {
+      const txDuration =  await setPresaleDuration();
+      await notifySetTimestamp(txDuration.wait(1));
+    } else {
+      setTimePeriod(0);
+    }
+  };
+
   const setWithdrawVesting = async(e) => {
-    if(timePeriod != undefined) {
+    if(withdrawAmt != undefined || withdrawAmt != "") {
       const txWithdraw =  await setVestingSeedWithdraw();
       await notifySetTimestamp(txWithdraw.wait(1));
     } else {
@@ -442,6 +548,77 @@ function Dashboard(): JSX.Element {
       setNewOwner("0x");
     }
   };
+
+  
+  const setSaleStatusHandler = async(e) => {
+    if(saleStatus != "" || saleStatus != undefined) {
+      if(saleStatus == "start") {
+        const txSaleStatus = await startSale();
+        await notifySaleStatus(txSaleStatus.wait(1));
+      } else {
+        if(saleStatus == "pause" || saleStatus == "end") {
+          const txSaleStatus = await endSale();
+          await notifySaleStatus(txSaleStatus.wait(1));
+        }
+      }
+    } else { 
+      setSaleStatus("0");
+    }
+  };
+
+
+  const setAvailableTgeHandler = async(e) => {
+    if(tgeValue != undefined) {
+      const txTge = await availableAtTGEVal();
+      await notifySetAvailableAtTge(txTge.wait(1));
+    } else { 
+      setNewOwner("0x");
+    }
+  };
+
+  const setBuyAmountBusdRangeHandler = async(e) => {
+    if(minBusdValue != "" || minBusdValue != undefined && maxBusdValue != "" || maxBusdValue != undefined) {
+      const txBuyAmt = await setBuyAmountBUSD();
+      await notifySetBuyAmountBusd(txBuyAmt.wait(1));
+    } else {
+      setMinBusdValue(0);
+      setMaxBusdValue(0);
+    }
+  };
+
+  const setBuyAmountUsdtRangeHandler = async(e) => {
+    if(minUsdtValue != "" || minUsdtValue != undefined && maxUsdtValue != "" || maxUsdtValue != undefined) {
+      const txBuyAmt = await setBuyAmountUSDT();
+      await notifySetBuyAmountUsdt(txBuyAmt.wait(1));
+    } else {
+      setMinUsdtValue(0);
+      setMaxUsdtValue(0);
+    } 
+  };
+
+  const setWithdrawBUSDHandler = async(e) => {
+    const txWithdraw = await withdrawBUSD();
+    await notifyWhenWithdraw(txWithdraw.wait(1));
+  };
+
+  const setWithdrawUSDTHandler = async(e) => {
+    const txWithdraw = await withdrawUSDT();
+    await notifyWhenWithdraw(txWithdraw.wait(1));
+  };
+
+  const setEndSaleHandler = async(e) => {
+    const txEndSale = await endSale();
+    await notifySetEndSale(txEndSale.wait(1));
+  };
+  
+  const setWithdrawFromVesting = async(e) => {
+    if(tokenAmtWithdraw != undefined || tokenAmtWithdraw != ""){
+      const txWithdraw = await withdrawFromVesting();
+      await notifyWhenWithdraw(txWithdraw.wait(1));
+    } else {
+      setTokenAmtWithdraw(0);
+    }
+  }
 
   const handleSeedRound = async () => {
     if (BigNumber.from(totalNonVestingAmt).gt("0")) {
@@ -554,6 +731,43 @@ function Dashboard(): JSX.Element {
     reader.readAsText(file);
   };
 
+  const onChangePresaleCliff = e => {
+    e.preventDefault();
+    setPreSaleCliff(e.target.value);
+    setIsValidCliff(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
+  };
+
+  const onChangePresaleDuration= e => {
+    e.preventDefault();
+    setPresaleDuration(e.target.value);
+    setIsValidDuration(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
+  };
+
+  const onChangePreSaleWithdraw = e => {
+    e.preventDefault();
+    setTokenAmtWithdraw(e.target.value);
+    setIsValidAmount(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
+  }
+  const onChangeMinBusdValue= e => {
+    e.preventDefault();
+    setMinBusdValue(e.target.value);
+  };
+
+  const onChangeMaxBusdValue= e => {
+    e.preventDefault();
+    setMaxBusdValue(e.target.value);
+  };
+
+  const onChangeMinUsdtValue= e => {
+    e.preventDefault();
+    setMinUsdtValue(e.target.value);
+  };
+
+  const onChangeMaxUsdtValue= e => {
+    e.preventDefault();
+    setMaxUsdtValue(e.target.value);
+  };
+
   const onChangeCliff = e => {
     e.preventDefault();
     setCliff(e.target.value);
@@ -569,6 +783,12 @@ function Dashboard(): JSX.Element {
   const onChangeTGE = e => {
     e.preventDefault();
     setAvailableTge(e.target.value);
+    setIsValidTGE(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
+  };
+
+  const onChangeSetTGE = e => {
+    e.preventDefault();
+    setTgeValue(e.target.value);
     setIsValidTGE(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
   };
 
@@ -606,6 +826,11 @@ function Dashboard(): JSX.Element {
   const onChangeExchangePriceBusd = e => {
     e.preventDefault();
     setPriceBusd(e.target.value);
+  };
+
+  const onChangeSaleStatus = e => {
+    e.preventDefault();
+    setSaleStatus(e.target.value);
   };
   // const onChange = e => {
   //   e.preventDefault();
@@ -1180,9 +1405,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="duration in seconds"
                                   aria-label="duration in seconds"
                                   aria-describedby="basic-addon2"
+                                  value={preSaleDuration}
+                                  onClick={e => onChangePresaleDuration(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setPresaleDurationHandler}>
                                     SET DURATION
                                   </button>
                                 </div>
@@ -1196,9 +1423,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="cliff in seconds"
                                   aria-label="cliff in seconds"
                                   aria-describedby="basic-addon2"
+                                  value={preSaleCliff}
+                                  onClick={e => onChangePresaleCliff(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setPreSaleCliffHandler}>
                                     SET CLIFF
                                   </button>
                                 </div>
@@ -1212,9 +1441,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="time period in seconds"
                                   aria-label="time period in seconds"
                                   aria-describedby="basic-addon2"
+                                  value={timePeriod}
+                                  onChange={e => onChangeTime(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerTimelock}>
                                     SET time stamp
                                   </button>
                                 </div>
@@ -1228,9 +1459,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="start or pause"
                                   aria-label="start or pause"
                                   aria-describedby="basic-addon2"
+                                  value={saleStatus}
+                                  onChange={e => onChangeSaleStatus(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setSaleStatusHandler}>
                                     SET SALE STATUS
                                   </button>
                                 </div>
@@ -1244,9 +1477,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="pct available at TGE"
                                   aria-label="pct available at TGE"
                                   aria-describedby="basic-addon2"
+                                  value={tgeValue}
+                                  onChange={e => onChangeSetTGE(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setAvailableTgeHandler}>
                                     SET AVAILABLE AT TGE
                                   </button>
                                 </div>
@@ -1276,6 +1511,8 @@ function Dashboard(): JSX.Element {
                                   placeholder="min busd"
                                   aria-label="min busd"
                                   aria-describedby="basic-addon2"
+                                  value={minBusdValue}
+                                  onChange={e => onChangeMinBusdValue(e)}
                                 />
                                 <input
                                   type="text"
@@ -1283,9 +1520,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="max busd"
                                   aria-label="max busd"
                                   aria-describedby="basic-addon2"
+                                  value={maxBusdValue}
+                                  onChange={e => onChangeMaxBusdValue(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setBuyAmountBusdRangeHandler}>
                                     set Buy Amount Range BUSD
                                   </button>
                                 </div>
@@ -1299,6 +1538,8 @@ function Dashboard(): JSX.Element {
                                   placeholder="min usdt"
                                   aria-label="min usdt"
                                   aria-describedby="basic-addon2"
+                                  value={minUsdtValue}
+                                  onChange={e => onChangeMinUsdtValue(e)}
                                 />
                                 <input
                                   type="text"
@@ -1306,9 +1547,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="max usdt"
                                   aria-label="max usdt"
                                   aria-describedby="basic-addon2"
+                                  value={maxUsdtValue}
+                                  onChange={e => onChangeMaxUsdtValue(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setBuyAmountUsdtRangeHandler}>
                                     set Buy Amount Range USDT
                                   </button>
                                 </div>
@@ -1317,13 +1560,13 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">
                               <div className="input-group">
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block me-5" type="button">
+                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setWithdrawBUSDHandler}>
                                     withdraw busd
                                   </button>
-                                  <button className="btn btn-primary btn-block me-5" type="button">
+                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setWithdrawUSDTHandler}>
                                     withdraw usdt
                                   </button>
-                                  <button className="btn btn-primary btn-block me-5" type="button">
+                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setEndSaleHandler}>
                                     end sale
                                   </button>
                                 </div>
@@ -1337,9 +1580,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="token amount"
                                   aria-label="token amount"
                                   aria-describedby="basic-addon2"
+                                  value={tokenAmtWithdraw}
+                                  onChange={e => onChangePreSaleWithdraw(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setWithdrawFromVesting}>
                                     withdraw From Vesting
                                   </button>
                                 </div>
@@ -1353,9 +1598,11 @@ function Dashboard(): JSX.Element {
                                   placeholder="vesting schedule id"
                                   aria-label="vesting schedule id"
                                   aria-describedby="basic-addon2"
+                                  value={scheduleID}
+                                  onChange={e => onChangeRevoke(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokeParamPresale}>
                                     REVOKE
                                   </button>
                                 </div>
@@ -1388,7 +1635,7 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
                             <li className="list-group-item">owner : {ownerAddressIDOPrevesting}</li>
                             <li className="list-group-item">token : {tokenAddressIDOPrevesting}</li>
-                            <li className="list-group-item">timestampset : {timestampStatusIDOVesting.toString()}</li>
+                            <li className="list-group-item">timestampset : {timestampStatusIDOVesting !== undefined ? timestampStatusIDOVesting.toString() : 0}</li>
                             <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOVesting}</li>
                             <li className="list-group-item">start : {startTimeIDO}</li>
                             <li className="list-group-item">vestingschedulestotalamount : {prevestingIDOTotalAmount} SERA</li>
