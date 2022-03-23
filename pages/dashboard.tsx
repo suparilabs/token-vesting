@@ -51,7 +51,8 @@ import {
   useSetTimestampPreVesting, 
   useTransferOwnershipVesting,
   useVestingWithdraw,
-  useRevoke
+  useRevoke,
+  useIncomingDepositsFinalised
  } from "../hooks/useTokenPreVesting";
 import { 
   useBulkDepositTokens, 
@@ -80,6 +81,7 @@ function Dashboard(): JSX.Element {
   const [isValidCliff, setIsValidCliff] = React.useState<boolean>(true);
   const [isValidAmount, setIsValidAmount] = React.useState<boolean>(true);
   const [enoughTokenBalance, setEnoughTokenBalance] = React.useState<boolean>(false);
+
   const [availableTge, setAvailableTge] = React.useState<string>("0");
   const [tges, setTges] = React.useState<any>([]);
   const [duration, setDuration] = React.useState<string>("0");
@@ -93,6 +95,7 @@ function Dashboard(): JSX.Element {
   const [withdrawAmt, setWithdrawAmt] = React.useState<any>();
   const [isValidAmt, setIsValidAmt] = React.useState<boolean>(true);
   const [tokenAmt, setTokenAmt] = React.useState<any>();
+  const [tokenAddress, setTokenAddress] = React.useState<any>(); 
   const [priceUsdt, setPriceUsdt] = React.useState<any>();
   const [priceBusd, setPriceBusd] = React.useState<any>();
   const [tgeValue, setTgeValue] = React.useState<any>();
@@ -302,18 +305,59 @@ function Dashboard(): JSX.Element {
   const {data: timestampStatusSeedTimelock} = useTimestampStatus(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timestampInitialStatusSeedTimelock} = useTimestampInitialStatus(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timePeriodValue} = useTimeperiodValue(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  //const {data: transferLockedTokensSeedTimelock} = useTransferAccidentallyLockedTokens(seedPreTimelockAddress, ,tokenAmt,chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: incomingDepositStatusSPT} = useIncomingDepositsFinalised(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  
+  //SEED ROUND _ PRETIMELOCK WRITE CALLS
+  const setPreTimelockTimestamp = useSetTimestampPreTimelock(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
+  const setTransferOwnershipTimelock = useTransferOwnershipTimelock(seedPreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const transferLockedTokensSeedTimelock = useTransferAccidentallyLockedTokens(seedPreTimelockAddress, tokenAddress, tokenAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  
+  //SEED ROUND _ READ CALLS: PREVESTING
+  const {data: ownerAddressSeedPrevesting} = usePreVestingFetchOwner(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: tokenAddressSeedPrevesting} = usePreVestingToken(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampStatusSeedVesting} = useTimestampStatusVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampInitialStatusVesting} = useTimestampInitialStatusVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: startTime}  = useStartPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingTotalAmount} = useVestingScheduleTotalAmt(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingTotalCount} = useVestingScheduleTotalCount(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingWithdrawableAmt} = useWithdrawableAmt(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: incomingDepositStatusSPV} = useIncomingDepositsFinalised(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+
+  //SEED ROUND _ PREVESTING WRITE CALLS 
+  const setPreVestingSeedTimestamp = useSetTimestampPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
+  const setTransferOwnershipSeedVesting = useTransferOwnershipVesting(seedTokenPreVesting, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setVestingSeedWithdraw = useVestingWithdraw(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setRevokeSeedParams = useRevoke(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  
   //PRIVATE ROUND _ READ CALLS: PRETIMELOCK
   const {data: ownerAddressPrivatePretimelock} = usePreTimelockFetchOwner(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: tokenAddressPrivatePretimelock} = usePreTimelockToken(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timestampStatusPrivateTimelock} = useTimestampStatus(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timestampInitialStatusPrivateTimelock} = useTimestampInitialStatus(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timePeriodPrivateValue} = useTimeperiodValue(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  //IDO ROUND _ READ CALLS: PRETIMELOCK
-  const {data: ownerAddressIDOPretimelock} = usePreTimelockFetchOwner(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusIDOTimelock} = useTimestampStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusIDOTimelock} = useTimestampInitialStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timePeriodIDOTimelockValue} = useTimeperiodValue(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: incomingDepositStatusPPT} = useIncomingDepositsFinalised(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+
+  //PRIVATE ROUND _ PRETIMELOCK WRITE CALLS
+  const setPreTimelockPrivateTimestamp = useSetTimestampPreTimelock(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
+  const setTransferOwnershipPrivateTimelock = useTransferOwnershipTimelock(privatePreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  
+  //PRIVATE ROUND _ READ CALLS: PREVESTING
+  const {data: ownerAddressPrivatePrevesting} = usePreVestingFetchOwner(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: tokenAddressPrivatePrevesting} = usePreVestingToken(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampStatusPrivateVesting} = useTimestampStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampInitialStatusPrivateVesting} = useTimestampInitialStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: startTimePrivate}  = useStartPreVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingPrivateTotalAmount} = useVestingScheduleTotalAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingPrivateTotalCount} = useVestingScheduleTotalCount(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: prevestingPrivateWithdrawableAmt} = useWithdrawableAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: incomingDepositStatusPPV} = useIncomingDepositsFinalised(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+
+  //PRIVATE ROUND _ PREVESTING WRITE CALLS
+  const setPreVestingPrivateTimestamp = useSetTimestampPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
+  const setTransferOwnershipPrivateVesting = useTransferOwnershipVesting(seedTokenPreVesting, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setVestingPrivateWithdraw = useVestingWithdraw(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setRevokePrivateParams = useRevoke(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+
   //IDO ROUND _ READ CALLS: PRESALE
   const {data: ownerAddressIDOPreSale} = usePreSaleFetchOwner(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: tokenAddressIDOPreSale} = useTokenPreSaleAddress(chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -337,7 +381,6 @@ function Dashboard(): JSX.Element {
   const setExchangePriceBusd= useSetExchangePriceBusd(priceBusd, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const setPresaleDuration = useSetDuration(chainId == undefined ? desiredChain.chainId : (chainId as number), preSaleDuration);
   const setPresaleCliff = useSetCliffPeriod(chainId == undefined ? desiredChain.chainId : (chainId as number), preSaleCliff);
-  const setPreSaleTimestamp = useSetTimestampPreTimelock(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
   const availableAtTGEVal = useSetAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number), tgeValue * 100);
   const startSale = useStartSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const endSale = useEndSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -348,25 +391,12 @@ function Dashboard(): JSX.Element {
   const withdrawFromVesting = useWithdrawFromVesting(tokenAmtWithdraw != undefined ? tokenAmtWithdraw : 0, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const revokePresale = useRevokePreSale(scheduleID != undefined ? scheduleID : 0, chainId == undefined ? desiredChain.chainId : (chainId as number));
 
-  //SEED ROUND _ READ CALLS: PREVESTING
-  const {data: ownerAddressSeedPrevesting} = usePreVestingFetchOwner(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressSeedPrevesting} = usePreVestingToken(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusSeedVesting} = useTimestampStatusVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusVesting} = useTimestampInitialStatusVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: startTime}  = useStartPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingTotalAmount} = useVestingScheduleTotalAmt(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingTotalCount} = useVestingScheduleTotalCount(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingWithdrawableAmt} = useWithdrawableAmt(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
-  //PRIVATE ROUND _ READ CALLS: PREVESTING
-  const {data: ownerAddressPrivatePrevesting} = usePreVestingFetchOwner(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressPrivatePrevesting} = usePreVestingToken(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusPrivateVesting} = useTimestampStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusPrivateVesting} = useTimestampInitialStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: startTimePrivate}  = useStartPreVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingPrivateTotalAmount} = useVestingScheduleTotalAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingPrivateTotalCount} = useVestingScheduleTotalCount(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingPrivateWithdrawableAmt} = useWithdrawableAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  //IDO ROUND _ READ CALLS: PRETIMELOCK
+  const {data: ownerAddressIDOPretimelock} = usePreTimelockFetchOwner(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampStatusIDOTimelock} = useTimestampStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timestampInitialStatusIDOTimelock} = useTimestampInitialStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: timePeriodIDOTimelockValue} = useTimeperiodValue(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: incomingDepositStatusIPT} = useIncomingDepositsFinalised(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
 
   //IDO ROUND _ READ CALLS: PREVESTING
   const {data: ownerAddressIDOPrevesting} = usePreVestingFetchOwner(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -377,24 +407,8 @@ function Dashboard(): JSX.Element {
   const {data: prevestingIDOTotalAmount} = useVestingScheduleTotalAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: prevestingIDOTotalCount} = useVestingScheduleTotalCount(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: prevestingIDOWithdrawableAmt} = useWithdrawableAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const {data: incomingDepositStatusIPV} = useIncomingDepositsFinalised(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
 
-  //SEED ROUND _ PRETIMELOCK WRITE CALLS
-  const setPreTimelockTimestamp = useSetTimestampPreTimelock(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnershipTimelock = useTransferOwnershipTimelock(seedPreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  //PRIVATE ROUND _ PRETIMELOCK WRITE CALLS
-  const setPreTimelockPrivateTimestamp = useSetTimestampPreTimelock(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnershipPrivateTimelock = useTransferOwnershipTimelock(privatePreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
-  //SEED ROUND _ PREVESTING WRITE CALLS 
-  const setPreVestingSeedTimestamp = useSetTimestampPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnershipSeedVesting = useTransferOwnershipVesting(seedTokenPreVesting, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setVestingSeedWithdraw = useVestingWithdraw(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setRevokeSeedParams = useRevoke(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  //PRIVATE ROUND _ PREVESTING WRITE CALLS
-  const setPreVestingPrivateTimestamp = useSetTimestampPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnershipPrivateVesting = useTransferOwnershipVesting(seedTokenPreVesting, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setVestingPrivateWithdraw = useVestingWithdraw(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setRevokePrivateParams = useRevoke(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
  
   const setPreVestingPrivateTimestampHandler = async(e) => {
     if(timePeriod != undefined || timePeriod != "") {
@@ -611,6 +625,16 @@ function Dashboard(): JSX.Element {
     await notifySetEndSale(txEndSale.wait(1));
   };
   
+  const setAccidentalTokensReleaseHandler = async(e) => {
+    if(tokenAmt != undefined || tokenAmt != "" && tokenAddress != undefined || tokenAddress != "") {  
+      const txRelease = await transferLockedTokensSeedTimelock();
+      await notifySetEndSale(txRelease.wait(1));
+    } else {
+      setTokenAmt(0);
+      setTokenAddress(0);
+    }
+  };
+
   const setWithdrawFromVesting = async(e) => {
     if(tokenAmtWithdraw != undefined || tokenAmtWithdraw != ""){
       const txWithdraw = await withdrawFromVesting();
@@ -809,13 +833,19 @@ function Dashboard(): JSX.Element {
 
   const onChangeNewAmt = e => {
     e.preventDefault();
-    setWithdrawAmt(e.target.value);
+    setTokenAmt(e.target.value);
     setIsValidAmt(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
+  };
+
+  const onChangeTokenAddress = e => {
+    e.preventDefault();
+    setTokenAddress(e.target.value);
   };
 
   const onChangeWithdraw = e => {
     e.preventDefault();
     setWithdrawAmt(e.target.value);
+    setIsValidAmt(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
   };
 
   const onChangeExchangePriceUsdt = e => {
@@ -1027,7 +1057,13 @@ function Dashboard(): JSX.Element {
                           <div className="mt-4 font-weight-bold mx-auto text-center">SeedRoundTokenPreTimeLock</div>
                           <ul className="list-group list-group-flush">
                             <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
+                            Incoming Deposits Allowed : 
+                              { incomingDepositStatusSPT != undefined && incomingDepositStatusSPT == true && (
+                                <span style={{ color: "green" }}>LIVE</span>
+                              )}
+                              { incomingDepositStatusSPT != undefined && incomingDepositStatusSPT == false && (
+                                <span style={{ color: "red" }}>STOPPED</span>
+                              )}
                             </li>
                             <li className="list-group-item">Contract Address : {seedPreTimelockAddress}</li>
                             <li className="list-group-item">owner : {ownerAddressSeedPretimelock}</li>
@@ -1047,7 +1083,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeTime(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerTimelock}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerTimelock} disabled={!active || (ownerAddressSeedPretimelock != undefined ? ownerAddressSeedPretimelock != account : false)}>
                                     set Time Stamp
                                   </button>
                                 </div>
@@ -1065,7 +1101,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeNewAddress(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerTimelock}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerTimelock} disabled={!active || (ownerAddressSeedPretimelock != undefined ? ownerAddressSeedPretimelock != account : false)}>
                                     transfer Ownership
                                   </button>
                                 </div>
@@ -1073,15 +1109,26 @@ function Dashboard(): JSX.Element {
                             </li>
                             <li className="list-group-item">
                               <div className="input-group">
+                              <input
+                                  type="text"
+                                  className="form-control form-control-sm"
+                                  placeholder="token amount"
+                                  aria-label="token amount"
+                                  aria-describedby="basic-addon2"
+                                  value={tokenAddress}
+                                  onChange={e => onChangeTokenAddress(e)}
+                                />
                                 <input
                                   type="text"
                                   className="form-control form-control-sm"
                                   placeholder="token amount"
                                   aria-label="token amount"
                                   aria-describedby="basic-addon2"
+                                  value={tokenAmt}
+                                  onChange={e => onChangeNewAmt(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setAccidentalTokensReleaseHandler} disabled={!active || (ownerAddressSeedPretimelock != undefined ? ownerAddressSeedPretimelock != account : false)}>
                                     transfer Accidentally Locked Tokens
                                   </button>
                                 </div>
@@ -1094,7 +1141,13 @@ function Dashboard(): JSX.Element {
                           <div className="mt-4 font-weight-bold mx-auto text-center">SeedRoundTokenPreVesting</div>
                           <ul className="list-group list-group-flush">
                             <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
+                            Incoming Deposits Allowed : 
+                              { incomingDepositStatusSPV != undefined && incomingDepositStatusSPV == true && (
+                                <span style={{ color: "green" }}>LIVE</span>
+                              )}
+                              { incomingDepositStatusSPV != undefined && incomingDepositStatusSPV == false && (
+                                <span style={{ color: "red" }}>STOPPED</span>
+                              )}
                             </li>
                             <li className="list-group-item">Contract Address : {seedTokenPreVesting}</li>
                             <li className="list-group-item">owner : {ownerAddressSeedPrevesting}</li>
@@ -1117,7 +1170,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeTime(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerVesting}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerVesting} disabled={!active || (ownerAddressSeedPrevesting != undefined ? ownerAddressSeedPrevesting != account : false)}>
                                     set Time Stamp
                                   </button>
                                 </div>
@@ -1135,7 +1188,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeNewAddress(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerVesting}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerVesting} disabled={!active || (ownerAddressSeedPrevesting != undefined ? ownerAddressSeedPrevesting != account : false)}>
                                     transfer Ownership
                                   </button>
                                 </div>
@@ -1153,7 +1206,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeWithdraw(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setWithdrawVesting}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setWithdrawVesting} disabled={!active || (ownerAddressSeedPrevesting != undefined ? ownerAddressSeedPrevesting != account : false)}>
                                     Withdraw
                                   </button>
                                 </div>
@@ -1171,7 +1224,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeRevoke(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokeParam}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokeParam} disabled={!active || (ownerAddressSeedPrevesting != undefined ? ownerAddressSeedPrevesting != account : false)}>
                                     REVOKE
                                   </button>
                                 </div>
@@ -1184,7 +1237,13 @@ function Dashboard(): JSX.Element {
                           <div className="mt-4 font-weight-bold mx-auto text-center">PrivateRoundTokenPreTimeLock</div>
                           <ul className="list-group list-group-flush">
                             <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
+                            Incoming Deposits Allowed : 
+                              { incomingDepositStatusPPT != undefined && incomingDepositStatusPPT == true && (
+                                <span style={{ color: "green" }}>LIVE</span>
+                              )}
+                              { incomingDepositStatusPPT != undefined && incomingDepositStatusPPT == false && (
+                                <span style={{ color: "red" }}>STOPPED</span>
+                              )}
                             </li>
                             <li className="list-group-item">Contract Address : {privatePreTimelockAddress}</li>
                             <li className="list-group-item">owner : {ownerAddressPrivatePretimelock}</li>
@@ -1204,7 +1263,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeTime(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerPrivateTimelock}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerPrivateTimelock} disabled={!active || (ownerAddressPrivatePretimelock != undefined ? ownerAddressPrivatePretimelock != account : false)}>
                                     set Time Stamp
                                   </button>
                                 </div>
@@ -1222,7 +1281,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeNewAddress(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerPrivateVesting}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerPrivateVesting} disabled={!active || (ownerAddressPrivatePretimelock != undefined ? ownerAddressPrivatePretimelock != account : false)}>
                                     transfer Ownership
                                   </button>
                                 </div>
@@ -1238,7 +1297,7 @@ function Dashboard(): JSX.Element {
                                   aria-describedby="basic-addon2"
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" disabled={!active || (ownerAddressPrivatePretimelock != undefined ? ownerAddressPrivatePretimelock != account : false)}>
                                     transfer Accidentally Locked Tokens
                                   </button>
                                 </div>
@@ -1251,7 +1310,13 @@ function Dashboard(): JSX.Element {
                           <div className="mt-4 font-weight-bold mx-auto text-center">PrivateRoundTokenPreVesting</div>
                           <ul className="list-group list-group-flush">
                             <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
+                            Incoming Deposits Allowed : 
+                              { incomingDepositStatusPPV != undefined && incomingDepositStatusPPV == true && (
+                                <span style={{ color: "green" }}>LIVE</span>
+                              )}
+                              { incomingDepositStatusPPV != undefined && incomingDepositStatusPPV == false && (
+                                <span style={{ color: "red" }}>STOPPED</span>
+                              )}
                             </li>
                             <li className="list-group-item">Contract Address : {privateTokenPreVesting}</li>
                             <li className="list-group-item">owner : {ownerAddressPrivatePrevesting}</li>
@@ -1274,7 +1339,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeTime(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setPreVestingPrivateTimestampHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setPreVestingPrivateTimestampHandler} disabled={!active || (ownerAddressPrivatePrevesting != undefined ? ownerAddressPrivatePrevesting != account : false)}>
                                     set Time Stamp
                                   </button>
                                 </div>
@@ -1292,7 +1357,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeNewAddress(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTransferOwnershipPrivateVestingHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setTransferOwnershipPrivateVestingHandler} disabled={!active || (ownerAddressPrivatePrevesting != undefined ? ownerAddressPrivatePrevesting != account : false)}>
                                     transfer Ownership
                                   </button>
                                 </div>
@@ -1307,10 +1372,10 @@ function Dashboard(): JSX.Element {
                                   aria-label="token amount"
                                   aria-describedby="basic-addon2"
                                   value={withdrawAmt}
-                                  onChange={e => onChangeNewAmt(e)}
+                                  onChange={e => onChangeWithdraw(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setVestingPrivateWithdrawHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setVestingPrivateWithdrawHandler} disabled={!active || (ownerAddressPrivatePrevesting != undefined ? ownerAddressPrivatePrevesting != account : false)}>
                                     Withdraw
                                   </button>
                                 </div>
@@ -1328,7 +1393,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeRevoke(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokePrivateParamsHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokePrivateParamsHandler} disabled={!active || (ownerAddressPrivatePrevesting != undefined ? ownerAddressPrivatePrevesting != account : false)}>
                                     REVOKE
                                   </button>
                                 </div>
@@ -1373,7 +1438,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeExchangePriceUsdt(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setExchangePriceUsdtHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setExchangePriceUsdtHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     SET EXCHANGE PRICE USDT
                                   </button>
                                 </div>
@@ -1391,7 +1456,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeExchangePriceBusd(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setExchangePriceBusdHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setExchangePriceBusdHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     set Exchange Price BUSD
                                   </button>
                                 </div>
@@ -1409,7 +1474,7 @@ function Dashboard(): JSX.Element {
                                   onClick={e => onChangePresaleDuration(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setPresaleDurationHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setPresaleDurationHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     SET DURATION
                                   </button>
                                 </div>
@@ -1427,7 +1492,7 @@ function Dashboard(): JSX.Element {
                                   onClick={e => onChangePresaleCliff(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setPreSaleCliffHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setPreSaleCliffHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     SET CLIFF
                                   </button>
                                 </div>
@@ -1445,7 +1510,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeTime(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerTimelock}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerTimelock} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     SET time stamp
                                   </button>
                                 </div>
@@ -1463,7 +1528,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeSaleStatus(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setSaleStatusHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setSaleStatusHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     SET SALE STATUS
                                   </button>
                                 </div>
@@ -1481,7 +1546,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeSetTGE(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setAvailableTgeHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setAvailableTgeHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     SET AVAILABLE AT TGE
                                   </button>
                                 </div>
@@ -1497,7 +1562,7 @@ function Dashboard(): JSX.Element {
                                   aria-describedby="basic-addon2"
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
+                                  <button className="btn btn-primary btn-block" type="button" disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     transfer Accidentally Locked Tokens In TimeLock
                                   </button>
                                 </div>
@@ -1524,7 +1589,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeMaxBusdValue(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setBuyAmountBusdRangeHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setBuyAmountBusdRangeHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     set Buy Amount Range BUSD
                                   </button>
                                 </div>
@@ -1551,7 +1616,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeMaxUsdtValue(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setBuyAmountUsdtRangeHandler}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setBuyAmountUsdtRangeHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     set Buy Amount Range USDT
                                   </button>
                                 </div>
@@ -1560,13 +1625,13 @@ function Dashboard(): JSX.Element {
                             <li className="list-group-item">
                               <div className="input-group">
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setWithdrawBUSDHandler}>
+                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setWithdrawBUSDHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     withdraw busd
                                   </button>
-                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setWithdrawUSDTHandler}>
+                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setWithdrawUSDTHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     withdraw usdt
                                   </button>
-                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setEndSaleHandler}>
+                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setEndSaleHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     end sale
                                   </button>
                                 </div>
@@ -1584,7 +1649,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangePreSaleWithdraw(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setWithdrawFromVesting}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setWithdrawFromVesting} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     withdraw From Vesting
                                   </button>
                                 </div>
@@ -1602,7 +1667,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeRevoke(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokeParamPresale}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokeParamPresale} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     REVOKE
                                   </button>
                                 </div>
@@ -1615,7 +1680,13 @@ function Dashboard(): JSX.Element {
                           <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreTimeLock</div>
                           <ul className="list-group list-group-flush">
                             <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
+                            Incoming Deposits Allowed : 
+                              { incomingDepositStatusIPT != undefined && incomingDepositStatusIPT == true && (
+                                <span style={{ color: "green" }}>LIVE</span>
+                              )}
+                              { incomingDepositStatusIPT != undefined && incomingDepositStatusIPT == false && (
+                                <span style={{ color: "red" }}>STOPPED</span>
+                              )}
                             </li>
                             <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
                             <li className="list-group-item">owner : {ownerAddressIDOPretimelock}</li>
@@ -1630,7 +1701,13 @@ function Dashboard(): JSX.Element {
                           <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreVesting</div>
                           <ul className="list-group list-group-flush">
                             <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
+                            Incoming Deposits Allowed : 
+                              { incomingDepositStatusIPV != undefined && incomingDepositStatusIPV == true && (
+                                <span style={{ color: "green" }}>LIVE</span>
+                              )}
+                              { incomingDepositStatusIPV != undefined && incomingDepositStatusIPV == false && (
+                                <span style={{ color: "red" }}>STOPPED</span>
+                              )}
                             </li>
                             <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
                             <li className="list-group-item">owner : {ownerAddressIDOPrevesting}</li>

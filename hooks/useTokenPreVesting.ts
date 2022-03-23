@@ -322,3 +322,22 @@ export function useRevoke(contractAddress: string, vestingScheduleId: string, ch
     return (contract as Contract).revoke(vestingScheduleId);
   };
 }
+
+//all incoming deposits finalised or not?
+function getIncomingDepositStatus(contract: TokenPreVesting): (address: string) => Promise<boolean> {
+  return async (): Promise<boolean> => contract.allIncomingDepositsFinalised().then((result: boolean) => result);
+}
+
+export function useIncomingDepositsFinalised(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "allIncomingDepositsFinalizedStatus", contractAddress, DataType.Address] : null,
+    getIncomingDepositStatus(contract),
+    { suspense },
+  );
+  return result;
+}
