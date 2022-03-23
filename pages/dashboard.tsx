@@ -260,6 +260,14 @@ function Dashboard(): JSX.Element {
     });
   };
 
+  const notifyTokenRelease = async (promiseObj) => {
+    await toast.promise(promiseObj, {
+      pending: `Releasing Tokens...`,
+      success: `Tokens has been released👌`,
+      error: `Failed to release tokens 🤯"`,
+    });
+  };
+
   const notifyTransferOwnership = async (promiseObj) => {
     await toast.promise(promiseObj, {
       pending: `Transferring Ownership...`,
@@ -340,6 +348,7 @@ function Dashboard(): JSX.Element {
   //PRIVATE ROUND _ PRETIMELOCK WRITE CALLS
   const setPreTimelockPrivateTimestamp = useSetTimestampPreTimelock(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
   const setTransferOwnershipPrivateTimelock = useTransferOwnershipTimelock(privatePreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const transferLockedTokensPrivateTimelock = useTransferAccidentallyLockedTokens(privatePreTimelockAddress, tokenAddress, tokenAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
   
   //PRIVATE ROUND _ READ CALLS: PREVESTING
   const {data: ownerAddressPrivatePrevesting} = usePreVestingFetchOwner(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -390,7 +399,8 @@ function Dashboard(): JSX.Element {
   const withdrawBUSD = useWithdrawBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const withdrawFromVesting = useWithdrawFromVesting(tokenAmtWithdraw != undefined ? tokenAmtWithdraw : 0, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const revokePresale = useRevokePreSale(scheduleID != undefined ? scheduleID : 0, chainId == undefined ? desiredChain.chainId : (chainId as number));
-
+  const transferLockedTokensIDOTimelock = useTransferAccidentallyLockedTokens(idoTokenPreSaleAddress, tokenAddress, tokenAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+ 
   //IDO ROUND _ READ CALLS: PRETIMELOCK
   const {data: ownerAddressIDOPretimelock} = usePreTimelockFetchOwner(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
   const {data: timestampStatusIDOTimelock} = useTimestampStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -625,10 +635,30 @@ function Dashboard(): JSX.Element {
     await notifySetEndSale(txEndSale.wait(1));
   };
   
-  const setAccidentalTokensReleaseHandler = async(e) => {
+  const setSeedAccidentalTokensReleaseHandler = async(e) => {
     if(tokenAmt != undefined || tokenAmt != "" && tokenAddress != undefined || tokenAddress != "") {  
       const txRelease = await transferLockedTokensSeedTimelock();
-      await notifySetEndSale(txRelease.wait(1));
+      await notifyTokenRelease(txRelease.wait(1));
+    } else {
+      setTokenAmt(0);
+      setTokenAddress(0);
+    }
+  };
+
+  const setPrivateAccidentalTokensReleaseHandler = async(e) => {
+    if(tokenAmt != undefined || tokenAmt != "" && tokenAddress != undefined || tokenAddress != "") {  
+      const txRelease = await transferLockedTokensPrivateTimelock();
+      await notifyTokenRelease(txRelease.wait(1));
+    } else {
+      setTokenAmt(0);
+      setTokenAddress(0);
+    }
+  };
+  
+  const setIDOAccidentalTokensReleaseHandler = async(e) => {
+    if(tokenAmt != undefined || tokenAmt != "" && tokenAddress != undefined || tokenAddress != "") {  
+      const txRelease = await transferLockedTokensIDOTimelock();
+      await notifyTokenRelease(txRelease.wait(1));
     } else {
       setTokenAmt(0);
       setTokenAddress(0);
@@ -1112,8 +1142,8 @@ function Dashboard(): JSX.Element {
                               <input
                                   type="text"
                                   className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
+                                  placeholder="token address"
+                                  aria-label="token address"
                                   aria-describedby="basic-addon2"
                                   value={tokenAddress}
                                   onChange={e => onChangeTokenAddress(e)}
@@ -1128,7 +1158,7 @@ function Dashboard(): JSX.Element {
                                   onChange={e => onChangeNewAmt(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setAccidentalTokensReleaseHandler} disabled={!active || (ownerAddressSeedPretimelock != undefined ? ownerAddressSeedPretimelock != account : false)}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setSeedAccidentalTokensReleaseHandler} disabled={!active || (ownerAddressSeedPretimelock != undefined ? ownerAddressSeedPretimelock != account : false)}>
                                     transfer Accidentally Locked Tokens
                                   </button>
                                 </div>
@@ -1289,15 +1319,26 @@ function Dashboard(): JSX.Element {
                             </li>
                             <li className="list-group-item">
                               <div className="input-group">
+                              <input
+                                  type="text"
+                                  className="form-control form-control-sm"
+                                  placeholder="token address"
+                                  aria-label="token address"
+                                  aria-describedby="basic-addon2"
+                                  value={tokenAddress}
+                                  onChange={e => onChangeTokenAddress(e)}
+                                />
                                 <input
                                   type="text"
                                   className="form-control form-control-sm"
                                   placeholder="token amount"
                                   aria-label="token amount"
                                   aria-describedby="basic-addon2"
+                                  value={tokenAmt}
+                                  onChange={e => onChangeNewAmt(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" disabled={!active || (ownerAddressPrivatePretimelock != undefined ? ownerAddressPrivatePretimelock != account : false)}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setPrivateAccidentalTokensReleaseHandler} disabled={!active || (ownerAddressPrivatePretimelock != undefined ? ownerAddressPrivatePretimelock != account : false)}>
                                     transfer Accidentally Locked Tokens
                                   </button>
                                 </div>
@@ -1554,15 +1595,26 @@ function Dashboard(): JSX.Element {
                             </li>
                             <li className="list-group-item">
                               <div className="input-group">
+                              <input
+                                  type="text"
+                                  className="form-control form-control-sm"
+                                  placeholder="token address"
+                                  aria-label="token address"
+                                  aria-describedby="basic-addon2"
+                                  value={tokenAddress}
+                                  onChange={e => onChangeTokenAddress(e)}
+                                />
                                 <input
                                   type="text"
                                   className="form-control form-control-sm"
                                   placeholder="token amount"
                                   aria-label="token amount"
                                   aria-describedby="basic-addon2"
+                                  value={tokenAmt}
+                                  onChange={e => onChangeNewAmt(e)}
                                 />
                                 <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
+                                  <button className="btn btn-primary btn-block" type="button" onClick={setIDOAccidentalTokensReleaseHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
                                     transfer Accidentally Locked Tokens In TimeLock
                                   </button>
                                 </div>
