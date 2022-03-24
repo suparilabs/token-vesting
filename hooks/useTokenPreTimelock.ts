@@ -1,11 +1,8 @@
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber } from "ethers";
 import { TokenPreTimelock__factory, TokenPreTimelock } from "../src/types";
-import { useWeb3React } from "@web3-react/core";
 import { Contract } from "ethers";
 import useSWR, { SWRResponse } from "swr";
 import { DataType } from "../utils";
-import { addresses } from "../constants";
-import { ERC20__factory, TokenPreSale, TokenPreSale__factory } from "../src/types";
 import { useContract } from "./useContract";
 //desposit tokens in bulk
 export function useBulkDepositTokens(tokenPreTimeLockAddress: string, address: string[], amounts: BigNumber[]): any {

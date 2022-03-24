@@ -242,16 +242,17 @@ export function useVestingScheduleTotalAmt(
 ): SWRResponse<any, any> {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi);
   const result: any = useSWR(
-    contract ? [chainId, "vestingTotalAmount", contractAddress, DataType.Address] : null,
+    contract ? [chainId, "vestingTotalAmount", contractAddress, DataType.TokenBalance] : null,
     getVestingSchedulesTotalAmt(contract),
     { suspense },
   );
+  console.log("useVestingScheduleTotalAmt...", result.data, contractAddress);
   return result;
 }
 
-function getVestingSchedulesTotalAmt(contract: TokenPreVesting): (address: string) => Promise<any> {
-  return async (): Promise<any> =>
-    contract.getVestingSchedulesTotalAmount().then((result: any) => BigNumber.from(result).toNumber());
+function getVestingSchedulesTotalAmt(contract: TokenPreVesting): (address: string) => Promise<string> {
+  return async (): Promise<string> =>
+    contract.getVestingSchedulesTotalAmount().then((result: BigNumber) => result.toString());
 }
 
 //Vesting schedules total count

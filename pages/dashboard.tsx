@@ -5,12 +5,12 @@ import { useWeb3React } from "@web3-react/core";
 import BN from "bignumber.js";
 import { secondsToDhms } from "../utils";
 import moment from "moment";
-import { 
+import {
   useUSDT,
   useBUSD,
   useCliff,
   useDuration,
-  useStartSale, 
+  useStartSale,
   useEndSale,
   useAvailableAtTGE,
   useTokenPreSaleAddress,
@@ -34,14 +34,13 @@ import {
   useWithdrawBUSD,
   useWithdrawUSDT,
   useWithdrawFromVesting,
-  useRevokePreSale
- } from "../hooks/useTokenPreSale";
+  useRevokePreSale,
+} from "../hooks/useTokenPreSale";
 import { useTokenTransfer } from "../hooks/useTokenTransfer";
 import { addresses, desiredChain } from "../constants";
 import { toast } from "react-toastify";
-import { 
-  useCreateBulkVestingSchedule, 
-  useSetTimeStamp,
+import {
+  useCreateBulkVestingSchedule,
   useTimestampInitialStatusVesting,
   useTimestampStatusVesting,
   usePreVestingToken,
@@ -50,25 +49,28 @@ import {
   useVestingScheduleTotalAmt,
   useVestingScheduleTotalCount,
   useWithdrawableAmt,
-  useSetTimestampPreVesting, 
+  useSetTimestampPreVesting,
   useTransferOwnershipVesting,
   useVestingWithdraw,
   useRevoke,
-  useIncomingDepositsFinalised
- } from "../hooks/useTokenPreVesting";
-import { 
-  useBulkDepositTokens, 
+  useIncomingDepositsFinalised,
+} from "../hooks/useTokenPreVesting";
+import {
+  useBulkDepositTokens,
   usePreTimelockFetchOwner,
-  usePreTimelockToken, 
-  useTimestampStatus, 
+  usePreTimelockToken,
+  useTimestampStatus,
   useTimestampInitialStatus,
   useTimeperiodValue,
   useSetTimestampPreTimelock,
   useTransferOwnershipTimelock,
-  useTransferAccidentallyLockedTokens
- } from "../hooks/useTokenPreTimelock";
+  useTransferAccidentallyLockedTokens,
+} from "../hooks/useTokenPreTimelock";
 
 import { useTokenBalance } from "../hooks/useTokenBalance";
+import { formatUnits, parseUnits } from "@ethersproject/units";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
+import { useTokenDecimals } from "../hooks/useTokenDecimals";
 
 function Dashboard(): JSX.Element {
   const { chainId, active, account } = useWeb3React();
@@ -97,7 +99,7 @@ function Dashboard(): JSX.Element {
   const [withdrawAmt, setWithdrawAmt] = React.useState<any>();
   const [isValidAmt, setIsValidAmt] = React.useState<boolean>(true);
   const [tokenAmt, setTokenAmt] = React.useState<any>();
-  const [tokenAddress, setTokenAddress] = React.useState<any>(); 
+  const [tokenAddress, setTokenAddress] = React.useState<any>();
   const [priceUsdt, setPriceUsdt] = React.useState<any>();
   const [priceBusd, setPriceBusd] = React.useState<any>();
   const [tgeValue, setTgeValue] = React.useState<any>();
@@ -117,6 +119,16 @@ function Dashboard(): JSX.Element {
   const [durations, setDurations] = React.useState<any>([]);
   const [revocables, setRevocables] = React.useState<any>([]);
   const [slice, setSlice] = React.useState<any>([]);
+
+  // token
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+  const { data: tokenDecimals } = useTokenDecimals(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
 
   //FOR SEED ROUND
   const sendTokenToPreTimeLockForSeed = useTokenTransfer(
@@ -186,11 +198,13 @@ function Dashboard(): JSX.Element {
     beneficiaries,
     nonVestingAmt,
   );
-  //contract addresses 
+  //contract addresses
   const seedPreTimelockAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].SEED_PRE_TIME_LOCK;
   const seedTokenPreVesting = addresses[chainId != undefined ? chainId : desiredChain.chainId].SEED_PRE_VESTING;
-  const privatePreTimelockAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_TIME_LOCK;
-  const privateTokenPreVesting = addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_VESTING;
+  const privatePreTimelockAddress =
+    addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_TIME_LOCK;
+  const privateTokenPreVesting =
+    addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_VESTING;
   const idoTokenPreSaleAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].IDO_TOKEN_PRE_SALE;
   //web3
   const handleSendTGETokensNow = async e => {
@@ -214,7 +228,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifySaleStatus = async (promiseObj) => {
+  const notifySaleStatus = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Sale status getting updated`,
       success: `Sale status updated👌`,
@@ -238,7 +252,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifySetTimestamp = async (promiseObj) => {
+  const notifySetTimestamp = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Setting timestamp...`,
       success: `Timestamp is now SET👌`,
@@ -246,7 +260,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifySetExchangePrice = async (promiseObj) => {
+  const notifySetExchangePrice = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Setting Exchange Price...`,
       success: `Exchange Price is now SET👌`,
@@ -254,7 +268,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifySetEndSale = async (promiseObj) => {
+  const notifySetEndSale = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Ending Sale...`,
       success: `Sale has ENDED👌`,
@@ -262,7 +276,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifyTokenRelease = async (promiseObj) => {
+  const notifyTokenRelease = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Releasing Tokens...`,
       success: `Tokens has been released👌`,
@@ -270,7 +284,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifyTransferOwnership = async (promiseObj) => {
+  const notifyTransferOwnership = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Transferring Ownership...`,
       success: `Ownership is Successfully Transferred👌`,
@@ -278,7 +292,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifySetBuyAmountBusd = async (promiseObj) => {
+  const notifySetBuyAmountBusd = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Setting Busd`,
       success: `BUSD is successfully SET👌`,
@@ -286,7 +300,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifySetBuyAmountUsdt = async (promiseObj) => {
+  const notifySetBuyAmountUsdt = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Setting Busd`,
       success: `TGE value is successfully set👌`,
@@ -294,7 +308,7 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifySetAvailableAtTge = async (promiseObj) => {
+  const notifySetAvailableAtTge = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Setting TGE Value...`,
       success: `TGE value is successfully set👌`,
@@ -302,308 +316,545 @@ function Dashboard(): JSX.Element {
     });
   };
 
-  const notifyWhenWithdraw = async (promiseObj) => {
+  const notifyWhenWithdraw = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Withdraw in progress...`,
       success: `Withdraw has successfully being made👌`,
       error: `Failed to withdraw 🤯"`,
     });
   };
-  //SEED ROUND _ READ CALLS: PRETIMELOCK 
-  const {data: ownerAddressSeedPretimelock} = usePreTimelockFetchOwner(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressSeedPretimelock} = usePreTimelockToken(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusSeedTimelock} = useTimestampStatus(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusSeedTimelock} = useTimestampInitialStatus(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timePeriodValue} = useTimeperiodValue(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: incomingDepositStatusSPT} = useIncomingDepositsFinalised(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
-  //SEED ROUND _ PRETIMELOCK WRITE CALLS
-  const setPreTimelockTimestamp = useSetTimestampPreTimelock(seedPreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnershipTimelock = useTransferOwnershipTimelock(seedPreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const transferLockedTokensSeedTimelock = useTransferAccidentallyLockedTokens(seedPreTimelockAddress, tokenAddress, tokenAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
-  //SEED ROUND _ READ CALLS: PREVESTING
-  const {data: ownerAddressSeedPrevesting} = usePreVestingFetchOwner(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressSeedPrevesting} = usePreVestingToken(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusSeedVesting} = useTimestampStatusVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusVesting} = useTimestampInitialStatusVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: startTime}  = useStartPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingTotalAmount} = useVestingScheduleTotalAmt(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingTotalCount} = useVestingScheduleTotalCount(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingWithdrawableAmt} = useWithdrawableAmt(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: incomingDepositStatusSPV} = useIncomingDepositsFinalised(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  //SEED ROUND _ READ CALLS: PRETIMELOCK
+  const { data: ownerAddressSeedPretimelock } = usePreTimelockFetchOwner(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressSeedPretimelock } = usePreTimelockToken(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampStatusSeedTimelock } = useTimestampStatus(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampInitialStatusSeedTimelock } = useTimestampInitialStatus(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timePeriodValue } = useTimeperiodValue(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: incomingDepositStatusSPT } = useIncomingDepositsFinalised(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
-  //SEED ROUND _ PREVESTING WRITE CALLS 
-  const setPreVestingSeedTimestamp = useSetTimestampPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnershipSeedVesting = useTransferOwnershipVesting(seedTokenPreVesting, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setVestingSeedWithdraw = useVestingWithdraw(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setRevokeSeedParams = useRevoke(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
+  //SEED ROUND _ PRETIMELOCK WRITE CALLS
+  const setPreTimelockTimestamp = useSetTimestampPreTimelock(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    timePeriod,
+  );
+  const setTransferOwnershipTimelock = useTransferOwnershipTimelock(
+    seedPreTimelockAddress,
+    newOwner,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const transferLockedTokensSeedTimelock = useTransferAccidentallyLockedTokens(
+    seedPreTimelockAddress,
+    tokenAddress,
+    tokenAmt,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  //SEED ROUND _ READ CALLS: PREVESTING
+  const { data: ownerAddressSeedPrevesting } = usePreVestingFetchOwner(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressSeedPrevesting } = usePreVestingToken(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampStatusSeedVesting } = useTimestampStatusVesting(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampInitialStatusVesting } = useTimestampInitialStatusVesting(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: startTime } = useStartPreVesting(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingTotalAmount } = useVestingScheduleTotalAmt(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingTotalCount } = useVestingScheduleTotalCount(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingWithdrawableAmt } = useWithdrawableAmt(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: incomingDepositStatusSPV } = useIncomingDepositsFinalised(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  //SEED ROUND _ PREVESTING WRITE CALLS
+  const setPreVestingSeedTimestamp = useSetTimestampPreVesting(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    timePeriod,
+  );
+  const setTransferOwnershipSeedVesting = useTransferOwnershipVesting(
+    seedTokenPreVesting,
+    newOwner,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const setVestingSeedWithdraw = useVestingWithdraw(
+    seedTokenPreVesting,
+    withdrawAmt,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const setRevokeSeedParams = useRevoke(
+    seedTokenPreVesting,
+    withdrawAmt,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
   //PRIVATE ROUND _ READ CALLS: PRETIMELOCK
-  const {data: ownerAddressPrivatePretimelock} = usePreTimelockFetchOwner(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressPrivatePretimelock} = usePreTimelockToken(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusPrivateTimelock} = useTimestampStatus(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusPrivateTimelock} = useTimestampInitialStatus(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timePeriodPrivateValue} = useTimeperiodValue(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: incomingDepositStatusPPT} = useIncomingDepositsFinalised(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
+  const { data: ownerAddressPrivatePretimelock } = usePreTimelockFetchOwner(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressPrivatePretimelock } = usePreTimelockToken(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampStatusPrivateTimelock } = useTimestampStatus(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampInitialStatusPrivateTimelock } = useTimestampInitialStatus(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timePeriodPrivateValue } = useTimeperiodValue(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: incomingDepositStatusPPT } = useIncomingDepositsFinalised(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
   //PRIVATE ROUND _ PRETIMELOCK WRITE CALLS
-  const setPreTimelockPrivateTimestamp = useSetTimestampPreTimelock(privatePreTimelockAddress, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnershipPrivateTimelock = useTransferOwnershipTimelock(privatePreTimelockAddress, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const transferLockedTokensPrivateTimelock = useTransferAccidentallyLockedTokens(privatePreTimelockAddress, tokenAddress, tokenAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
+  const setPreTimelockPrivateTimestamp = useSetTimestampPreTimelock(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    timePeriod,
+  );
+  const setTransferOwnershipPrivateTimelock = useTransferOwnershipTimelock(
+    privatePreTimelockAddress,
+    newOwner,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const transferLockedTokensPrivateTimelock = useTransferAccidentallyLockedTokens(
+    privatePreTimelockAddress,
+    tokenAddress,
+    tokenAmt,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
   //PRIVATE ROUND _ READ CALLS: PREVESTING
-  const {data: ownerAddressPrivatePrevesting} = usePreVestingFetchOwner(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressPrivatePrevesting} = usePreVestingToken(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusPrivateVesting} = useTimestampStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusPrivateVesting} = useTimestampInitialStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: startTimePrivate}  = useStartPreVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingPrivateTotalAmount} = useVestingScheduleTotalAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingPrivateTotalCount} = useVestingScheduleTotalCount(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingPrivateWithdrawableAmt} = useWithdrawableAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: incomingDepositStatusPPV} = useIncomingDepositsFinalised(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: ownerAddressPrivatePrevesting } = usePreVestingFetchOwner(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressPrivatePrevesting } = usePreVestingToken(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampStatusPrivateVesting } = useTimestampStatusVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampInitialStatusPrivateVesting } = useTimestampInitialStatusVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: startTimePrivate } = useStartPreVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingPrivateTotalAmount } = useVestingScheduleTotalAmt(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingPrivateTotalCount } = useVestingScheduleTotalCount(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingPrivateWithdrawableAmt } = useWithdrawableAmt(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: incomingDepositStatusPPV } = useIncomingDepositsFinalised(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
   //PRIVATE ROUND _ PREVESTING WRITE CALLS
-  const setPreVestingPrivateTimestamp = useSetTimestampPreVesting(seedTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number),timePeriod);
-  const setTransferOwnershipPrivateVesting = useTransferOwnershipVesting(seedTokenPreVesting, newOwner, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setVestingPrivateWithdraw = useVestingWithdraw(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setRevokePrivateParams = useRevoke(seedTokenPreVesting, withdrawAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const setPreVestingPrivateTimestamp = useSetTimestampPreVesting(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    timePeriod,
+  );
+  const setTransferOwnershipPrivateVesting = useTransferOwnershipVesting(
+    seedTokenPreVesting,
+    newOwner,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const setVestingPrivateWithdraw = useVestingWithdraw(
+    seedTokenPreVesting,
+    withdrawAmt,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const setRevokePrivateParams = useRevoke(
+    seedTokenPreVesting,
+    withdrawAmt,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
   //IDO ROUND _ READ CALLS: PRESALE
-  const {data: ownerAddressIDOPreSale} = usePreSaleFetchOwner(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressIDOPreSale} = useTokenPreSaleAddress(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressIDOPreVesting} = useVestingContractAddress(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressIDOPretimelock} = useTimeLockContractAddress(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenUSDT} = useUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenBUSD} = useBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: coinsSold} = usePreSaleCoinsSoldInfo(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: valueExchangePriceUsdt} = useExchangePriceUsdt(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: valueExchangePriceBusd} = useExchangePriceBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: getPreSaleDuration} = useDuration(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: getPreSaleCliff} = useCliff(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: minUsdt} = useMinBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: maxUsdt} = useMaxBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: minBusd} = useMinBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: maxBusd} = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: availableAtTGE} = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  
+  const { data: ownerAddressIDOPreSale } = usePreSaleFetchOwner(
+    idoTokenPreSaleAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressIDOPreSale } = useTokenPreSaleAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressIDOPreVesting } = useVestingContractAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressIDOPretimelock } = useTimeLockContractAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenUSDT } = useUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: tokenBUSD } = useBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: coinsSold } = usePreSaleCoinsSoldInfo(
+    idoTokenPreSaleAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: valueExchangePriceUsdt } = useExchangePriceUsdt(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: valueExchangePriceBusd } = useExchangePriceBusd(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: getPreSaleDuration } = useDuration(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: getPreSaleCliff } = useCliff(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: minUsdt } = useMinBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: maxUsdt } = useMaxBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: minBusd } = useMinBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: maxBusd } = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: availableAtTGE } = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
+
   //IDO ROUND _ WRITE CALLS: PRESALE
-  const setExchangePriceUsdt = useSetExchangePriceUsdt(priceUsdt, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setExchangePriceBusd= useSetExchangePriceBusd(priceBusd, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setPresaleDuration = useSetDuration(chainId == undefined ? desiredChain.chainId : (chainId as number), preSaleDuration);
-  const setPresaleCliff = useSetCliffPeriod(chainId == undefined ? desiredChain.chainId : (chainId as number), preSaleCliff);
-  const availableAtTGEVal = useSetAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number), tgeValue * 100);
+  const setExchangePriceUsdt = useSetExchangePriceUsdt(
+    priceUsdt,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const setExchangePriceBusd = useSetExchangePriceBusd(
+    priceBusd,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const setPresaleDuration = useSetDuration(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    preSaleDuration,
+  );
+  const setPresaleCliff = useSetCliffPeriod(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    preSaleCliff,
+  );
+  const availableAtTGEVal = useSetAvailableAtTGE(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    tgeValue * 100,
+  );
   const startSale = useStartSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const endSale = useEndSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setBuyAmountBUSD = useSetBuyAmountRangeBUSD(minBusdValue, maxBusdValue, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const setBuyAmountUSDT = useSetBuyAmountRangeUSDT(minUsdtValue, maxUsdtValue, chainId == undefined ? desiredChain.chainId : (chainId as number))
+  const setBuyAmountBUSD = useSetBuyAmountRangeBUSD(
+    minBusdValue,
+    maxBusdValue,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const setBuyAmountUSDT = useSetBuyAmountRangeUSDT(
+    minUsdtValue,
+    maxUsdtValue,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
   const withdrawUSDT = useWithdrawUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const withdrawBUSD = useWithdrawBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const withdrawFromVesting = useWithdrawFromVesting(tokenAmtWithdraw != undefined ? tokenAmtWithdraw : 0, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const revokePresale = useRevokePreSale(scheduleID != undefined ? scheduleID : 0, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const transferLockedTokensIDOTimelock = useTransferAccidentallyLockedTokens(idoTokenPreSaleAddress, tokenAddress, tokenAmt, chainId == undefined ? desiredChain.chainId : (chainId as number));
- 
+  const withdrawFromVesting = useWithdrawFromVesting(
+    tokenAmtWithdraw != undefined ? tokenAmtWithdraw : 0,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const revokePresale = useRevokePreSale(
+    scheduleID != undefined ? scheduleID : 0,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const transferLockedTokensIDOTimelock = useTransferAccidentallyLockedTokens(
+    idoTokenPreSaleAddress,
+    tokenAddress,
+    tokenAmt,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
   //IDO ROUND _ READ CALLS: PRETIMELOCK
-  const {data: ownerAddressIDOPretimelock} = usePreTimelockFetchOwner(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusIDOTimelock} = useTimestampStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusIDOTimelock} = useTimestampInitialStatus(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timePeriodIDOTimelockValue} = useTimeperiodValue(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: incomingDepositStatusIPT} = useIncomingDepositsFinalised(idoTokenPreSaleAddress, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: ownerAddressIDOPretimelock } = usePreTimelockFetchOwner(
+    idoTokenPreSaleAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampStatusIDOTimelock } = useTimestampStatus(
+    idoTokenPreSaleAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampInitialStatusIDOTimelock } = useTimestampInitialStatus(
+    idoTokenPreSaleAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timePeriodIDOTimelockValue } = useTimeperiodValue(
+    idoTokenPreSaleAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: incomingDepositStatusIPT } = useIncomingDepositsFinalised(
+    idoTokenPreSaleAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
   //IDO ROUND _ READ CALLS: PREVESTING
-  const {data: ownerAddressIDOPrevesting} = usePreVestingFetchOwner(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: tokenAddressIDOPrevesting} = usePreVestingToken(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampStatusIDOVesting} = useTimestampStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: timestampInitialStatusIDOVesting} = useTimestampInitialStatusVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: startTimeIDO}  = useStartPreVesting(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingIDOTotalAmount} = useVestingScheduleTotalAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingIDOTotalCount} = useVestingScheduleTotalCount(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: prevestingIDOWithdrawableAmt} = useWithdrawableAmt(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const {data: incomingDepositStatusIPV} = useIncomingDepositsFinalised(privateTokenPreVesting, chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: ownerAddressIDOPrevesting } = usePreVestingFetchOwner(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressIDOPrevesting } = usePreVestingToken(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampStatusIDOVesting } = useTimestampStatusVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: timestampInitialStatusIDOVesting } = useTimestampInitialStatusVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: startTimeIDO } = useStartPreVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingIDOTotalAmount } = useVestingScheduleTotalAmt(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingIDOTotalCount } = useVestingScheduleTotalCount(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: prevestingIDOWithdrawableAmt } = useWithdrawableAmt(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: incomingDepositStatusIPV } = useIncomingDepositsFinalised(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
- 
-  const setPreVestingPrivateTimestampHandler = async(e) => {
-    if(timePeriod != undefined || timePeriod != "") {
-      const txTimestamp =  await setPreVestingPrivateTimestamp();
+  const setPreVestingPrivateTimestampHandler = async e => {
+    if (timePeriod != undefined || timePeriod != "") {
+      const txTimestamp = await setPreVestingPrivateTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
-  
-  const setPreSaleCliffHandler = async(e) => {
-    if(preSaleCliff != undefined) {
-      const txCliffPeriod =  await setPresaleCliff();
+
+  const setPreSaleCliffHandler = async e => {
+    if (preSaleCliff != undefined) {
+      const txCliffPeriod = await setPresaleCliff();
       await notifySetTimestamp(txCliffPeriod.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
 
-  const setTransferOwnershipPrivateVestingHandler = async(e) => {
-    if(newOwner != undefined || newOwner != "") {
-      const txTransfer =  await setTransferOwnershipPrivateVesting();
+  const setTransferOwnershipPrivateVestingHandler = async e => {
+    if (newOwner != undefined || newOwner != "") {
+      const txTransfer = await setTransferOwnershipPrivateVesting();
       await notifySetTimestamp(txTransfer.wait(1));
     } else {
-      setNewOwner('0x');
+      setNewOwner("0x");
     }
   };
 
-  const setVestingPrivateWithdrawHandler = async(e) => {
-    if(withdrawAmt != undefined || withdrawAmt != "") {
-      const txWithdraw =  await setVestingPrivateWithdraw();
+  const setVestingPrivateWithdrawHandler = async e => {
+    if (withdrawAmt != undefined || withdrawAmt != "") {
+      const txWithdraw = await setVestingPrivateWithdraw();
       await notifySetTimestamp(txWithdraw.wait(1));
     } else {
       setWithdrawAmt(0);
     }
   };
 
-  const setRevokePrivateParamsHandler = async(e) => {
-    if(scheduleID != undefined || scheduleID != "") {
-      const txRevoke =  await setRevokePrivateParams();
+  const setRevokePrivateParamsHandler = async e => {
+    if (scheduleID != undefined || scheduleID != "") {
+      const txRevoke = await setRevokePrivateParams();
       await notifySetTimestamp(txRevoke.wait(1));
     } else {
       setScheduleID(0);
     }
   };
 
-  const setExchangePriceUsdtHandler = async(e) => {
-    if(priceUsdt != undefined || priceUsdt != "") {
-      const txExchange =  await setExchangePriceUsdt();
+  const setExchangePriceUsdtHandler = async e => {
+    if (priceUsdt != undefined || priceUsdt != "") {
+      const txExchange = await setExchangePriceUsdt();
       await notifySetExchangePrice(txExchange.wait(1));
     } else {
       setPriceUsdt(0);
     }
   };
 
-  const setExchangePriceBusdHandler = async(e) => {
-    if(priceBusd != undefined || priceBusd != "") {
-      const txExchange =  await setExchangePriceBusd();
+  const setExchangePriceBusdHandler = async e => {
+    if (priceBusd != undefined || priceBusd != "") {
+      const txExchange = await setExchangePriceBusd();
       await notifySetExchangePrice(txExchange.wait(1));
     } else {
       setPriceBusd(0);
     }
   };
 
-  const setTimestampHandlerTimelock = async(e) => {
-    if(timePeriod != undefined || timePeriod != "") {
-      const txTimestamp =  await setPreTimelockTimestamp();
+  const setTimestampHandlerTimelock = async e => {
+    if (timePeriod != undefined || timePeriod != "") {
+      const txTimestamp = await setPreTimelockTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
 
-  const setTimestampHandlerPrivateTimelock = async(e) => {
-    if(timePeriod != undefined || timePeriod != "") {
-      const txTimestamp =  await setPreTimelockPrivateTimestamp();
+  const setTimestampHandlerPrivateTimelock = async e => {
+    if (timePeriod != undefined || timePeriod != "") {
+      const txTimestamp = await setPreTimelockPrivateTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
 
-  const setRevokeParam = async(e) => {
-    if(scheduleID != undefined || scheduleID != "") {
-      const txRevoke =  await setRevokeSeedParams();
+  const setRevokeParam = async e => {
+    if (scheduleID != undefined || scheduleID != "") {
+      const txRevoke = await setRevokeSeedParams();
       await notifySetTimestamp(txRevoke.wait(1));
     } else {
       setScheduleID(0);
     }
   };
 
-  const setRevokeParamPresale = async(e) => {
-    if(scheduleID != undefined || scheduleID != "") {
-      const txRevoke =  await revokePresale();
+  const setRevokeParamPresale = async e => {
+    if (scheduleID != undefined || scheduleID != "") {
+      const txRevoke = await revokePresale();
       await notifySetTimestamp(txRevoke.wait(1));
     } else {
       setScheduleID(0);
     }
   };
 
-  const setTimestampHandlerVesting = async(e) => {
-    if(timePeriod != undefined || timePeriod != "") {
-      const txTimestamp =  await setPreVestingSeedTimestamp();
+  const setTimestampHandlerVesting = async e => {
+    if (timePeriod != undefined || timePeriod != "") {
+      const txTimestamp = await setPreVestingSeedTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
 
-  const setPresaleDurationHandler = async(e) => {
-    if(preSaleDuration != undefined || preSaleDuration != "") {
-      const txDuration =  await setPresaleDuration();
+  const setPresaleDurationHandler = async e => {
+    if (preSaleDuration != undefined || preSaleDuration != "") {
+      const txDuration = await setPresaleDuration();
       await notifySetTimestamp(txDuration.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
 
-  const setWithdrawVesting = async(e) => {
-    if(withdrawAmt != undefined || withdrawAmt != "") {
-      const txWithdraw =  await setVestingSeedWithdraw();
+  const setWithdrawVesting = async e => {
+    if (withdrawAmt != undefined || withdrawAmt != "") {
+      const txWithdraw = await setVestingSeedWithdraw();
       await notifySetTimestamp(txWithdraw.wait(1));
     } else {
       setTimePeriod(0);
     }
   };
 
-  const transferOwnershipHandlerTimelock = async(e) => {
-    if(newOwner != "" || newOwner != undefined) {
+  const transferOwnershipHandlerTimelock = async e => {
+    if (newOwner != "" || newOwner != undefined) {
       const txTransferOwnership = await setTransferOwnershipTimelock();
       await notifyTransferOwnership(txTransferOwnership.wait(1));
-    } else { 
+    } else {
       setNewOwner("0x");
     }
   };
 
-  const transferOwnershipHandlerVesting = async(e) => {
-    if(newOwner != "" || newOwner != undefined) {
+  const transferOwnershipHandlerVesting = async e => {
+    if (newOwner != "" || newOwner != undefined) {
       const txTransferOwnership = await setTransferOwnershipSeedVesting();
       await notifyTransferOwnership(txTransferOwnership.wait(1));
-    } else { 
+    } else {
       setNewOwner("0x");
     }
   };
 
-  const transferOwnershipHandlerPrivateVesting = async(e) => {
-    if(newOwner != "" || newOwner != undefined) {
+  const transferOwnershipHandlerPrivateVesting = async e => {
+    if (newOwner != "" || newOwner != undefined) {
       const txTransferOwnership = await setTransferOwnershipPrivateTimelock();
       await notifyTransferOwnership(txTransferOwnership.wait(1));
-    } else { 
+    } else {
       setNewOwner("0x");
     }
   };
 
-  
-  const setSaleStatusHandler = async(e) => {
-    if(saleStatus != "" || saleStatus != undefined) {
-      if(saleStatus == "start") {
+  const setSaleStatusHandler = async e => {
+    if (saleStatus != "" || saleStatus != undefined) {
+      if (saleStatus == "start") {
         const txSaleStatus = await startSale();
         await notifySaleStatus(txSaleStatus.wait(1));
       } else {
-        if(saleStatus == "pause" || saleStatus == "end") {
+        if (saleStatus == "pause" || saleStatus == "end") {
           const txSaleStatus = await endSale();
           await notifySaleStatus(txSaleStatus.wait(1));
         }
       }
-    } else { 
+    } else {
       setSaleStatus("0");
     }
   };
 
-
-  const setAvailableTgeHandler = async(e) => {
-    if(tgeValue != undefined) {
+  const setAvailableTgeHandler = async e => {
+    if (tgeValue != undefined) {
       const txTge = await availableAtTGEVal();
       await notifySetAvailableAtTge(txTge.wait(1));
-    } else { 
+    } else {
       setNewOwner("0x");
     }
   };
 
-  const setBuyAmountBusdRangeHandler = async(e) => {
-    if(minBusdValue != "" || minBusdValue != undefined && maxBusdValue != "" || maxBusdValue != undefined) {
+  const setBuyAmountBusdRangeHandler = async e => {
+    if (minBusdValue != "" || (minBusdValue != undefined && maxBusdValue != "") || maxBusdValue != undefined) {
       const txBuyAmt = await setBuyAmountBUSD();
       await notifySetBuyAmountBusd(txBuyAmt.wait(1));
     } else {
@@ -612,33 +863,33 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setBuyAmountUsdtRangeHandler = async(e) => {
-    if(minUsdtValue != "" || minUsdtValue != undefined && maxUsdtValue != "" || maxUsdtValue != undefined) {
+  const setBuyAmountUsdtRangeHandler = async e => {
+    if (minUsdtValue != "" || (minUsdtValue != undefined && maxUsdtValue != "") || maxUsdtValue != undefined) {
       const txBuyAmt = await setBuyAmountUSDT();
       await notifySetBuyAmountUsdt(txBuyAmt.wait(1));
     } else {
       setMinUsdtValue(0);
       setMaxUsdtValue(0);
-    } 
+    }
   };
 
-  const setWithdrawBUSDHandler = async(e) => {
+  const setWithdrawBUSDHandler = async e => {
     const txWithdraw = await withdrawBUSD();
     await notifyWhenWithdraw(txWithdraw.wait(1));
   };
 
-  const setWithdrawUSDTHandler = async(e) => {
+  const setWithdrawUSDTHandler = async e => {
     const txWithdraw = await withdrawUSDT();
     await notifyWhenWithdraw(txWithdraw.wait(1));
   };
 
-  const setEndSaleHandler = async(e) => {
+  const setEndSaleHandler = async e => {
     const txEndSale = await endSale();
     await notifySetEndSale(txEndSale.wait(1));
   };
-  
-  const setSeedAccidentalTokensReleaseHandler = async(e) => {
-    if(tokenAmt != undefined || tokenAmt != "" && tokenAddress != undefined || tokenAddress != "") {  
+
+  const setSeedAccidentalTokensReleaseHandler = async e => {
+    if (tokenAmt != undefined || (tokenAmt != "" && tokenAddress != undefined) || tokenAddress != "") {
       const txRelease = await transferLockedTokensSeedTimelock();
       await notifyTokenRelease(txRelease.wait(1));
     } else {
@@ -647,8 +898,8 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setPrivateAccidentalTokensReleaseHandler = async(e) => {
-    if(tokenAmt != undefined || tokenAmt != "" && tokenAddress != undefined || tokenAddress != "") {  
+  const setPrivateAccidentalTokensReleaseHandler = async e => {
+    if (tokenAmt != undefined || (tokenAmt != "" && tokenAddress != undefined) || tokenAddress != "") {
       const txRelease = await transferLockedTokensPrivateTimelock();
       await notifyTokenRelease(txRelease.wait(1));
     } else {
@@ -656,9 +907,9 @@ function Dashboard(): JSX.Element {
       setTokenAddress(0);
     }
   };
-  
-  const setIDOAccidentalTokensReleaseHandler = async(e) => {
-    if(tokenAmt != undefined || tokenAmt != "" && tokenAddress != undefined || tokenAddress != "") {  
+
+  const setIDOAccidentalTokensReleaseHandler = async e => {
+    if (tokenAmt != undefined || (tokenAmt != "" && tokenAddress != undefined) || tokenAddress != "") {
       const txRelease = await transferLockedTokensIDOTimelock();
       await notifyTokenRelease(txRelease.wait(1));
     } else {
@@ -667,14 +918,14 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setWithdrawFromVesting = async(e) => {
-    if(tokenAmtWithdraw != undefined || tokenAmtWithdraw != ""){
+  const setWithdrawFromVesting = async e => {
+    if (tokenAmtWithdraw != undefined || tokenAmtWithdraw != "") {
       const txWithdraw = await withdrawFromVesting();
       await notifyWhenWithdraw(txWithdraw.wait(1));
     } else {
       setTokenAmtWithdraw(0);
     }
-  }
+  };
 
   const handleSeedRound = async () => {
     if (BigNumber.from(totalNonVestingAmt).gt("0")) {
@@ -698,7 +949,6 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  
   const handlePrivateRound = async () => {
     if (BigNumber.from(totalNonVestingAmt).gt("0")) {
       // transfer tokens to pre time lock
@@ -709,7 +959,7 @@ function Dashboard(): JSX.Element {
       const bulkDepositForPrivateSaleTx = await createBulkDepositForPrivateSale();
       await notifyBulkDepositTokens(bulkDepositForPrivateSaleTx.wait(1), "PrivateSale");
     }
-    
+
     if (BigNumber.from(totalVestingAmt).gt("0")) {
       // transfer tokens to pre vesting
       const sendTokenToPreVestingForPrivateSaleTX = await sendTokenToPreVestingForPrivateSale();
@@ -726,7 +976,9 @@ function Dashboard(): JSX.Element {
   };
 
   const parseCSV = (data: any) => {
-    const amountsArr = Object.values(data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow("18"))));
+    const amountsArr = Object.values(
+      data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow(tokenDecimals))),
+    );
     let totalAmount = BigNumber.from("0");
     for (let i = 0; i < amountsArr.length; i++) {
       totalAmount = totalAmount.add(BigNumber.from(amountsArr[i]));
@@ -793,7 +1045,7 @@ function Dashboard(): JSX.Element {
     setIsValidCliff(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
   };
 
-  const onChangePresaleDuration= e => {
+  const onChangePresaleDuration = e => {
     e.preventDefault();
     setPresaleDuration(e.target.value);
     setIsValidDuration(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
@@ -803,23 +1055,23 @@ function Dashboard(): JSX.Element {
     e.preventDefault();
     setTokenAmtWithdraw(e.target.value);
     setIsValidAmount(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
-  }
-  const onChangeMinBusdValue= e => {
+  };
+  const onChangeMinBusdValue = e => {
     e.preventDefault();
     setMinBusdValue(e.target.value);
   };
 
-  const onChangeMaxBusdValue= e => {
+  const onChangeMaxBusdValue = e => {
     e.preventDefault();
     setMaxBusdValue(e.target.value);
   };
 
-  const onChangeMinUsdtValue= e => {
+  const onChangeMinUsdtValue = e => {
     e.preventDefault();
     setMinUsdtValue(e.target.value);
   };
 
-  const onChangeMaxUsdtValue= e => {
+  const onChangeMaxUsdtValue = e => {
     e.preventDefault();
     setMaxUsdtValue(e.target.value);
   };
@@ -929,8 +1181,8 @@ function Dashboard(): JSX.Element {
                       >
                         <div className="card shadow-lg card-1">
                           {/* <div className="row justify-content-end mb-5"> */}
-                            {/* <div className="col-lg-12 col-auto "> */}
-                              {/* <button
+                          {/* <div className="col-lg-12 col-auto "> */}
+                          {/* <button
                                 type="button"
                                 className="btn btn-primary btn-block"
                                 disabled={!active}
@@ -938,7 +1190,7 @@ function Dashboard(): JSX.Element {
                               >
                                 <small className="font-weight-bold">Start</small>
                               </button> */}
-                              {/* <button
+                          {/* <button
                                 type="button"
                                 className="btn btn-danger btn-block"
                                 onClick={handleEndSale}
@@ -946,13 +1198,13 @@ function Dashboard(): JSX.Element {
                               >
                                 <small className="font-weight-bold">Stop</small>
                               </button> */}
-                              {/* <button type="button" className="btn btn-success btn-block">
+                          {/* <button type="button" className="btn btn-success btn-block">
                                 <small className="font-weight-bold">Transfer Ownership</small>
                               </button>
                               <button type="button" className="btn btn-primary btn-block" onClick={dispCsvData}>
                                 <small className="font-weight-bold">Display CSV data</small>
                               </button> */}
-                            {/* </div> */}
+                          {/* </div> */}
                           {/* </div> */}
                           <div className="card-body inner-card border">
                             <div className="row justify-content-between text-left">
@@ -1086,694 +1338,1113 @@ function Dashboard(): JSX.Element {
                             </div>
                           </div>
                           <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">SeedRoundTokenPreTimeLock</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                            Incoming Deposits Allowed : 
-                              { incomingDepositStatusSPT != undefined && incomingDepositStatusSPT == true && (
-                                <span style={{ color: "green" }}>LIVE</span>
-                              )}
-                              { incomingDepositStatusSPT != undefined && incomingDepositStatusSPT == false && (
-                                <span style={{ color: "red" }}>STOPPED</span>
-                              )}
-                            </li>
-                            <li className="list-group-item">Contract Address : {seedPreTimelockAddress}</li>
-                            <li className="list-group-item">owner : {ownerAddressSeedPretimelock}</li>
-                            <li className="list-group-item">token : {tokenAddressSeedPretimelock}</li>
-                            <li className="list-group-item">timestampset : {timestampStatusSeedTimelock != undefined ? timestampStatusSeedTimelock.toString(): false}</li>
-                            <li className="list-group-item">initial timestamp : {moment.unix(timestampInitialStatusSeedTimelock).format("MMMM DD, YYYY")}</li>
-                            <li className="list-group-item">timeperiod : {secondsToDhms(timePeriodValue)}</li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="timestamp in seconds"
-                                  aria-label="timestamp in seconds"
-                                  aria-describedby="basic-addon2"
-                                  value={timePeriod}
-                                  onChange={e => onChangeTime(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerTimelock} disabled={!active || (ownerAddressSeedPretimelock != undefined ? ownerAddressSeedPretimelock != account : false)}>
-                                    set Time Stamp
-                                  </button>
+                            <div className="mt-4 font-weight-bold mx-auto text-center">SeedRoundTokenPreTimeLock</div>
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">
+                                <span className="font-weight-bold">Contract Address :</span> {seedPreTimelockAddress}
+                              </li>
+                              <li className="list-group-item">Owner : {ownerAddressSeedPretimelock}</li>
+                              <li className="list-group-item">Token : {tokenAddressSeedPretimelock}</li>
+                              <li className="list-group-item">
+                                Incoming deposits are :{" "}
+                                {incomingDepositStatusSPT != undefined && incomingDepositStatusSPT == false && (
+                                  <span style={{ color: "green" }}>ACCEPTED</span>
+                                )}
+                                {incomingDepositStatusSPT != undefined && incomingDepositStatusSPT == true && (
+                                  <span style={{ color: "red" }}>STOPPED</span>
+                                )}
+                              </li>
+                              <li className="list-group-item">
+                                Locking started :{" "}
+                                {timestampStatusSeedTimelock != undefined
+                                  ? timestampStatusSeedTimelock.toString()
+                                  : false}
+                              </li>
+                              <li className="list-group-item">
+                                Deposit finalized at :{" "}
+                                {timestampInitialStatusSeedTimelock &&
+                                  timestampStatusSeedTimelock != undefined &&
+                                  timestampStatusSeedTimelock == true &&
+                                  moment.unix(timestampInitialStatusSeedTimelock).format("MMMM DD, YYYY hh:mm:ss a")}
+                              </li>
+                              <li className="list-group-item">
+                                TGE unlock date :{" "}
+                                {timePeriodValue != undefined &&
+                                timestampStatusSeedTimelock != undefined &&
+                                timestampStatusSeedTimelock == true
+                                  ? moment.unix(timePeriodValue).format("MMMM DD, YYYY hh:mm:ss a")
+                                  : "-"}
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="timestamp in seconds"
+                                    aria-label="timestamp in seconds"
+                                    aria-describedby="basic-addon2"
+                                    value={timePeriod}
+                                    onChange={e => onChangeTime(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setTimestampHandlerTimelock}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressSeedPretimelock != undefined
+                                          ? ownerAddressSeedPretimelock != account
+                                          : false)
+                                      }
+                                    >
+                                      set Time Stamp
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="new owner"
-                                  aria-label="new owner"
-                                  aria-describedby="basic-addon2"
-                                  value={newOwner}
-                                  onChange={e => onChangeNewAddress(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerTimelock} disabled={!active || (ownerAddressSeedPretimelock != undefined ? ownerAddressSeedPretimelock != account : false)}>
-                                    transfer Ownership
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="new owner"
+                                    aria-label="new owner"
+                                    aria-describedby="basic-addon2"
+                                    value={newOwner}
+                                    onChange={e => onChangeNewAddress(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={transferOwnershipHandlerTimelock}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressSeedPretimelock != undefined
+                                          ? ownerAddressSeedPretimelock != account
+                                          : false)
+                                      }
+                                    >
+                                      transfer Ownership
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                              <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token address"
-                                  aria-label="token address"
-                                  aria-describedby="basic-addon2"
-                                  value={tokenAddress}
-                                  onChange={e => onChangeTokenAddress(e)}
-                                />
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                  value={tokenAmt}
-                                  onChange={e => onChangeNewAmt(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setSeedAccidentalTokensReleaseHandler} disabled={!active || (ownerAddressSeedPretimelock != undefined ? ownerAddressSeedPretimelock != account : false)}>
-                                    transfer Accidentally Locked Tokens
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token address"
+                                    aria-label="token address"
+                                    aria-describedby="basic-addon2"
+                                    value={tokenAddress}
+                                    onChange={e => onChangeTokenAddress(e)}
+                                  />
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token amount"
+                                    aria-label="token amount"
+                                    aria-describedby="basic-addon2"
+                                    value={tokenAmt}
+                                    onChange={e => onChangeNewAmt(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setSeedAccidentalTokensReleaseHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressSeedPretimelock != undefined
+                                          ? ownerAddressSeedPretimelock != account
+                                          : false)
+                                      }
+                                    >
+                                      transfer Accidentally Locked Tokens
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                          </ul>
+                              </li>
+                            </ul>
                           </div>
 
                           <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">SeedRoundTokenPreVesting</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                            Incoming Deposits Allowed : 
-                              { incomingDepositStatusSPV != undefined && incomingDepositStatusSPV == true && (
-                                <span style={{ color: "green" }}>LIVE</span>
-                              )}
-                              { incomingDepositStatusSPV != undefined && incomingDepositStatusSPV == false && (
-                                <span style={{ color: "red" }}>STOPPED</span>
-                              )}
-                            </li>
-                            <li className="list-group-item">Contract Address : {seedTokenPreVesting}</li>
-                            <li className="list-group-item">owner : {ownerAddressSeedPrevesting}</li>
-                            <li className="list-group-item">token : {tokenAddressSeedPrevesting}</li>
-                            <li className="list-group-item">timestampset : {timestampStatusSeedVesting != undefined? timestampStatusSeedVesting.toString() : false}</li>
-                            <li className="list-group-item">initial timestamp : {moment.unix(timestampInitialStatusVesting).format("MMMM DD, YYYY")}</li>
-                            <li className="list-group-item">start : {moment.unix(startTime).format("MMMM DD, YYYY")}</li>
-                            <li className="list-group-item">vesting schedules total amount : {prevestingTotalAmount} SERA</li>
-                            <li className="list-group-item">vesting schedule count : {prevestingTotalCount}</li>
-                            <li className="list-group-item">withdrawable amount : {prevestingWithdrawableAmt}</li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="timestamp in seconds"
-                                  aria-label="timestamp in seconds"
-                                  aria-describedby="basic-addon2"
-                                  value={timePeriod}
-                                  onChange={e => onChangeTime(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerVesting} disabled={!active || (ownerAddressSeedPrevesting != undefined ? ownerAddressSeedPrevesting != account : false)}>
-                                    set Time Stamp
-                                  </button>
+                            <div className="mt-4 font-weight-bold mx-auto text-center">SeedRoundTokenPreVesting</div>
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">Contract Address : {seedTokenPreVesting}</li>
+                              <li className="list-group-item">owner : {ownerAddressSeedPrevesting}</li>
+                              <li className="list-group-item">token : {tokenAddressSeedPrevesting}</li>
+                              <li className="list-group-item">
+                                Incoming deposits are :{" "}
+                                {incomingDepositStatusSPV != undefined && incomingDepositStatusSPV == true && (
+                                  <span style={{ color: "red" }}>STOPPED</span>
+                                )}
+                                {incomingDepositStatusSPV != undefined && incomingDepositStatusSPV == false && (
+                                  <span style={{ color: "accepted" }}>ACCEPTED</span>
+                                )}
+                              </li>
+                              <li className="list-group-item">
+                                Locking started :{" "}
+                                {timestampStatusSeedVesting != undefined
+                                  ? timestampStatusSeedVesting.toString()
+                                  : false}
+                              </li>
+                              <li className="list-group-item">
+                                Deposit finalized at :{" "}
+                                {(timestampInitialStatusVesting &&
+                                  timestampStatusSeedVesting != undefined &&
+                                  timestampStatusSeedVesting == true &&
+                                  moment.unix(timestampInitialStatusVesting).format("MMMM DD, YYYY hh:mm:ss a")) ||
+                                  "-"}
+                              </li>
+                              <li className="list-group-item">
+                                Vesting started at :{" "}
+                                {startTime && moment.unix(startTime).format("MMMM DD, YYYY hh:mm:ss a")}
+                              </li>
+                              <li className="list-group-item">
+                                Total tokens vested :{" "}
+                                {tokenDecimals && prevestingTotalAmount != undefined
+                                  ? `${parseFloat(formatUnits(prevestingTotalAmount, tokenDecimals)).toFixed(
+                                      4,
+                                    )} ${tokenSymbol}`
+                                  : "-"}
+                              </li>
+                              <li className="list-group-item">vesting schedule count : {prevestingTotalCount}</li>
+                              <li className="list-group-item">
+                                withdrawable amount : {prevestingWithdrawableAmt} SERA
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="timestamp in seconds"
+                                    aria-label="timestamp in seconds"
+                                    aria-describedby="basic-addon2"
+                                    value={timePeriod}
+                                    onChange={e => onChangeTime(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setTimestampHandlerVesting}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressSeedPrevesting != undefined
+                                          ? ownerAddressSeedPrevesting != account
+                                          : false)
+                                      }
+                                    >
+                                      set Time Stamp
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="new owner"
-                                  aria-label="new owner"
-                                  aria-describedby="basic-addon2"
-                                  value={newOwner}
-                                  onChange={e => onChangeNewAddress(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerVesting} disabled={!active || (ownerAddressSeedPrevesting != undefined ? ownerAddressSeedPrevesting != account : false)}>
-                                    transfer Ownership
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="new owner"
+                                    aria-label="new owner"
+                                    aria-describedby="basic-addon2"
+                                    value={newOwner}
+                                    onChange={e => onChangeNewAddress(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={transferOwnershipHandlerVesting}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressSeedPrevesting != undefined
+                                          ? ownerAddressSeedPrevesting != account
+                                          : false)
+                                      }
+                                    >
+                                      transfer Ownership
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                  value={withdrawAmt}
-                                  onChange={e => onChangeWithdraw(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setWithdrawVesting} disabled={!active || (ownerAddressSeedPrevesting != undefined ? ownerAddressSeedPrevesting != account : false)}>
-                                    Withdraw
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token amount"
+                                    aria-label="token amount"
+                                    aria-describedby="basic-addon2"
+                                    value={withdrawAmt}
+                                    onChange={e => onChangeWithdraw(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setWithdrawVesting}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressSeedPrevesting != undefined
+                                          ? ownerAddressSeedPrevesting != account
+                                          : false)
+                                      }
+                                    >
+                                      Withdraw
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="vesting schedule id"
-                                  aria-label="vesting schedule id"
-                                  aria-describedby="basic-addon2"
-                                  value={scheduleID}
-                                  onChange={e => onChangeRevoke(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokeParam} disabled={!active || (ownerAddressSeedPrevesting != undefined ? ownerAddressSeedPrevesting != account : false)}>
-                                    REVOKE
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="vesting schedule id"
+                                    aria-label="vesting schedule id"
+                                    aria-describedby="basic-addon2"
+                                    value={scheduleID}
+                                    onChange={e => onChangeRevoke(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setRevokeParam}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressSeedPrevesting != undefined
+                                          ? ownerAddressSeedPrevesting != account
+                                          : false)
+                                      }
+                                    >
+                                      REVOKE
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                          </ul>
+                              </li>
+                            </ul>
                           </div>
 
                           <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">PrivateRoundTokenPreTimeLock</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                            Incoming Deposits Allowed : 
-                              { incomingDepositStatusPPT != undefined && incomingDepositStatusPPT == true && (
-                                <span style={{ color: "green" }}>LIVE</span>
-                              )}
-                              { incomingDepositStatusPPT != undefined && incomingDepositStatusPPT == false && (
-                                <span style={{ color: "red" }}>STOPPED</span>
-                              )}
-                            </li>
-                            <li className="list-group-item">Contract Address : {privatePreTimelockAddress}</li>
-                            <li className="list-group-item">owner : {ownerAddressPrivatePretimelock}</li>
-                            <li className="list-group-item">token : {tokenAddressPrivatePretimelock}</li>
-                            <li className="list-group-item">timestampset : {timestampStatusPrivateTimelock != undefined ? timestampStatusPrivateTimelock.toString() : false}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusPrivateTimelock != undefined ? moment.unix(timestampInitialStatusPrivateTimelock).format("MMMM DD, YYYY") : 0}</li>
-                            <li className="list-group-item">timeperiod : {timePeriodPrivateValue != undefined ? secondsToDhms(timePeriodPrivateValue) : timePeriodPrivateValue.toString()}</li>
-                          
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="timestamp in seconds"
-                                  aria-label="timestamp in seconds"
-                                  aria-describedby="basic-addon2"
-                                  value={timePeriod}
-                                  onChange={e => onChangeTime(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerPrivateTimelock} disabled={!active || (ownerAddressPrivatePretimelock != undefined ? ownerAddressPrivatePretimelock != account : false)}>
-                                    set Time Stamp
-                                  </button>
+                            <div className="mt-4 font-weight-bold mx-auto text-center">
+                              PrivateRoundTokenPreTimeLock
+                            </div>
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">Contract Address : {privatePreTimelockAddress}</li>
+                              <li className="list-group-item">owner : {ownerAddressPrivatePretimelock}</li>
+                              <li className="list-group-item">token : {tokenAddressPrivatePretimelock}</li>
+                              <li className="list-group-item">
+                                Incoming deposits are :
+                                {incomingDepositStatusPPT != undefined && incomingDepositStatusPPT == true && (
+                                  <span style={{ color: "red" }}>STOPPED</span>
+                                )}
+                                {incomingDepositStatusPPT != undefined && incomingDepositStatusPPT == false && (
+                                  <span style={{ color: "green" }}>ACCEPTED</span>
+                                )}
+                              </li>
+                              <li className="list-group-item">
+                                Locking started :{" "}
+                                {timestampStatusPrivateTimelock != undefined
+                                  ? timestampStatusPrivateTimelock.toString()
+                                  : false}
+                              </li>
+                              <li className="list-group-item">
+                                Deposit finalized at :{" "}
+                                {(timestampInitialStatusPrivateTimelock &&
+                                  timestampStatusPrivateTimelock != undefined &&
+                                  timestampStatusPrivateTimelock == true &&
+                                  moment
+                                    .unix(timestampInitialStatusPrivateTimelock)
+                                    .format("MMMM DD, YYYY hh:mm:ss a")) ||
+                                  "-"}
+                              </li>
+                              <li className="list-group-item">
+                                TGE unlock date :{" "}
+                                {timePeriodPrivateValue != undefined &&
+                                timestampStatusPrivateTimelock != undefined &&
+                                timestampStatusPrivateTimelock == true
+                                  ? moment.unix(timePeriodPrivateValue).format("MMMM DD, YYYY hh:mm:ss a")
+                                  : "-"}
+                              </li>
+
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="timestamp in seconds"
+                                    aria-label="timestamp in seconds"
+                                    aria-describedby="basic-addon2"
+                                    value={timePeriod}
+                                    onChange={e => onChangeTime(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setTimestampHandlerPrivateTimelock}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressPrivatePretimelock != undefined
+                                          ? ownerAddressPrivatePretimelock != account
+                                          : false)
+                                      }
+                                    >
+                                      set Time Stamp
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="new owner"
-                                  aria-label="new owner"
-                                  aria-describedby="basic-addon2"
-                                  value={newOwner}
-                                  onChange={e => onChangeNewAddress(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={transferOwnershipHandlerPrivateVesting} disabled={!active || (ownerAddressPrivatePretimelock != undefined ? ownerAddressPrivatePretimelock != account : false)}>
-                                    transfer Ownership
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="new owner"
+                                    aria-label="new owner"
+                                    aria-describedby="basic-addon2"
+                                    value={newOwner}
+                                    onChange={e => onChangeNewAddress(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={transferOwnershipHandlerPrivateVesting}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressPrivatePretimelock != undefined
+                                          ? ownerAddressPrivatePretimelock != account
+                                          : false)
+                                      }
+                                    >
+                                      transfer Ownership
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                              <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token address"
-                                  aria-label="token address"
-                                  aria-describedby="basic-addon2"
-                                  value={tokenAddress}
-                                  onChange={e => onChangeTokenAddress(e)}
-                                />
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                  value={tokenAmt}
-                                  onChange={e => onChangeNewAmt(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setPrivateAccidentalTokensReleaseHandler} disabled={!active || (ownerAddressPrivatePretimelock != undefined ? ownerAddressPrivatePretimelock != account : false)}>
-                                    transfer Accidentally Locked Tokens
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token address"
+                                    aria-label="token address"
+                                    aria-describedby="basic-addon2"
+                                    value={tokenAddress}
+                                    onChange={e => onChangeTokenAddress(e)}
+                                  />
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token amount"
+                                    aria-label="token amount"
+                                    aria-describedby="basic-addon2"
+                                    value={tokenAmt}
+                                    onChange={e => onChangeNewAmt(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setPrivateAccidentalTokensReleaseHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressPrivatePretimelock != undefined
+                                          ? ownerAddressPrivatePretimelock != account
+                                          : false)
+                                      }
+                                    >
+                                      transfer Accidentally Locked Tokens
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                          </ul>
+                              </li>
+                            </ul>
                           </div>
 
                           <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">PrivateRoundTokenPreVesting</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                            Incoming Deposits Allowed : 
-                              { incomingDepositStatusPPV != undefined && incomingDepositStatusPPV == true && (
-                                <span style={{ color: "green" }}>LIVE</span>
-                              )}
-                              { incomingDepositStatusPPV != undefined && incomingDepositStatusPPV == false && (
-                                <span style={{ color: "red" }}>STOPPED</span>
-                              )}
-                            </li>
-                            <li className="list-group-item">Contract Address : {privateTokenPreVesting}</li>
-                            <li className="list-group-item">owner : {ownerAddressPrivatePrevesting}</li>
-                            <li className="list-group-item">token : {tokenAddressPrivatePrevesting}</li>
-                            <li className="list-group-item">timestampset : {timestampStatusPrivateVesting != undefined ? timestampStatusPrivateVesting.toString() : false}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusPrivateVesting != undefined ? moment.unix(timestampInitialStatusPrivateVesting).format("MMMM DD, YYYY") : 0}</li>
-                            <li className="list-group-item">start : {startTimePrivate != undefined ? moment.unix(startTimePrivate).format("MMMM DD, YYYY") : 0}</li>
-                            <li className="list-group-item">vestingschedulestotalamount : {prevestingPrivateTotalAmount} SERA</li>
-                            <li className="list-group-item">vesting schedule count : {prevestingPrivateTotalCount}</li>
-                            <li className="list-group-item">withdrawable amount : {prevestingPrivateWithdrawableAmt} SERA</li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="timestamp in seconds"
-                                  aria-label="timestamp in seconds"
-                                  aria-describedby="basic-addon2"
-                                  value={timePeriod}
-                                  onChange={e => onChangeTime(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setPreVestingPrivateTimestampHandler} disabled={!active || (ownerAddressPrivatePrevesting != undefined ? ownerAddressPrivatePrevesting != account : false)}>
-                                    set Time Stamp
-                                  </button>
+                            <div className="mt-4 font-weight-bold mx-auto text-center">PrivateRoundTokenPreVesting</div>
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">Contract Address : {privateTokenPreVesting}</li>
+                              <li className="list-group-item">owner : {ownerAddressPrivatePrevesting}</li>
+                              <li className="list-group-item">token : {tokenAddressPrivatePrevesting}</li>
+                              <li className="list-group-item">
+                                Incoming deposits are :
+                                {incomingDepositStatusPPV != undefined && incomingDepositStatusPPV == true && (
+                                  <span style={{ color: "red" }}>STOPPED</span>
+                                )}
+                                {incomingDepositStatusPPV != undefined && incomingDepositStatusPPV == false && (
+                                  <span style={{ color: "green" }}>ACCEPTED</span>
+                                )}
+                              </li>
+                              <li className="list-group-item">
+                                Locking started :{" "}
+                                {timestampStatusPrivateVesting != undefined
+                                  ? timestampStatusPrivateVesting.toString()
+                                  : false}
+                              </li>
+                              <li className="list-group-item">
+                                Deposit finalized at :{" "}
+                                {timestampInitialStatusPrivateVesting != undefined &&
+                                timestampStatusPrivateVesting != undefined &&
+                                timestampStatusPrivateVesting == true
+                                  ? moment.unix(timestampInitialStatusPrivateVesting).format("MMMM DD, YYYY hh:mm:ss a")
+                                  : '-'}
+                              </li>
+                              <li className="list-group-item">
+                                Vesting started at :{" "}
+                                {startTimePrivate ? moment.unix(startTimePrivate).format("MMMM DD, YYYY hh:mm:ss a") : "-"}
+                              </li>
+                              <li className="list-group-item">
+                                Total tokens vested : {prevestingPrivateTotalAmount} SERA
+                              </li>
+                              <li className="list-group-item">
+                                vesting schedule count : {prevestingPrivateTotalCount}
+                              </li>
+                              <li className="list-group-item">
+                                withdrawable amount : {prevestingPrivateWithdrawableAmt} SERA
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="timestamp in seconds"
+                                    aria-label="timestamp in seconds"
+                                    aria-describedby="basic-addon2"
+                                    value={timePeriod}
+                                    onChange={e => onChangeTime(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setPreVestingPrivateTimestampHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressPrivatePrevesting != undefined
+                                          ? ownerAddressPrivatePrevesting != account
+                                          : false)
+                                      }
+                                    >
+                                      set Time Stamp
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="new owner"
-                                  aria-label="new owner"
-                                  aria-describedby="basic-addon2"
-                                  value={newOwner}
-                                  onChange={e => onChangeNewAddress(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTransferOwnershipPrivateVestingHandler} disabled={!active || (ownerAddressPrivatePrevesting != undefined ? ownerAddressPrivatePrevesting != account : false)}>
-                                    transfer Ownership
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="new owner"
+                                    aria-label="new owner"
+                                    aria-describedby="basic-addon2"
+                                    value={newOwner}
+                                    onChange={e => onChangeNewAddress(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setTransferOwnershipPrivateVestingHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressPrivatePrevesting != undefined
+                                          ? ownerAddressPrivatePrevesting != account
+                                          : false)
+                                      }
+                                    >
+                                      transfer Ownership
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                  value={withdrawAmt}
-                                  onChange={e => onChangeWithdraw(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setVestingPrivateWithdrawHandler} disabled={!active || (ownerAddressPrivatePrevesting != undefined ? ownerAddressPrivatePrevesting != account : false)}>
-                                    Withdraw
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token amount"
+                                    aria-label="token amount"
+                                    aria-describedby="basic-addon2"
+                                    value={withdrawAmt}
+                                    onChange={e => onChangeWithdraw(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setVestingPrivateWithdrawHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressPrivatePrevesting != undefined
+                                          ? ownerAddressPrivatePrevesting != account
+                                          : false)
+                                      }
+                                    >
+                                      Withdraw
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="vesting schedule id"
-                                  aria-label="vesting schedule id"
-                                  aria-describedby="basic-addon2"
-                                  value={scheduleID}
-                                  onChange={e => onChangeRevoke(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokePrivateParamsHandler} disabled={!active || (ownerAddressPrivatePrevesting != undefined ? ownerAddressPrivatePrevesting != account : false)}>
-                                    REVOKE
-                                  </button>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="vesting schedule id"
+                                    aria-label="vesting schedule id"
+                                    aria-describedby="basic-addon2"
+                                    value={scheduleID}
+                                    onChange={e => onChangeRevoke(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setRevokePrivateParamsHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressPrivatePrevesting != undefined
+                                          ? ownerAddressPrivatePrevesting != account
+                                          : false)
+                                      }
+                                    >
+                                      REVOKE
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                          </ul>
-                          </div>
-
-
-                          <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreSale</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                              SaleStatus : <span style={{ color: "green" }}>LIVE</span>
-                            </li>
-                            <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
-                            <li className="list-group-item">owner : {ownerAddressIDOPreSale}</li>
-                            <li className="list-group-item">token : {tokenAddressIDOPreSale}</li>
-                            <li className="list-group-item">Vesting : {tokenAddressIDOPreVesting}</li>
-                            <li className="list-group-item">TimeLock : {tokenAddressIDOPretimelock}</li>
-                            <li className="list-group-item">USDT : {tokenUSDT}</li>
-                            <li className="list-group-item">BUSD : {tokenBUSD}</li>
-                            <li className="list-group-item">coinsSold : {coinsSold}</li>
-                            <li className="list-group-item">exchangePriceUSDT : {valueExchangePriceUsdt !== undefined ? valueExchangePriceUsdt : 0}</li>
-                            <li className="list-group-item">exchangePriceBUSD : {valueExchangePriceBusd !== undefined ? valueExchangePriceBusd : 0}</li>
-                            <li className="list-group-item">duration : {secondsToDhms(getPreSaleDuration)}</li>
-                            <li className="list-group-item">cliff : {secondsToDhms(getPreSaleCliff)}</li>
-                            <li className="list-group-item">minBuyAmountUSDT : {minUsdt !== undefined ? minUsdt : 0} USDT</li>
-                            <li className="list-group-item">maxBuyAmountUSDT : {maxUsdt !== undefined ? maxUsdt : 0} USDT</li>
-                            <li className="list-group-item">minBuyAmountBUSD : {minBusd !== undefined ? minBusd : 0} BUSD</li>
-                            <li className="list-group-item">maxBuyAmountBUSD : {maxBusd !== undefined ? maxBusd : 0} BUSD</li>
-                            <li className="list-group-item">availableAtTGE : {availableAtTGE !== undefined ? availableAtTGE / 100 : 0}% </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="usdt exchange price"
-                                  aria-label="usdt exchange price"
-                                  aria-describedby="basic-addon2"
-                                  value={priceUsdt}
-                                  onChange={e => onChangeExchangePriceUsdt(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setExchangePriceUsdtHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    SET EXCHANGE PRICE USDT
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="busd exchange price"
-                                  aria-label="busd exchange price"
-                                  aria-describedby="basic-addon2"
-                                  value={priceBusd}
-                                  onChange={e => onChangeExchangePriceBusd(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setExchangePriceBusdHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    set Exchange Price BUSD
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="duration in seconds"
-                                  aria-label="duration in seconds"
-                                  aria-describedby="basic-addon2"
-                                  value={preSaleDuration}
-                                  onClick={e => onChangePresaleDuration(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setPresaleDurationHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    SET DURATION
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="cliff in seconds"
-                                  aria-label="cliff in seconds"
-                                  aria-describedby="basic-addon2"
-                                  value={preSaleCliff}
-                                  onClick={e => onChangePresaleCliff(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setPreSaleCliffHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    SET CLIFF
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="time period in seconds"
-                                  aria-label="time period in seconds"
-                                  aria-describedby="basic-addon2"
-                                  value={timePeriod}
-                                  onChange={e => onChangeTime(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setTimestampHandlerTimelock} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    SET time stamp
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="start or pause"
-                                  aria-label="start or pause"
-                                  aria-describedby="basic-addon2"
-                                  value={saleStatus}
-                                  onChange={e => onChangeSaleStatus(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setSaleStatusHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    SET SALE STATUS
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="pct available at TGE"
-                                  aria-label="pct available at TGE"
-                                  aria-describedby="basic-addon2"
-                                  value={tgeValue}
-                                  onChange={e => onChangeSetTGE(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setAvailableTgeHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    SET AVAILABLE AT TGE
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                              <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token address"
-                                  aria-label="token address"
-                                  aria-describedby="basic-addon2"
-                                  value={tokenAddress}
-                                  onChange={e => onChangeTokenAddress(e)}
-                                />
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                  value={tokenAmt}
-                                  onChange={e => onChangeNewAmt(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setIDOAccidentalTokensReleaseHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    transfer Accidentally Locked Tokens In TimeLock
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="min busd"
-                                  aria-label="min busd"
-                                  aria-describedby="basic-addon2"
-                                  value={minBusdValue}
-                                  onChange={e => onChangeMinBusdValue(e)}
-                                />
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="max busd"
-                                  aria-label="max busd"
-                                  aria-describedby="basic-addon2"
-                                  value={maxBusdValue}
-                                  onChange={e => onChangeMaxBusdValue(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setBuyAmountBusdRangeHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    set Buy Amount Range BUSD
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="min usdt"
-                                  aria-label="min usdt"
-                                  aria-describedby="basic-addon2"
-                                  value={minUsdtValue}
-                                  onChange={e => onChangeMinUsdtValue(e)}
-                                />
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="max usdt"
-                                  aria-label="max usdt"
-                                  aria-describedby="basic-addon2"
-                                  value={maxUsdtValue}
-                                  onChange={e => onChangeMaxUsdtValue(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setBuyAmountUsdtRangeHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    set Buy Amount Range USDT
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setWithdrawBUSDHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    withdraw busd
-                                  </button>
-                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setWithdrawUSDTHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    withdraw usdt
-                                  </button>
-                                  <button className="btn btn-primary btn-block me-5" type="button" onClick={setEndSaleHandler} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    end sale
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                  value={tokenAmtWithdraw}
-                                  onChange={e => onChangePreSaleWithdraw(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setWithdrawFromVesting} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    withdraw From Vesting
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="vesting schedule id"
-                                  aria-label="vesting schedule id"
-                                  aria-describedby="basic-addon2"
-                                  value={scheduleID}
-                                  onChange={e => onChangeRevoke(e)}
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button" onClick={setRevokeParamPresale} disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}>
-                                    REVOKE
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
+                              </li>
+                            </ul>
                           </div>
 
                           <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreTimeLock</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                            Incoming Deposits Allowed : 
-                              { incomingDepositStatusIPT != undefined && incomingDepositStatusIPT == true && (
-                                <span style={{ color: "green" }}>LIVE</span>
-                              )}
-                              { incomingDepositStatusIPT != undefined && incomingDepositStatusIPT == false && (
-                                <span style={{ color: "red" }}>STOPPED</span>
-                              )}
-                            </li>
-                            <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
-                            <li className="list-group-item">owner : {ownerAddressIDOPretimelock}</li>
-                            <li className="list-group-item">token : {tokenAddressIDOPretimelock}</li>
-                            <li className="list-group-item">timestampset : {timestampStatusIDOTimelock !== undefined ? timestampStatusIDOTimelock.toString() : 0}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOTimelock !== undefined ? moment.unix(timestampInitialStatusIDOTimelock).format("MMMM DD, YYYY") : 0}</li>
-                            <li className="list-group-item">timeperiod : {timePeriodIDOTimelockValue !== undefined ? secondsToDhms(timePeriodIDOTimelockValue) : 0}</li>
-                          </ul>
+                            <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreSale</div>
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">
+                                SaleStatus : <span style={{ color: "green" }}>LIVE</span>
+                              </li>
+                              <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
+                              <li className="list-group-item">owner : {ownerAddressIDOPreSale}</li>
+                              <li className="list-group-item">token : {tokenAddressIDOPreSale}</li>
+                              <li className="list-group-item">Vesting : {tokenAddressIDOPreVesting}</li>
+                              <li className="list-group-item">TimeLock : {tokenAddressIDOPretimelock}</li>
+                              <li className="list-group-item">USDT : {tokenUSDT}</li>
+                              <li className="list-group-item">BUSD : {tokenBUSD}</li>
+                              <li className="list-group-item">coinsSold : {coinsSold}</li>
+                              <li className="list-group-item">
+                                exchangePriceUSDT : {valueExchangePriceUsdt !== undefined ? valueExchangePriceUsdt : 0}
+                              </li>
+                              <li className="list-group-item">
+                                exchangePriceBUSD : {valueExchangePriceBusd !== undefined ? valueExchangePriceBusd : 0}
+                              </li>
+                              <li className="list-group-item">duration : {secondsToDhms(getPreSaleDuration)}</li>
+                              <li className="list-group-item">cliff : {secondsToDhms(getPreSaleCliff)}</li>
+                              <li className="list-group-item">
+                                minBuyAmountUSDT : {minUsdt !== undefined ? minUsdt : 0} USDT
+                              </li>
+                              <li className="list-group-item">
+                                maxBuyAmountUSDT : {maxUsdt !== undefined ? maxUsdt : 0} USDT
+                              </li>
+                              <li className="list-group-item">
+                                minBuyAmountBUSD : {minBusd !== undefined ? minBusd : 0} BUSD
+                              </li>
+                              <li className="list-group-item">
+                                maxBuyAmountBUSD : {maxBusd !== undefined ? maxBusd : 0} BUSD
+                              </li>
+                              <li className="list-group-item">
+                                availableAtTGE : {availableAtTGE !== undefined ? availableAtTGE / 100 : 0}%{" "}
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="usdt exchange price"
+                                    aria-label="usdt exchange price"
+                                    aria-describedby="basic-addon2"
+                                    value={priceUsdt}
+                                    onChange={e => onChangeExchangePriceUsdt(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setExchangePriceUsdtHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      SET EXCHANGE PRICE USDT
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="busd exchange price"
+                                    aria-label="busd exchange price"
+                                    aria-describedby="basic-addon2"
+                                    value={priceBusd}
+                                    onChange={e => onChangeExchangePriceBusd(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setExchangePriceBusdHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      set Exchange Price BUSD
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="duration in seconds"
+                                    aria-label="duration in seconds"
+                                    aria-describedby="basic-addon2"
+                                    value={preSaleDuration}
+                                    onClick={e => onChangePresaleDuration(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setPresaleDurationHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      SET DURATION
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="cliff in seconds"
+                                    aria-label="cliff in seconds"
+                                    aria-describedby="basic-addon2"
+                                    value={preSaleCliff}
+                                    onClick={e => onChangePresaleCliff(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setPreSaleCliffHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      SET CLIFF
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="time period in seconds"
+                                    aria-label="time period in seconds"
+                                    aria-describedby="basic-addon2"
+                                    value={timePeriod}
+                                    onChange={e => onChangeTime(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setTimestampHandlerTimelock}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      SET time stamp
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="start or pause"
+                                    aria-label="start or pause"
+                                    aria-describedby="basic-addon2"
+                                    value={saleStatus}
+                                    onChange={e => onChangeSaleStatus(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setSaleStatusHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      SET SALE STATUS
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="pct available at TGE"
+                                    aria-label="pct available at TGE"
+                                    aria-describedby="basic-addon2"
+                                    value={tgeValue}
+                                    onChange={e => onChangeSetTGE(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setAvailableTgeHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      SET AVAILABLE AT TGE
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token address"
+                                    aria-label="token address"
+                                    aria-describedby="basic-addon2"
+                                    value={tokenAddress}
+                                    onChange={e => onChangeTokenAddress(e)}
+                                  />
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token amount"
+                                    aria-label="token amount"
+                                    aria-describedby="basic-addon2"
+                                    value={tokenAmt}
+                                    onChange={e => onChangeNewAmt(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setIDOAccidentalTokensReleaseHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      transfer Accidentally Locked Tokens In TimeLock
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="min busd"
+                                    aria-label="min busd"
+                                    aria-describedby="basic-addon2"
+                                    value={minBusdValue}
+                                    onChange={e => onChangeMinBusdValue(e)}
+                                  />
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="max busd"
+                                    aria-label="max busd"
+                                    aria-describedby="basic-addon2"
+                                    value={maxBusdValue}
+                                    onChange={e => onChangeMaxBusdValue(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setBuyAmountBusdRangeHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      set Buy Amount Range BUSD
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="min usdt"
+                                    aria-label="min usdt"
+                                    aria-describedby="basic-addon2"
+                                    value={minUsdtValue}
+                                    onChange={e => onChangeMinUsdtValue(e)}
+                                  />
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="max usdt"
+                                    aria-label="max usdt"
+                                    aria-describedby="basic-addon2"
+                                    value={maxUsdtValue}
+                                    onChange={e => onChangeMaxUsdtValue(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setBuyAmountUsdtRangeHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      set Buy Amount Range USDT
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block me-5"
+                                      type="button"
+                                      onClick={setWithdrawBUSDHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      withdraw busd
+                                    </button>
+                                    <button
+                                      className="btn btn-primary btn-block me-5"
+                                      type="button"
+                                      onClick={setWithdrawUSDTHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      withdraw usdt
+                                    </button>
+                                    <button
+                                      className="btn btn-primary btn-block me-5"
+                                      type="button"
+                                      onClick={setEndSaleHandler}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      end sale
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="token amount"
+                                    aria-label="token amount"
+                                    aria-describedby="basic-addon2"
+                                    value={tokenAmtWithdraw}
+                                    onChange={e => onChangePreSaleWithdraw(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setWithdrawFromVesting}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      withdraw From Vesting
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li className="list-group-item">
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="vesting schedule id"
+                                    aria-label="vesting schedule id"
+                                    aria-describedby="basic-addon2"
+                                    value={scheduleID}
+                                    onChange={e => onChangeRevoke(e)}
+                                  />
+                                  <div className="input-group-append">
+                                    <button
+                                      className="btn btn-primary btn-block"
+                                      type="button"
+                                      onClick={setRevokeParamPresale}
+                                      disabled={
+                                        !active ||
+                                        (ownerAddressIDOPreSale != undefined
+                                          ? ownerAddressIDOPreSale != account
+                                          : false)
+                                      }
+                                    >
+                                      REVOKE
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                            </ul>
                           </div>
 
                           <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreVesting</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                            Incoming Deposits Allowed : 
-                              { incomingDepositStatusIPV != undefined && incomingDepositStatusIPV == true && (
-                                <span style={{ color: "green" }}>LIVE</span>
-                              )}
-                              { incomingDepositStatusIPV != undefined && incomingDepositStatusIPV == false && (
-                                <span style={{ color: "red" }}>STOPPED</span>
-                              )}
-                            </li>
-                            <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
-                            <li className="list-group-item">owner : {ownerAddressIDOPrevesting}</li>
-                            <li className="list-group-item">token : {tokenAddressIDOPrevesting}</li>
-                            <li className="list-group-item">timestampset : {timestampStatusIDOVesting !== undefined ? timestampStatusIDOVesting.toString() : 0}</li>
-                            <li className="list-group-item">initialtimestamp : {timestampInitialStatusIDOVesting != undefined ? moment.unix(timestampInitialStatusIDOVesting).format("MMMM DD, YYYY") : 0}</li>
-                            <li className="list-group-item">start : {startTimeIDO != undefined ? moment.unix(startTimeIDO).format("MMMM DD, YYYY") : 0}</li>
-                            <li className="list-group-item">vestingschedulestotalamount : {prevestingIDOTotalAmount} SERA</li>
-                            <li className="list-group-item">vesting schedule count : {prevestingIDOTotalCount}</li>
-                            <li className="list-group-item">withdrawable amount : {prevestingIDOWithdrawableAmt} SERA</li>
-                          </ul>
+                            <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreTimeLock</div>
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">
+                                Incoming Deposits Allowed :
+                                {incomingDepositStatusIPT != undefined && incomingDepositStatusIPT == true && (
+                                  <span style={{ color: "green" }}>LIVE</span>
+                                )}
+                                {incomingDepositStatusIPT != undefined && incomingDepositStatusIPT == false && (
+                                  <span style={{ color: "red" }}>STOPPED</span>
+                                )}
+                              </li>
+                              <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
+                              <li className="list-group-item">owner : {ownerAddressIDOPretimelock}</li>
+                              <li className="list-group-item">token : {tokenAddressIDOPretimelock}</li>
+                              <li className="list-group-item">
+                                timestampset :{" "}
+                                {timestampStatusIDOTimelock !== undefined ? timestampStatusIDOTimelock.toString() : 0}
+                              </li>
+                              <li className="list-group-item">
+                                initialtimestamp :{" "}
+                                {timestampInitialStatusIDOTimelock !== undefined
+                                  ? moment.unix(timestampInitialStatusIDOTimelock).format("MMMM DD, YYYY")
+                                  : 0}
+                              </li>
+                              <li className="list-group-item">
+                                timeperiod :{" "}
+                                {timePeriodIDOTimelockValue !== undefined
+                                  ? secondsToDhms(timePeriodIDOTimelockValue)
+                                  : 0}
+                              </li>
+                            </ul>
+                          </div>
+
+                          <div className="mt-5 border">
+                            <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreVesting</div>
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">
+                                Incoming Deposits Allowed :
+                                {incomingDepositStatusIPV != undefined && incomingDepositStatusIPV == true && (
+                                  <span style={{ color: "green" }}>LIVE</span>
+                                )}
+                                {incomingDepositStatusIPV != undefined && incomingDepositStatusIPV == false && (
+                                  <span style={{ color: "red" }}>STOPPED</span>
+                                )}
+                              </li>
+                              <li className="list-group-item">Contract Address : {idoTokenPreSaleAddress}</li>
+                              <li className="list-group-item">owner : {ownerAddressIDOPrevesting}</li>
+                              <li className="list-group-item">token : {tokenAddressIDOPrevesting}</li>
+                              <li className="list-group-item">
+                                timestampset :{" "}
+                                {timestampStatusIDOVesting !== undefined ? timestampStatusIDOVesting.toString() : 0}
+                              </li>
+                              <li className="list-group-item">
+                                initialtimestamp :{" "}
+                                {timestampInitialStatusIDOVesting != undefined
+                                  ? moment.unix(timestampInitialStatusIDOVesting).format("MMMM DD, YYYY")
+                                  : 0}
+                              </li>
+                              <li className="list-group-item">
+                                start :{" "}
+                                {startTimeIDO != undefined ? moment.unix(startTimeIDO).format("MMMM DD, YYYY") : 0}
+                              </li>
+                              <li className="list-group-item">
+                                vestingschedulestotalamount : {prevestingIDOTotalAmount} SERA
+                              </li>
+                              <li className="list-group-item">vesting schedule count : {prevestingIDOTotalCount}</li>
+                              <li className="list-group-item">
+                                withdrawable amount : {prevestingIDOWithdrawableAmt} SERA
+                              </li>
+                            </ul>
                           </div>
                         </div>
                       </form>
