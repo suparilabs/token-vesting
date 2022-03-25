@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import Papa from "papaparse";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import BN from "bignumber.js";
 import { secondsToDhms } from "../utils";
@@ -68,7 +68,7 @@ import {
 } from "../hooks/useTokenPreTimelock";
 
 import { useTokenBalance } from "../hooks/useTokenBalance";
-import { formatUnits, parseUnits } from "@ethersproject/units";
+import { formatUnits } from "@ethersproject/units";
 import { useTokenSymbol } from "../hooks/useTokenSymbol";
 import { useTokenDecimals } from "../hooks/useTokenDecimals";
 
@@ -675,7 +675,7 @@ function Dashboard(): JSX.Element {
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
 
-  const setPreVestingPrivateTimestampHandler = async e => {
+  const setPreVestingPrivateTimestampHandler = async () => {
     if (timePeriod != undefined || timePeriod != "") {
       const txTimestamp = await setPreVestingPrivateTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
@@ -684,7 +684,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setPreSaleCliffHandler = async e => {
+  const setPreSaleCliffHandler = async () => {
     if (preSaleCliff != undefined) {
       const txCliffPeriod = await setPresaleCliff();
       await notifySetTimestamp(txCliffPeriod.wait(1));
@@ -693,7 +693,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setTransferOwnershipPrivateVestingHandler = async e => {
+  const setTransferOwnershipPrivateVestingHandler = async () => {
     if (newOwner != undefined || newOwner != "") {
       const txTransfer = await setTransferOwnershipPrivateVesting();
       await notifySetTimestamp(txTransfer.wait(1));
@@ -702,7 +702,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setVestingPrivateWithdrawHandler = async e => {
+  const setVestingPrivateWithdrawHandler = async () => {
     if (withdrawAmt != undefined || withdrawAmt != "") {
       const txWithdraw = await setVestingPrivateWithdraw();
       await notifySetTimestamp(txWithdraw.wait(1));
@@ -711,7 +711,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setRevokePrivateParamsHandler = async e => {
+  const setRevokePrivateParamsHandler = async () => {
     if (scheduleID != undefined || scheduleID != "") {
       const txRevoke = await setRevokePrivateParams();
       await notifySetTimestamp(txRevoke.wait(1));
@@ -720,7 +720,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setExchangePriceUsdtHandler = async e => {
+  const setExchangePriceUsdtHandler = async () => {
     if (priceUsdt != undefined || priceUsdt != "") {
       const txExchange = await setExchangePriceUsdt();
       await notifySetExchangePrice(txExchange.wait(1));
@@ -729,7 +729,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setExchangePriceBusdHandler = async e => {
+  const setExchangePriceBusdHandler = async () => {
     if (priceBusd != undefined || priceBusd != "") {
       const txExchange = await setExchangePriceBusd();
       await notifySetExchangePrice(txExchange.wait(1));
@@ -738,7 +738,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setTimestampHandlerTimelock = async e => {
+  const setTimestampHandlerTimelock = async () => {
     if (timePeriod != undefined || timePeriod != "") {
       const txTimestamp = await setPreTimelockTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
@@ -747,7 +747,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setTimestampHandlerPrivateTimelock = async e => {
+  const setTimestampHandlerPrivateTimelock = async () => {
     if (timePeriod != undefined || timePeriod != "") {
       const txTimestamp = await setPreTimelockPrivateTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
@@ -756,7 +756,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setRevokeParam = async e => {
+  const setRevokeParam = async () => {
     if (scheduleID != undefined || scheduleID != "") {
       const txRevoke = await setRevokeSeedParams();
       await notifySetTimestamp(txRevoke.wait(1));
@@ -765,7 +765,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setRevokeParamPresale = async e => {
+  const setRevokeParamPresale = async () => {
     if (scheduleID != undefined || scheduleID != "") {
       const txRevoke = await revokePresale();
       await notifySetTimestamp(txRevoke.wait(1));
@@ -774,7 +774,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setTimestampHandlerVesting = async e => {
+  const setTimestampHandlerVesting = async () => {
     if (timePeriod != undefined || timePeriod != "") {
       const txTimestamp = await setPreVestingSeedTimestamp();
       await notifySetTimestamp(txTimestamp.wait(1));
@@ -783,7 +783,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setPresaleDurationHandler = async e => {
+  const setPresaleDurationHandler = async () => {
     if (preSaleDuration != undefined || preSaleDuration != "") {
       const txDuration = await setPresaleDuration();
       await notifySetTimestamp(txDuration.wait(1));
@@ -792,7 +792,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setWithdrawVesting = async e => {
+  const setWithdrawVesting = async () => {
     if (withdrawAmt != undefined || withdrawAmt != "") {
       const txWithdraw = await setVestingSeedWithdraw();
       await notifySetTimestamp(txWithdraw.wait(1));
@@ -801,7 +801,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const transferOwnershipHandlerTimelock = async e => {
+  const transferOwnershipHandlerTimelock = async () => {
     if (newOwner != "" || newOwner != undefined) {
       const txTransferOwnership = await setTransferOwnershipTimelock();
       await notifyTransferOwnership(txTransferOwnership.wait(1));
@@ -810,7 +810,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const transferOwnershipHandlerVesting = async e => {
+  const transferOwnershipHandlerVesting = async () => {
     if (newOwner != "" || newOwner != undefined) {
       const txTransferOwnership = await setTransferOwnershipSeedVesting();
       await notifyTransferOwnership(txTransferOwnership.wait(1));
@@ -819,7 +819,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const transferOwnershipHandlerPrivateVesting = async e => {
+  const transferOwnershipHandlerPrivateVesting = async () => {
     if (newOwner != "" || newOwner != undefined) {
       const txTransferOwnership = await setTransferOwnershipPrivateTimelock();
       await notifyTransferOwnership(txTransferOwnership.wait(1));
@@ -828,7 +828,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setSaleStatusHandler = async e => {
+  const setSaleStatusHandler = async () => {
     if (saleStatus != "" || saleStatus != undefined) {
       if (saleStatus == "start") {
         const txSaleStatus = await startSale();
@@ -844,7 +844,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setAvailableTgeHandler = async e => {
+  const setAvailableTgeHandler = async () => {
     if (tgeValue != undefined) {
       const txTge = await availableAtTGEVal();
       await notifySetAvailableAtTge(txTge.wait(1));
@@ -853,7 +853,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setBuyAmountBusdRangeHandler = async e => {
+  const setBuyAmountBusdRangeHandler = async () => {
     if (minBusdValue != "" || (minBusdValue != undefined && maxBusdValue != "") || maxBusdValue != undefined) {
       const txBuyAmt = await setBuyAmountBUSD();
       await notifySetBuyAmountBusd(txBuyAmt.wait(1));
@@ -863,7 +863,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setBuyAmountUsdtRangeHandler = async e => {
+  const setBuyAmountUsdtRangeHandler = async () => {
     if (minUsdtValue != "" || (minUsdtValue != undefined && maxUsdtValue != "") || maxUsdtValue != undefined) {
       const txBuyAmt = await setBuyAmountUSDT();
       await notifySetBuyAmountUsdt(txBuyAmt.wait(1));
@@ -873,22 +873,22 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setWithdrawBUSDHandler = async e => {
+  const setWithdrawBUSDHandler = async () => {
     const txWithdraw = await withdrawBUSD();
     await notifyWhenWithdraw(txWithdraw.wait(1));
   };
 
-  const setWithdrawUSDTHandler = async e => {
+  const setWithdrawUSDTHandler = async () => {
     const txWithdraw = await withdrawUSDT();
     await notifyWhenWithdraw(txWithdraw.wait(1));
   };
 
-  const setEndSaleHandler = async e => {
+  const setEndSaleHandler = async () => {
     const txEndSale = await endSale();
     await notifySetEndSale(txEndSale.wait(1));
   };
 
-  const setSeedAccidentalTokensReleaseHandler = async e => {
+  const setSeedAccidentalTokensReleaseHandler = async () => {
     if (tokenAmt != undefined || (tokenAmt != "" && tokenAddress != undefined) || tokenAddress != "") {
       const txRelease = await transferLockedTokensSeedTimelock();
       await notifyTokenRelease(txRelease.wait(1));
@@ -898,7 +898,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setPrivateAccidentalTokensReleaseHandler = async e => {
+  const setPrivateAccidentalTokensReleaseHandler = async () => {
     if (tokenAmt != undefined || (tokenAmt != "" && tokenAddress != undefined) || tokenAddress != "") {
       const txRelease = await transferLockedTokensPrivateTimelock();
       await notifyTokenRelease(txRelease.wait(1));
@@ -908,7 +908,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setIDOAccidentalTokensReleaseHandler = async e => {
+  const setIDOAccidentalTokensReleaseHandler = async () => {
     if (tokenAmt != undefined || (tokenAmt != "" && tokenAddress != undefined) || tokenAddress != "") {
       const txRelease = await transferLockedTokensIDOTimelock();
       await notifyTokenRelease(txRelease.wait(1));
@@ -918,7 +918,7 @@ function Dashboard(): JSX.Element {
     }
   };
 
-  const setWithdrawFromVesting = async e => {
+  const setWithdrawFromVesting = async () => {
     if (tokenAmtWithdraw != undefined || tokenAmtWithdraw != "") {
       const txWithdraw = await withdrawFromVesting();
       await notifyWhenWithdraw(txWithdraw.wait(1));
@@ -977,7 +977,7 @@ function Dashboard(): JSX.Element {
 
   const parseCSV = (data: any) => {
     const amountsArr = Object.values(
-      data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow(tokenDecimals))),
+      data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow(tokenDecimals as BigNumberish))),
     );
     let totalAmount = BigNumber.from("0");
     for (let i = 0; i < amountsArr.length; i++) {
@@ -1796,11 +1796,13 @@ function Dashboard(): JSX.Element {
                                 timestampStatusPrivateVesting != undefined &&
                                 timestampStatusPrivateVesting == true
                                   ? moment.unix(timestampInitialStatusPrivateVesting).format("MMMM DD, YYYY hh:mm:ss a")
-                                  : '-'}
+                                  : "-"}
                               </li>
                               <li className="list-group-item">
                                 Vesting started at :{" "}
-                                {startTimePrivate ? moment.unix(startTimePrivate).format("MMMM DD, YYYY hh:mm:ss a") : "-"}
+                                {startTimePrivate
+                                  ? moment.unix(startTimePrivate).format("MMMM DD, YYYY hh:mm:ss a")
+                                  : "-"}
                               </li>
                               <li className="list-group-item">
                                 Total tokens vested : {prevestingPrivateTotalAmount} SERA
