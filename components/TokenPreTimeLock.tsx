@@ -1,6 +1,9 @@
 import { useWeb3React } from "@web3-react/core";
 import moment from "moment";
 import React from "react";
+import { toast } from "react-toastify";
+import { isAddress } from "@ethersproject/address";
+import { TokenAmount } from "@uniswap/sdk";
 import { addresses, desiredChain } from "../constants";
 import {
   usePreTimelockFetchOwner,
@@ -13,12 +16,10 @@ import {
   useTransferAccidentallyLockedTokens,
   useIncomingDepositsFinalisedTimelock,
 } from "../hooks/useTokenPreTimelock";
-import { toast } from "react-toastify";
-import { isAddress } from "@ethersproject/address";
+
 import { useTokenSymbol } from "../hooks/useTokenSymbol";
 import { useTokenDecimals } from "../hooks/useTokenDecimals";
 import { useTokenBalance } from "../hooks/useTokenBalance";
-import { TokenAmount } from "@uniswap/sdk";
 
 const TokenPreTimeLock = props => {
   const { active, account, chainId } = useWeb3React();
@@ -151,7 +152,7 @@ const TokenPreTimeLock = props => {
             <span style={{ color: "green" }}>ACCEPTED</span>
           )}
           {incomingDepositStatusPreTimelock != undefined && incomingDepositStatusPreTimelock == true && (
-            <span style={{ color: "red" }}>STOPPED</span>
+            <span style={{ color: "red" }}>FINALIZED</span>
           )}
         </li>
         <li className="list-group-item">
@@ -199,7 +200,9 @@ const TokenPreTimeLock = props => {
                     type="button"
                     onClick={e => handleSetTimestampTimelock(e)}
                     disabled={
-                      !active || (ownerAddressPretimelock != undefined ? ownerAddressPretimelock != account : false)
+                      !active ||
+                      (ownerAddressPretimelock != undefined ? ownerAddressPretimelock != account : false) ||
+                      (timestampStatusTimelock != undefined ? timestampStatusTimelock != false : true)
                     }
                   >
                     set Time Stamp

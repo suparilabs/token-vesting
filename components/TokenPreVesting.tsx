@@ -1,8 +1,10 @@
 import React from "react";
-import { formatUnits } from "@ethersproject/units";
+import { formatUnits, parseUnits } from "@ethersproject/units";
 import { useWeb3React } from "@web3-react/core";
 import { toast } from "react-toastify";
 import moment from "moment";
+import { isAddress } from "@ethersproject/address";
+import { BigNumber } from "ethers";
 import { addresses, desiredChain } from "../constants";
 import {
   useIncomingDepositsFinalisedPreVesting,
@@ -21,7 +23,7 @@ import {
 } from "../hooks/useTokenPreVesting";
 import { useTokenSymbol } from "../hooks/useTokenSymbol";
 import { useTokenDecimals } from "../hooks/useTokenDecimals";
-import { isAddress } from "@ethersproject/address";
+
 
 const TokenPreVesting = props => {
   const { active, account, chainId } = useWeb3React();
@@ -78,22 +80,15 @@ const TokenPreVesting = props => {
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
 
-  const preVestingTimestampTx = useSetTimestampPreVesting(
-    props.tokenPreVestingAddress,
-    timePeriodPreVesting,
-  );
-  const transferOwnershipVestingTx = useTransferOwnershipVesting(
-    props.tokenPreVestingAddress,
-    newOwner,
-  );
+  const preVestingTimestampTx = useSetTimestampPreVesting(props.tokenPreVestingAddress, timePeriodPreVesting);
+  const transferOwnershipVestingTx = useTransferOwnershipVesting(props.tokenPreVestingAddress, newOwner);
   const vestingWithdrawTx = useVestingWithdraw(
     props.tokenPreVestingAddress,
-    withdrawAmount,
+    withdrawAmount != undefined && tokenDecimals != undefined
+      ? parseUnits(withdrawAmount, tokenDecimals)
+      : BigNumber.from("0"),
   );
-  const revokeParamsTx = useRevoke(
-    props.tokenPreVestingAddress,
-    withdrawAmount,
-  );
+  const revokeParamsTx = useRevoke(props.tokenPreVestingAddress, scheduleID);
 
   const handleWithdrawFromVesting = async e => {
     e.preventDefault();
@@ -177,7 +172,7 @@ const TokenPreVesting = props => {
         <li className="list-group-item">
           Incoming deposits are :{" "}
           {incomingDepositStatusPreVesting != undefined && incomingDepositStatusPreVesting == true && (
-            <span style={{ color: "red" }}>STOPPED</span>
+            <span style={{ color: "red" }}>FINALIZED</span>
           )}
           {incomingDepositStatusPreVesting != undefined && incomingDepositStatusPreVesting == false && (
             <span style={{ color: "green" }}>ACCEPTED</span>
@@ -228,7 +223,9 @@ const TokenPreVesting = props => {
                     type="button"
                     onClick={e => handleTimestamp(e)}
                     disabled={
-                      !active || (ownerAddressPrevesting != undefined ? ownerAddressPrevesting != account : false)
+                      !active ||
+                      (ownerAddressPrevesting != undefined ? ownerAddressPrevesting != account : false) ||
+                      (timestampStatusVesting != undefined ? timestampStatusVesting != false : true)
                     }
                   >
                     set Time Stamp

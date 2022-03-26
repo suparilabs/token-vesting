@@ -1,60 +1,73 @@
 import { useWeb3React } from "@web3-react/core";
 import { BigNumber } from "ethers";
-import { Contract } from "ethers";
 import useSWR, { SWRResponse } from "swr";
 import { DataType } from "../utils";
 import { addresses } from "../constants";
-import { ERC20__factory, TokenPreSale, TokenPreSale__factory } from "../src/types";
+import { ERC20, ERC20__factory, TokenPreSale, TokenPreSale__factory } from "../src/types";
 import { useContract } from "./useContract";
 import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
 
 export function useStartSale(chainId: number): any {
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
   return async () => {
-    return (contract as Contract).setSaleStatus("1");
+    return contract.setSaleStatus("1");
   };
 }
 
 export function useEndSale(chainId: number): any {
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
   return async () => {
-    return (contract as Contract).endSale();
+    return contract.endSale();
   };
 }
 
 export function useBuyTokensWithBusd(amount: any, chainId: number): any {
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
   return async () => {
-    return (contract as Contract).buyTokensUsingBUSD(amount);
+    return contract.buyTokensUsingBUSD(amount);
   };
 }
 
 export function useBuyTokensWithUsdt(amount: any, chainId: number): any {
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
   return async () => {
-    return (contract as Contract).buyTokensUsingUSDT(amount);
+    return contract.buyTokensUsingUSDT(amount);
   };
 }
 
 //setting tge value in tokensale
-export function useSetAvailableAtTGE(chainId: number, availableAtTGE: number): any {
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
+export function useSetAvailableAtTGE(chainId: number, availableAtTGE: BigNumber): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
   return async () => {
-    return (contract as Contract).setAvailableAtTGE(availableAtTGE);
+    return contract.setAvailableAtTGE(availableAtTGE);
   };
 }
 //setting cliff period in tokensale
 export function useSetCliffPeriod(chainId: number, cliff: number): any {
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
   return async () => {
-    return (contract as Contract).setCliff(cliff);
+    return contract.setCliff(cliff);
   };
 }
 //setting duration value in tokensale
 export function useSetDuration(chainId: number, duration: number): any {
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
   return async () => {
-    return (contract as Contract).setDuration(duration);
+    return contract.setDuration(duration);
   };
 }
 
@@ -94,66 +107,71 @@ export function useTimeLockContractAddress(chainId: number, suspense = false): S
 }
 
 //Allowance
-function getTokenAllowance(account: string, contract: Contract, chainId: number): (address: string) => Promise<string> {
+function getTokenAllowance(account: string, contract: ERC20, chainId: number): (address: string) => Promise<string> {
   return async (): Promise<string> =>
     contract
       .allowance(account, addresses[chainId as number].IDO_TOKEN_PRE_SALE)
-      .then((result: string) => result.toString());
+      .then((result: BigNumber) => result.toString());
 }
 
 export function useTokenAllowance(account: string, token: string, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
-  const contract = useContract(token, ERC20__factory.abi, true);
+  const contract = <ERC20>useContract(token, ERC20__factory.abi, true);
   const result: any = useSWR(
     contract ? [chainId, token, DataType.Address] : null,
-    getTokenAllowance(account as string, contract as Contract, chainId as number),
+    getTokenAllowance(account as string, contract, chainId as number),
     { suspense },
   );
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
-function getBUSD(contract: Contract): (address: string) => Promise<string> {
+function getBUSD(contract: TokenPreSale): (address: string) => Promise<string> {
   return async (): Promise<string> => contract.BUSD().then((result: string) => result.toString());
 }
 
 export function useBUSD(chainId: number, suspense = false): SWRResponse<any, any> {
-  // const { chainId } = useWeb3React();
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
   const result: any = useSWR(
     contract ? [chainId, "busd", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
-    getBUSD(contract as Contract),
+    getBUSD(contract),
     { suspense },
   );
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
-function getUSDT(contract: Contract): (address: string) => Promise<string> {
+function getUSDT(contract: TokenPreSale): (address: string) => Promise<string> {
   return async (): Promise<string> => contract.USDT().then((result: string) => result.toString());
 }
 
 export function useUSDT(chainId: number, suspense = false): SWRResponse<any, any> {
   // const { chainId } = useWeb3React();
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
   const result: any = useSWR(
     contract ? [chainId, "usdt", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
-    getUSDT(contract as Contract),
+    getUSDT(contract),
     { suspense },
   );
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
-function getAvailableAtTGE(contract: Contract): (address: string) => Promise<string> {
-  return async (): Promise<string> => contract.availableAtTGE().then((result: string) => result.toString());
+function getAvailableAtTGE(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.availableAtTGE().then((result: BigNumber) => result.toString());
 }
 
 export function useAvailableAtTGE(chainId: number, suspense = false): SWRResponse<any, any> {
-  const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi);
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
   const result: any = useSWR(
     contract ? [chainId, "tge", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
-    getAvailableAtTGE(contract as Contract),
+    getAvailableAtTGE(contract),
     { suspense },
   );
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
@@ -161,11 +179,9 @@ export function useAvailableAtTGE(chainId: number, suspense = false): SWRRespons
 }
 
 export function useTxApprove(token: string, amount: BigNumber, chainId: number): any {
-  const contract = useContract(token, ERC20__factory.abi, true);
+  const contract = <ERC20>useContract(token, ERC20__factory.abi, true);
   return async () => {
-    return (contract as Contract)
-      .approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE, amount)
-      .then((result: boolean) => result);
+    return contract.approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE, amount).then((result: any) => result);
   };
 }
 
@@ -398,42 +414,42 @@ function getMaxBuyAmtBusd(contract: TokenPreSale): (address: string) => Promise<
 }
 
 //setExchangePriceUSDT
-export function useSetExchangePriceUsdt(price: number, chainId: number): any {
+export function useSetExchangePriceUsdt(price: BigNumber, chainId: number): any {
   const contract = <TokenPreSale>(
     useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
   );
   return async () => {
-    return (contract as Contract).setExchangePriceUSDT(price).then((result: any) => result);
+    return contract.setExchangePriceUSDT(price).then((result: any) => result);
   };
 }
 
 //setExchangePriceBUSD
-export function useSetExchangePriceBusd(price: number, chainId: number): any {
+export function useSetExchangePriceBusd(price: BigNumber, chainId: number): any {
   const contract = <TokenPreSale>(
     useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
   );
   return async () => {
-    return (contract as Contract).setExchangePriceBUSD(price).then((result: any) => result);
+    return contract.setExchangePriceBUSD(price).then((result: any) => result);
   };
 }
 
 //setBuyAmountRangeBUSD
-export function useSetBuyAmountRangeBUSD(min: number, max: number, chainId: number): any {
+export function useSetBuyAmountRangeBUSD(min: BigNumber, max: BigNumber, chainId: number): any {
   const contract = <TokenPreSale>(
     useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
   );
   return async () => {
-    return (contract as Contract).setBuyAmountRangeBUSD(min, max).then((result: any) => result);
+    return contract.setBuyAmountRangeBUSD(min, max).then((result: any) => result);
   };
 }
 
 //setBuyAmountRangeUSDT
-export function useSetBuyAmountRangeUSDT(min: number, max: number, chainId: number): any {
+export function useSetBuyAmountRangeUSDT(min: BigNumber, max: BigNumber, chainId: number): any {
   const contract = <TokenPreSale>(
     useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
   );
   return async () => {
-    return (contract as Contract).setBuyAmountRangeUSDT(min, max).then((result: any) => result);
+    return contract.setBuyAmountRangeUSDT(min, max).then((result: any) => result);
   };
 }
 
@@ -443,7 +459,7 @@ export function useWithdrawBUSD(chainId: number): any {
     useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
   );
   return async () => {
-    return (contract as Contract).withdrawBUSD().then((result: any) => result);
+    return contract.withdrawBUSD().then((result: any) => result);
   };
 }
 
@@ -453,25 +469,25 @@ export function useWithdrawUSDT(chainId: number): any {
     useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
   );
   return async () => {
-    return (contract as Contract).withdrawUSDT().then((result: any) => result);
+    return contract.withdrawUSDT().then((result: any) => result);
   };
 }
 //Withdraw from vesting
-export function useWithdrawFromVesting(amount: number, chainId: number): any {
+export function useWithdrawFromVesting(amount: BigNumber, chainId: number): any {
   const contract = <TokenPreSale>(
     useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
   );
   return async () => {
-    return (contract as Contract).withdrawFromVesting(amount).then((result: any) => result);
+    return contract.withdrawFromVesting(amount).then((result: any) => result);
   };
 }
 //Revoke
-export function useRevokePreSale(vestingScheduleId: number, chainId: number): any {
+export function useRevokePreSale(vestingScheduleId: string, chainId: number): any {
   const contract = <TokenPreSale>(
     useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
   );
   return async () => {
-    return (contract as Contract).revoke(vestingScheduleId).then((result: any) => result);
+    return contract.revoke(vestingScheduleId).then((result: any) => result);
   };
 }
 
@@ -490,6 +506,14 @@ export function useTransferAccidentallyLockedTokensFromTimelock(
 export function useSetTimestampTokenPresale(contractAddress: string, chainId: number, timePeriod: number): any {
   const contract = <TokenPreSale>useContract(contractAddress, TokenPreSale__factory.abi, true);
   return async () => {
-    return (contract as Contract).setTimestamp(timePeriod);
+    return contract.setTimeStamp(timePeriod);
+  };
+}
+
+//transfer ownership
+export function useTransferOwnershipPreSale(contractAddress: string, newOwnerAddress: string): any {
+  const contract = <TokenPreSale>useContract(contractAddress, TokenPreSale__factory.abi, true);
+  return async () => {
+    return contract.transferOwnership(newOwnerAddress);
   };
 }

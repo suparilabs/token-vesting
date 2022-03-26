@@ -4,6 +4,7 @@ import moment from "moment";
 import { formatEther } from "@ethersproject/units";
 import { BigNumber } from "ethers";
 import BN from "bignumber.js";
+import { toast } from "react-toastify";
 import {
   useComputeReleasableAmount,
   useComputeVestingScheduleIdForAddressAndIndex,
@@ -13,10 +14,19 @@ import {
   useStart,
 } from "../hooks/useTokenPreVesting";
 import { secondsToDhms } from "../utils";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
+import { addresses, desiredChain } from "../constants";
+
 
 const Claim = props => {
   // WEB3 Connection
-  const { account } = useWeb3React();
+  const { account, chainId } = useWeb3React();
+
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+
   // Setting up variables to fetch details from hooks
   const vestingSchedule = useVestingScheduleByAddressAndIndex(
     account as string,
@@ -56,6 +66,21 @@ const Claim = props => {
   }% TGE then daily linear for ${
     vestingSchedule && (vestingSchedule[3] as number) > 0 ? secondsToDhms(vestingSchedule[3] as number) : "-"
   }`;
+
+  const handleClaim = async e => {
+    e.preventDefault();
+    const claimTx = await claim();
+    await notifyClaim(claimTx.wait(1));
+  };
+
+  const notifyClaim = async promiseObj => {
+    await toast.promise(promiseObj, {
+      pending: `Claiming ${claimable} ${tokenSymbol}`,
+      success: `Claimed ${claimable} ${tokenSymbol}👌`,
+      error: `Failed to claim ${claimable} ${tokenSymbol} 🤯"`,
+    });
+  };
+
   return (
     <div>
       {account && releasableAmount && (BigNumber.from(releasableAmount).gt("0") || toBeUnlockedAmount.gt("0")) && (
@@ -63,8 +88,8 @@ const Claim = props => {
           <div className="d-flex justify-content-between">
             <div className="d-flex flex-row align-items-center">
               <div className="ms-2 c-details">
-                <h6 className="mb-0">Sera to be unlocked: </h6>
-                <h6 className="mb-0">Sera Claimable: </h6>
+                <h6 className="mb-0">{tokenSymbol} to be unlocked: </h6>
+                <h6 className="mb-0">{tokenSymbol} Claimable: </h6>
               </div>
             </div>
             <div className="badge">
@@ -76,7 +101,7 @@ const Claim = props => {
             <button
               type="button"
               className="btn btn-warning"
-              onClick={claim}
+              onClick={e => handleClaim(e)}
               disabled={!BigNumber.from(releasableAmount).gt(0) || !timeStampSet}
             >
               Claim

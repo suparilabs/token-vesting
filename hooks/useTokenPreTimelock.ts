@@ -1,5 +1,4 @@
 import { BigNumber } from "ethers";
-import { Contract } from "ethers";
 import useSWR, { SWRResponse } from "swr";
 import { useContract } from "./useContract";
 import { TokenPreTimelock__factory, TokenPreTimelock } from "../src/types";
@@ -102,7 +101,7 @@ export function useTimeperiodValue(contractAddress: string, chainId: number, sus
 export function useSetTimestampPreTimelock(contractAddress: string, timePeriod: number): any {
   const contract = <TokenPreTimelock>useContract(contractAddress, TokenPreTimelock__factory.abi, true);
   return async () => {
-    return (contract as Contract).setTimestamp(timePeriod);
+    return contract.setTimestamp(timePeriod);
   };
 }
 
@@ -110,7 +109,7 @@ export function useSetTimestampPreTimelock(contractAddress: string, timePeriod: 
 export function useTransferOwnershipTimelock(contractAddress: string, newOwnerAddress: string): any {
   const contract = <TokenPreTimelock>useContract(contractAddress, TokenPreTimelock__factory.abi, true);
   return async () => {
-    return (contract as Contract).transferOwnership(newOwnerAddress);
+    return contract.transferOwnership(newOwnerAddress);
   };
 }
 
@@ -118,7 +117,7 @@ export function useTransferOwnershipTimelock(contractAddress: string, newOwnerAd
 export function useTransferAccidentallyLockedTokens(contractAddress: string, token: string, amount: number): any {
   const contract = <TokenPreTimelock>useContract(contractAddress, TokenPreTimelock__factory.abi, true);
   return async () => {
-    return (contract as Contract).transferAccidentallyLockedTokens(token, amount);
+    return contract.transferAccidentallyLockedTokens(token, amount);
   };
 }
 //transfer timelocked tokens

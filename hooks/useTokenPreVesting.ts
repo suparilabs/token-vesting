@@ -1,7 +1,6 @@
 import { BigNumber, BigNumberish } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import useSWR, { SWRResponse } from "swr";
-import { Contract } from "ethers";
 import { TokenPreVesting, TokenPreVesting__factory } from "../src/types";
 import { useContract } from "./useContract";
 import { DataType } from "../utils";
@@ -134,9 +133,9 @@ export function useComputeReleasableAmount(
 }
 
 export function useRelease(vesting: string, scheduleId: string, amount: string): any {
-  const contract = useContract(vesting, TokenPreVesting__factory.abi, true);
+  const contract = <TokenPreVesting>useContract(vesting, TokenPreVesting__factory.abi, true);
   return async () => {
-    return (contract as Contract).release(scheduleId, amount).then((result: boolean) => result);
+    return contract.release(scheduleId, amount).then((result: any) => result);
   };
 }
 
@@ -305,7 +304,7 @@ function getWithdrawAmt(contract: TokenPreVesting): (address: string) => Promise
 export function useSetTimestampPreVesting(contractAddress: string, timePeriod: number): any {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
   return async () => {
-    return (contract as Contract).setTimestamp(timePeriod);
+    return contract.setTimestamp(timePeriod);
   };
 }
 
@@ -313,15 +312,15 @@ export function useSetTimestampPreVesting(contractAddress: string, timePeriod: n
 export function useTransferOwnershipVesting(contractAddress: string, newOwnerAddress: string): any {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
   return async () => {
-    return (contract as Contract).transferOwnership(newOwnerAddress);
+    return contract.transferOwnership(newOwnerAddress);
   };
 }
 
 //withdraw
-export function useVestingWithdraw(contractAddress: string, amount: number): any {
+export function useVestingWithdraw(contractAddress: string, amount: BigNumber): any {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
   return async () => {
-    return (contract as Contract).withdraw(amount);
+    return contract.withdraw(amount);
   };
 }
 
@@ -329,7 +328,7 @@ export function useVestingWithdraw(contractAddress: string, amount: number): any
 export function useRevoke(contractAddress: string, vestingScheduleId: string): any {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
   return async () => {
-    return (contract as Contract).revoke(vestingScheduleId);
+    return contract.revoke(vestingScheduleId);
   };
 }
 

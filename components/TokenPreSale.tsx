@@ -1,8 +1,14 @@
-import { formatEther } from "@ethersproject/units";
+import { isAddress } from "@ethersproject/address";
+import { formatEther, formatUnits, parseUnits } from "@ethersproject/units";
+import { TokenAmount } from "@uniswap/sdk";
 import { useWeb3React } from "@web3-react/core";
+import { BigNumber } from "ethers";
 import React from "react";
 import { toast } from "react-toastify";
-import { desiredChain } from "../constants";
+import BN from "bignumber.js";
+import { addresses, desiredChain } from "../constants";
+import { useTokenBalance } from "../hooks/useTokenBalance";
+import { useTokenDecimals } from "../hooks/useTokenDecimals";
 import {
   useAvailableAtTGE,
   useBUSD,
@@ -29,19 +35,24 @@ import {
   useSetTimestampTokenPresale,
   useStartSale,
   useTimeLockContractAddress,
+  useTokenAllowance,
   useTokenPreSaleAddress,
   useTransferAccidentallyLockedTokensFromTimelock,
+  useTransferOwnershipPreSale,
+  useTxApprove,
   useUSDT,
   useVestingContractAddress,
   useWithdrawBUSD,
   useWithdrawFromVesting,
   useWithdrawUSDT,
 } from "../hooks/useTokenPreSale";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
 import { secondsToDhms } from "../utils";
 
 const TokenPreSale = props => {
   const { chainId, account, active } = useWeb3React();
 
+  const [newOwner, setNewOwner] = React.useState<string>("");
   const [priceUsdt, setPriceUsdt] = React.useState<any>();
   const [priceBusd, setPriceBusd] = React.useState<any>();
   const [preSaleDuration, setPreSaleDuration] = React.useState<any>();
@@ -57,6 +68,17 @@ const TokenPreSale = props => {
   const [tokenAmount, setTokenAmount] = React.useState<any>();
   const [saleStatus, setSaleStatus] = React.useState<any>();
   const [timestamp, setTimestamp] = React.useState<any>();
+  const [allowance, setAllowance] = React.useState<any>();
+
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+
+  const { data: tokenDecimals } = useTokenDecimals(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
 
   const { data: currentSaleStatus } = useGetSaleStatus(
     chainId == undefined ? desiredChain.chainId : (chainId as number),
@@ -95,13 +117,34 @@ const TokenPreSale = props => {
   const { data: maxBusd } = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: availableAtTGE } = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
 
+  //check allowance
+  const { data: tokenAllowance } = useTokenAllowance(
+    ownerAddressIDOPreSale,
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+
+  // raised
+  const { data: usdtBalance } = useTokenBalance(
+    chainId !== undefined ? (chainId as number) : desiredChain.chainId,
+    props.tokenPreSaleAddress,
+    tokenUSDT,
+  );
+
+  const { data: busdBalance } = useTokenBalance(
+    chainId !== undefined ? (chainId as number) : desiredChain.chainId,
+    props.tokenPreSaleAddress,
+    tokenBUSD,
+  );
+
   //IDO ROUND _ WRITE CALLS: PRESALE
+  const transferOwnershipPreSaleTx = useTransferOwnershipPreSale(props.tokenPreSaleAddress, newOwner);
+
   const exchangePriceUsdtTx = useSetExchangePriceUsdt(
-    priceUsdt,
+    priceUsdt != undefined && priceUsdt != "" ? parseUnits(priceUsdt, "18") : BigNumber.from("0"),
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
   const exchangePriceBusdTx = useSetExchangePriceBusd(
-    priceBusd,
+    priceBusd != undefined && priceBusd != "" ? parseUnits(priceBusd, "18") : BigNumber.from("0"),
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
   const presaleDurationTx = useSetDuration(
@@ -114,24 +157,26 @@ const TokenPreSale = props => {
   );
   const availableAtTGEValTx = useSetAvailableAtTGE(
     chainId == undefined ? desiredChain.chainId : (chainId as number),
-    tgeValue * 100,
+    tgeValue != undefined && tgeValue != ""
+      ? BigNumber.from(new BN(tgeValue).multipliedBy("100").toString())
+      : BigNumber.from("0"),
   );
   const startSaleTx = useStartSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const endSaleTx = useEndSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const buyAmountBUSDTx = useSetBuyAmountRangeBUSD(
-    minBusdValue,
-    maxBusdValue,
+    minBusdValue != undefined && minBusdValue != "" ? parseUnits(minBusdValue, "18") : BigNumber.from("0"),
+    maxBusdValue != undefined && maxBusdValue != "" ? parseUnits(maxBusdValue, "18") : BigNumber.from("0"),
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
   const buyAmountUSDTTx = useSetBuyAmountRangeUSDT(
-    minUsdtValue,
-    maxUsdtValue,
+    minUsdtValue != undefined && minUsdtValue != "" ? parseUnits(minUsdtValue, "18") : BigNumber.from("0"),
+    maxUsdtValue != undefined && maxUsdtValue != "" ? parseUnits(maxUsdtValue, "18") : BigNumber.from("0"),
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
   const withdrawUSDTTx = useWithdrawUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const withdrawBUSDTx = useWithdrawBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const withdrawFromVestingTx = useWithdrawFromVesting(
-    tokenAmountWithdraw != undefined ? tokenAmountWithdraw : 0,
+    tokenAmountWithdraw != undefined ? parseUnits(tokenAmountWithdraw, "18") : BigNumber.from("0"),
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
   const revokeTx = useRevokePreSale(
@@ -148,6 +193,12 @@ const TokenPreSale = props => {
     props.tokenPreSaleAddress,
     chainId == undefined ? desiredChain.chainId : (chainId as number),
     timestamp,
+  );
+
+  const approveToken = useTxApprove(
+    IDOPreSaleTokenAddress,
+    allowance != undefined && allowance != "" && tokenDecimals != undefined ? parseUnits(allowance, tokenDecimals) : BigNumber.from("0"),
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
 
   const handleCliff = async e => {
@@ -239,6 +290,16 @@ const TokenPreSale = props => {
     }
   };
 
+  const handleTransferOwnership = async e => {
+    e.preventDefault();
+    if (newOwner != "" || newOwner != undefined || !isAddress(newOwner)) {
+      const txTransferOwnership = await transferOwnershipPreSaleTx();
+      await notifyTransferOwnership(txTransferOwnership.wait(1));
+    } else {
+      setNewOwner("0x");
+    }
+  };
+
   const setBuyAmountUsdtRangeHandler = async e => {
     e.preventDefault();
     if (minUsdtValue != "" || (minUsdtValue != undefined && maxUsdtValue != "") || maxUsdtValue != undefined) {
@@ -297,6 +358,20 @@ const TokenPreSale = props => {
     } else {
       setTimestamp(0);
     }
+  };
+
+  const handleApproveToken = async e => {
+    e.preventDefault();
+    const approveTx = await approveToken();
+    await notifyApproveToken(approveTx.wait(1));
+  };
+
+  const notifyTransferOwnership = async promiseObj => {
+    await toast.promise(promiseObj, {
+      pending: `Transferring Ownership...`,
+      success: `Ownership is Successfully Transferred👌`,
+      error: `Failed to Transfer Ownership 🤯"`,
+    });
   };
 
   const notifySaleStatus = async promiseObj => {
@@ -371,6 +446,14 @@ const TokenPreSale = props => {
     });
   };
 
+  const notifyApproveToken = async promiseObj => {
+    await toast.promise(promiseObj, {
+      pending: `Approving ${tokenSymbol}`,
+      success: `Approved ${tokenSymbol}👌`,
+      error: `Failed to approve ${tokenSymbol} 🤯"`,
+    });
+  };
+
   return (
     <div className="mt-5 border">
       <div className="mt-4 font-weight-bold mx-auto text-center">{props.title}</div>
@@ -392,7 +475,27 @@ const TokenPreSale = props => {
         <li className="list-group-item">TimeLock : {IDOPretimelockAddress}</li>
         <li className="list-group-item">USDT : {tokenUSDT}</li>
         <li className="list-group-item">BUSD : {tokenBUSD}</li>
-        <li className="list-group-item">coinsSold : {coinsSold}</li>
+        <li className="list-group-item">
+          coinsSold :{" "}
+          {coinsSold != undefined && tokenDecimals != undefined
+            ? parseFloat(formatUnits(coinsSold, tokenDecimals)).toFixed(4)
+            : "0"}{" "}
+          {tokenSymbol} of{" "}
+          {tokenAllowance != undefined && tokenDecimals != undefined
+            ? parseFloat(formatUnits(tokenAllowance, tokenDecimals)).toFixed(4)
+            : "0"}{" "}
+          {tokenSymbol}{" "}
+        </li>
+        {usdtBalance && (
+          <li className="list-group-item">
+            USDT to withdraw : {(usdtBalance as TokenAmount).toSignificant(4, { groupSeparator: "," })} USDT
+          </li>
+        )}
+        {busdBalance && (
+          <li className="list-group-item">
+            BUSD to withdraw : {(busdBalance as TokenAmount).toSignificant(4, { groupSeparator: "," })} BUSD
+          </li>
+        )}
         <li className="list-group-item">
           exchangePriceUSDT : {valueExchangePriceUsdt !== undefined ? `${formatEther(valueExchangePriceUsdt)} USDT` : 0}
         </li>
@@ -411,7 +514,30 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
+              className="form-control form-control-sm"
+              placeholder="token allowance"
+              aria-label="token allowance"
+              aria-describedby="basic-addon2"
+              value={allowance}
+              onChange={e => setAllowance(e.target.value)}
+            />
+            <div className="input-group-append">
+              <button
+                className="btn btn-primary btn-block"
+                type="button"
+                onClick={e => handleApproveToken(e)}
+                disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}
+              >
+                APPROVE {tokenSymbol}
+              </button>
+            </div>
+          </div>
+        </li>
+        <li className="list-group-item">
+          <div className="input-group">
+            <input
+              type="number"
               className="form-control form-control-sm"
               placeholder="usdt exchange price"
               aria-label="usdt exchange price"
@@ -434,7 +560,7 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="busd exchange price"
               aria-label="busd exchange price"
@@ -457,7 +583,7 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="duration in seconds"
               aria-label="duration in seconds"
@@ -480,7 +606,7 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="cliff in seconds"
               aria-label="cliff in seconds"
@@ -503,7 +629,7 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="time period in seconds"
               aria-label="time period in seconds"
@@ -549,7 +675,7 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="pct available at TGE"
               aria-label="pct available at TGE"
@@ -574,6 +700,29 @@ const TokenPreSale = props => {
             <input
               type="text"
               className="form-control form-control-sm"
+              placeholder="new owner"
+              aria-label="new owner"
+              aria-describedby="basic-addon2"
+              value={newOwner}
+              onChange={e => setNewOwner(e.target.value)}
+            />
+            <div className="input-group-append">
+              <button
+                className="btn btn-primary btn-block"
+                type="button"
+                onClick={e => handleTransferOwnership(e)}
+                disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}
+              >
+                transfer Ownership
+              </button>
+            </div>
+          </div>
+        </li>
+        <li className="list-group-item">
+          <div className="input-group">
+            <input
+              type="text"
+              className="form-control form-control-sm"
               placeholder="token address"
               aria-label="token address"
               aria-describedby="basic-addon2"
@@ -581,7 +730,7 @@ const TokenPreSale = props => {
               onChange={e => setTokenAddress(e.target.value)}
             />
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="token amount"
               aria-label="token amount"
@@ -604,7 +753,7 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="min busd"
               aria-label="min busd"
@@ -613,7 +762,7 @@ const TokenPreSale = props => {
               onChange={e => setMinBusdValue(e.target.value)}
             />
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="max busd"
               aria-label="max busd"
@@ -636,7 +785,7 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="min usdt"
               aria-label="min usdt"
@@ -645,7 +794,7 @@ const TokenPreSale = props => {
               onChange={e => setMinUsdtValue(e.target.value)}
             />
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="max usdt"
               aria-label="max usdt"
@@ -698,7 +847,7 @@ const TokenPreSale = props => {
         <li className="list-group-item">
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control form-control-sm"
               placeholder="token amount"
               aria-label="token amount"
