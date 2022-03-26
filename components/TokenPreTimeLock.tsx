@@ -57,13 +57,11 @@ const TokenPreTimeLock = props => {
 
   const preTimelockTimestampTx = useSetTimestampPreTimelock(
     props.preTimelockAddress,
-    chainId == undefined ? desiredChain.chainId : (chainId as number),
     timePeriodPreTimelock,
   );
   const transferOwnershipSeedTimelockTx = useTransferOwnershipTimelock(
     props.preTimelockAddress,
     newOwner,
-    chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
   const transferLockedTokensSeedTimelockTx = useTransferAccidentallyLockedTokens(
     props.preTimelockAddress,

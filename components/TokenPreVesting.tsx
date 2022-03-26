@@ -78,26 +78,10 @@ const TokenPreVesting = props => {
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
 
-  const preVestingTimestampTx = useSetTimestampPreVesting(
-    props.tokenPreVestingAddress,
-    chainId == undefined ? desiredChain.chainId : (chainId as number),
-    timePeriodPreVesting,
-  );
-  const transferOwnershipVestingTx = useTransferOwnershipVesting(
-    props.tokenPreVestingAddress,
-    newOwner,
-    chainId == undefined ? desiredChain.chainId : (chainId as number),
-  );
-  const vestingWithdrawTx = useVestingWithdraw(
-    props.tokenPreVestingAddress,
-    withdrawAmount,
-    chainId == undefined ? desiredChain.chainId : (chainId as number),
-  );
-  const revokeParamsTx = useRevoke(
-    props.tokenPreVestingAddress,
-    withdrawAmount,
-    chainId == undefined ? desiredChain.chainId : (chainId as number),
-  );
+  const preVestingTimestampTx = useSetTimestampPreVesting(props.tokenPreVestingAddress, timePeriodPreVesting);
+  const transferOwnershipVestingTx = useTransferOwnershipVesting(props.tokenPreVestingAddress, newOwner);
+  const vestingWithdrawTx = useVestingWithdraw(props.tokenPreVestingAddress, withdrawAmount);
+  const revokeParamsTx = useRevoke(props.tokenPreVestingAddress, scheduleID);
 
   const handleWithdrawFromVesting = async e => {
     e.preventDefault();
