@@ -50,6 +50,7 @@ export function useVestingScheduleCountBeneficiary(
     getVestingSchedulesCountByBeneficiary(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -101,6 +102,7 @@ export function useComputeVestingScheduleIdForAddressAndIndex(
     getComputeVestingScheduleIdForAddressAndIndex(account, index, contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -159,6 +161,7 @@ export function usePreVestingFetchOwner(
     getOwner(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -174,6 +177,7 @@ export function usePreVestingToken(contractAddress: string, chainId: number, sus
     getToken(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -193,11 +197,12 @@ export function useTimestampStatusVesting(
     getTimestampStatus(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
 function getTimestampStatus(contract: TokenPreVesting): (address: string) => Promise<boolean> {
-  return async (): Promise<boolean> => contract.timestampSet().then((result: any) => result);
+  return async (): Promise<boolean> => contract.timestampSet().then((result: boolean) => result);
 }
 
 // Initial Timestamp
@@ -212,6 +217,7 @@ export function useTimestampInitialStatusVesting(
     getTimestampInitialStatus(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -227,6 +233,7 @@ export function useStartPreVesting(contractAddress: string, chainId: number, sus
     getStartTime(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -246,6 +253,7 @@ export function useVestingScheduleTotalAmt(
     getVestingSchedulesTotalAmt(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -266,6 +274,7 @@ export function useVestingScheduleTotalCount(
     getVestingSchedulesCount(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -282,6 +291,7 @@ export function useWithdrawableAmt(contractAddress: string, chainId: number, sus
     getWithdrawAmt(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -328,7 +338,7 @@ function getIncomingDepositStatus(contract: TokenPreVesting): (address: string) 
   return async (): Promise<boolean> => contract.allIncomingDepositsFinalised().then((result: boolean) => result);
 }
 
-export function useIncomingDepositsFinalised(
+export function useIncomingDepositsFinalisedPreVesting(
   contractAddress: string,
   chainId: number,
   suspense = false,

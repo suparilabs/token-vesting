@@ -6,6 +6,7 @@ import { DataType } from "../utils";
 import { addresses } from "../constants";
 import { ERC20__factory, TokenPreSale, TokenPreSale__factory } from "../src/types";
 import { useContract } from "./useContract";
+import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
 
 export function useStartSale(chainId: number): any {
   const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true);
@@ -75,7 +76,7 @@ export function useVestingContractAddress(chainId: number, suspense = false): SW
     getVestingContractAddress(contract),
     { suspense },
   );
-  //let res: any = BigNumber.from(result.data).toNumber();
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -88,7 +89,7 @@ export function useTimeLockContractAddress(chainId: number, suspense = false): S
     getTimelockContractAddress(contract),
     { suspense },
   );
-  //let res: any = BigNumber.from(result.data).toNumber();
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -108,8 +109,7 @@ export function useTokenAllowance(account: string, token: string, suspense = fal
     getTokenAllowance(account as string, contract as Contract, chainId as number),
     { suspense },
   );
-  // useKeepSWRDATALiveAsBlocksArrive(result.mutate);
-  //let res: any = BigNumber.from(result.data).toNumber();
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -125,7 +125,7 @@ export function useBUSD(chainId: number, suspense = false): SWRResponse<any, any
     getBUSD(contract as Contract),
     { suspense },
   );
-  //let res: any = BigNumber.from(result.data).toNumber();
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -141,7 +141,7 @@ export function useUSDT(chainId: number, suspense = false): SWRResponse<any, any
     getUSDT(contract as Contract),
     { suspense },
   );
-  //let res: any = BigNumber.from(result.data).toNumber();
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -156,7 +156,7 @@ export function useAvailableAtTGE(chainId: number, suspense = false): SWRRespons
     getAvailableAtTGE(contract as Contract),
     { suspense },
   );
-  //let res: any = BigNumber.from(result.data).toNumber();
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -183,6 +183,7 @@ export function useTokenPreSaleAddress(chainId: number, suspense = false): SWRRe
     getPreSaleTokenAddress(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -198,6 +199,7 @@ export function usePreSaleFetchOwner(
     getOwner(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -217,6 +219,7 @@ export function usePreSaleCoinsSoldInfo(
     getCoinsSold(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -236,12 +239,12 @@ export function useExchangePriceUsdt(chainId: number, suspense = false): SWRResp
     getExhangePriceUSDT(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
-function getExhangePriceUSDT(contract: TokenPreSale): (address: string) => Promise<any> {
-  return async (): Promise<any> =>
-    contract.exchangePriceUSDT().then((result: any) => BigNumber.from(result).toNumber());
+function getExhangePriceUSDT(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.exchangePriceUSDT().then((result: BigNumber) => result.toString());
 }
 
 export function useExchangePriceBusd(chainId: number, suspense = false): SWRResponse<any, any> {
@@ -255,12 +258,12 @@ export function useExchangePriceBusd(chainId: number, suspense = false): SWRResp
     getExhangePriceBUSD(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
-function getExhangePriceBUSD(contract: TokenPreSale): (address: string) => Promise<any> {
-  return async (): Promise<any> =>
-    contract.exchangePriceBUSD().then((result: any) => BigNumber.from(result).toNumber());
+function getExhangePriceBUSD(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.exchangePriceBUSD().then((result: BigNumber) => result.toString());
 }
 
 //get duration
@@ -275,6 +278,7 @@ export function useDuration(chainId: number, suspense = false): SWRResponse<any,
     getDuration(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -292,6 +296,7 @@ export function useGetSaleStatus(chainId: number, suspense = false): SWRResponse
     getSaleStatus(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -309,11 +314,12 @@ export function useCliff(chainId: number, suspense = false): SWRResponse<any, an
     getCliff(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
-function getCliff(contract: TokenPreSale): (address: string) => Promise<any> {
-  return async (): Promise<any> => contract.cliff().then((result: any) => BigNumber.from(result).toNumber());
+function getCliff(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.cliff().then((result: BigNumber) => result.toString());
 }
 
 //get min buy amt
@@ -328,6 +334,7 @@ export function useMinBuyAmountUSDT(chainId: number, suspense = false): SWRRespo
     getMinBuyAmtUsdt(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 export function useMaxBuyAmountUSDT(chainId: number, suspense = false): SWRResponse<any, any> {
@@ -341,6 +348,7 @@ export function useMaxBuyAmountUSDT(chainId: number, suspense = false): SWRRespo
     getMaxBuyAmtUsdt(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 export function useMinBuyAmountBusd(chainId: number, suspense = false): SWRResponse<any, any> {
@@ -354,6 +362,7 @@ export function useMinBuyAmountBusd(chainId: number, suspense = false): SWRRespo
     getMinBuyAmtBusd(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -368,23 +377,24 @@ export function useMaxBuyAmountBusd(chainId: number, suspense = false): SWRRespo
     getMaxBuyAmtBusd(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
-function getMinBuyAmtUsdt(contract: TokenPreSale): (address: string) => Promise<any> {
-  return async (): Promise<any> => contract.minBuyAmountUSDT().then((result: any) => BigNumber.from(result).toNumber());
+function getMinBuyAmtUsdt(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.minBuyAmountUSDT().then((result: BigNumber) => result.toString());
 }
 
-function getMaxBuyAmtUsdt(contract: TokenPreSale): (address: string) => Promise<any> {
-  return async (): Promise<any> => contract.maxBuyAmountUSDT().then((result: any) => BigNumber.from(result).toNumber());
+function getMaxBuyAmtUsdt(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.maxBuyAmountUSDT().then((result: BigNumber) => result.toString());
 }
 
-function getMinBuyAmtBusd(contract: TokenPreSale): (address: string) => Promise<any> {
-  return async (): Promise<any> => contract.minBuyAmountBUSD().then((result: any) => BigNumber.from(result).toNumber());
+function getMinBuyAmtBusd(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.minBuyAmountBUSD().then((result: BigNumber) => result.toString());
 }
 
-function getMaxBuyAmtBusd(contract: TokenPreSale): (address: string) => Promise<any> {
-  return async (): Promise<any> => contract.maxBuyAmountBUSD().then((result: any) => BigNumber.from(result).toNumber());
+function getMaxBuyAmtBusd(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.maxBuyAmountBUSD().then((result: BigNumber) => result.toString());
 }
 
 //setExchangePriceUSDT

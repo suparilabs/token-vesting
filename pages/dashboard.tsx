@@ -1,14 +1,21 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Papa from "papaparse";
 import { BigNumber, BigNumberish } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import BN from "bignumber.js";
+import { toast } from "react-toastify";
 import { useTokenTransfer } from "../hooks/useTokenTransfer";
 import { addresses, desiredChain } from "../constants";
-import { toast } from "react-toastify";
-import { useCreateBulkVestingSchedule } from "../hooks/useTokenPreVesting";
-import { useBulkDepositTokens } from "../hooks/useTokenPreTimelock";
-
+import {
+  useCreateBulkVestingSchedule,
+  useIncomingDepositsFinalisedPreVesting,
+  usePreVestingFetchOwner,
+} from "../hooks/useTokenPreVesting";
+import {
+  useBulkDepositTokens,
+  useIncomingDepositsFinalisedTimelock,
+  usePreTimelockFetchOwner,
+} from "../hooks/useTokenPreTimelock";
 import { useTokenBalance } from "../hooks/useTokenBalance";
 import { useTokenSymbol } from "../hooks/useTokenSymbol";
 import { useTokenDecimals } from "../hooks/useTokenDecimals";
@@ -16,6 +23,7 @@ import TokenPreTimeLock from "../components/TokenPreTimeLock";
 import TokenPreVesting from "../components/TokenPreVesting";
 import TokenPreSale from "../components/TokenPreSale";
 import { useTimeLockContractAddress, useVestingContractAddress } from "../hooks/useTokenPreSale";
+import { getAddress } from "@ethersproject/address";
 
 function Dashboard(): JSX.Element {
   const { chainId, active, account } = useWeb3React();
@@ -29,7 +37,7 @@ function Dashboard(): JSX.Element {
   const [isValidDuration, setIsValidDuration] = React.useState<boolean>(true);
   const [isValidCliff, setIsValidCliff] = React.useState<boolean>(true);
   const [enoughTokenBalance, setEnoughTokenBalance] = React.useState<boolean>(false);
-
+  const [disableTGEButton, setDisableTGEButton] = React.useState<boolean>(false);
   const [availableTge, setAvailableTge] = React.useState<string>("0");
   const [tges, setTges] = React.useState<any>([]);
   const [duration, setDuration] = React.useState<string>("0");
@@ -139,6 +147,49 @@ function Dashboard(): JSX.Element {
   const privateTokenPreVesting =
     addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_VESTING;
   const idoTokenPreSaleAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].IDO_TOKEN_PRE_SALE;
+
+  const { data: ownerAddressPretimelockSeed } = usePreTimelockFetchOwner(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPreVestingSeed } = usePreVestingFetchOwner(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPretimelockPrivate } = usePreTimelockFetchOwner(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPreVestingPrivate } = usePreVestingFetchOwner(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  // ============================================
+
+  const { data: incomingDepositFinalizedTimelockSeed } = useIncomingDepositsFinalisedTimelock(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedVestingSeed } = useIncomingDepositsFinalisedPreVesting(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedTimelockPrivate } = useIncomingDepositsFinalisedTimelock(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedVestingPrivate } = useIncomingDepositsFinalisedPreVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
   //web3
   const handleSendTGETokensNow = async e => {
     e.preventDefault();
@@ -178,7 +229,11 @@ function Dashboard(): JSX.Element {
   };
 
   const handleSeedRound = async () => {
-    if (BigNumber.from(totalNonVestingAmt).gt("0")) {
+    if (
+      BigNumber.from(totalNonVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPretimelockSeed) &&
+      !incomingDepositFinalizedTimelockSeed
+    ) {
       // transfer tokens to pre time lock
       const sendTokenToPreTimeLockForSeedTx = await sendTokenToPreTimeLockForSeed();
       await notifyTransfer(sendTokenToPreTimeLockForSeedTx.wait(1), "Seed TokenPreTimeLock");
@@ -188,7 +243,11 @@ function Dashboard(): JSX.Element {
       await notifyBulkDepositTokens(bulkDepositForSeedTx.wait(1), "Seed");
     }
 
-    if (BigNumber.from(totalVestingAmt).gt("0")) {
+    if (
+      BigNumber.from(totalVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPreVestingSeed) &&
+      !incomingDepositFinalizedVestingSeed
+    ) {
       // transfer tokens to pre vesting
       const sendTokenToPreVestingForSeedTX = await sendTokenToPreVestingForSeed();
       await notifyTransfer(sendTokenToPreVestingForSeedTX.wait(1), "Seed TokenPreVesting");
@@ -200,7 +259,11 @@ function Dashboard(): JSX.Element {
   };
 
   const handlePrivateRound = async () => {
-    if (BigNumber.from(totalNonVestingAmt).gt("0")) {
+    if (
+      BigNumber.from(totalNonVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPretimelockPrivate) &&
+      !incomingDepositFinalizedTimelockPrivate
+    ) {
       // transfer tokens to pre time lock
       const sendTokenToPreTimeLockForPrivateSaleTx = await sendTokenToPreTimeLockForPrivateSale();
       await notifyTransfer(sendTokenToPreTimeLockForPrivateSaleTx.wait(1), "PrivateSale TokenPreTimeLock");
@@ -210,7 +273,11 @@ function Dashboard(): JSX.Element {
       await notifyBulkDepositTokens(bulkDepositForPrivateSaleTx.wait(1), "PrivateSale");
     }
 
-    if (BigNumber.from(totalVestingAmt).gt("0")) {
+    if (
+      BigNumber.from(totalVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPreVestingPrivate) &&
+      !incomingDepositFinalizedVestingPrivate
+    ) {
       // transfer tokens to pre vesting
       const sendTokenToPreVestingForPrivateSaleTX = await sendTokenToPreVestingForPrivateSale();
       await notifyTransfer(sendTokenToPreVestingForPrivateSaleTX.wait(1), "PrivateSale TokenPreVesting");
@@ -224,6 +291,40 @@ function Dashboard(): JSX.Element {
   const handleChange = e => {
     setRound(e.target.value);
   };
+
+  useEffect(() => {
+    setDisableTGEButton(
+      !active ||
+        !enoughTokenBalance ||
+        !isValidCliff ||
+        !isValidDuration ||
+        !isValidTGE ||
+        getAddress(account as string) != getAddress(ownerAddressPretimelockSeed) ||
+        getAddress(account as string) != getAddress(ownerAddressPreVestingSeed) ||
+        getAddress(account as string) != getAddress(ownerAddressPretimelockPrivate) ||
+        getAddress(account as string) != getAddress(ownerAddressPreVestingPrivate) ||
+        incomingDepositFinalizedTimelockSeed ||
+        incomingDepositFinalizedVestingSeed ||
+        incomingDepositFinalizedTimelockPrivate ||
+        incomingDepositFinalizedVestingPrivate,
+    );
+  }, [
+    round,
+    active,
+    enoughTokenBalance,
+    isValidCliff,
+    isValidDuration,
+    isValidTGE,
+    account,
+    ownerAddressPretimelockSeed,
+    ownerAddressPreVestingSeed,
+    ownerAddressPretimelockPrivate,
+    ownerAddressPreVestingPrivate,
+    incomingDepositFinalizedTimelockSeed,
+    incomingDepositFinalizedVestingSeed,
+    incomingDepositFinalizedTimelockPrivate,
+    incomingDepositFinalizedVestingPrivate,
+  ]);
 
   const parseCSV = (data: any) => {
     const amountsArr = Object.values(
@@ -479,11 +580,12 @@ function Dashboard(): JSX.Element {
                                       className="btn btn-primary btn-block"
                                       onClick={e => handleSendTGETokensNow(e)}
                                       disabled={
-                                        !active ||
-                                        !enoughTokenBalance ||
-                                        !isValidCliff ||
-                                        !isValidDuration ||
-                                        !isValidTGE
+                                        // !active ||
+                                        // !enoughTokenBalance ||
+                                        // !isValidCliff ||
+                                        // !isValidDuration ||
+                                        // !isValidTGE
+                                        disableTGEButton
                                       }
                                     >
                                       <small className="font-weight-bold">Send tge tokens now</small>

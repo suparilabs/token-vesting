@@ -1,22 +1,24 @@
 import { useWeb3React } from "@web3-react/core";
 import moment from "moment";
 import React from "react";
-import { desiredChain } from "../constants";
+import { addresses, desiredChain } from "../constants";
 import {
   usePreTimelockFetchOwner,
   usePreTimelockToken,
   useTimeperiodValue,
   useTimestampInitialStatus,
   useTimestampStatus,
-} from "../hooks/useTokenPreTimelock";
-import { useIncomingDepositsFinalised } from "../hooks/useTokenPreVesting";
-import {
   useSetTimestampPreTimelock,
   useTransferOwnershipTimelock,
   useTransferAccidentallyLockedTokens,
+  useIncomingDepositsFinalisedTimelock,
 } from "../hooks/useTokenPreTimelock";
 import { toast } from "react-toastify";
 import { isAddress } from "@ethersproject/address";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
+import { useTokenDecimals } from "../hooks/useTokenDecimals";
+import { useTokenBalance } from "../hooks/useTokenBalance";
+import { TokenAmount } from "@uniswap/sdk";
 
 const TokenPreTimeLock = props => {
   const { active, account, chainId } = useWeb3React();
@@ -25,6 +27,22 @@ const TokenPreTimeLock = props => {
   const [newOwner, setNewOwner] = React.useState<any>();
   const [tokenAddress, setTokenAddress] = React.useState<any>();
   const [tokenAmount, setTokenAmount] = React.useState<any>();
+
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+  const { data: tokenDecimals } = useTokenDecimals(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+
+  const { data: preTimelockTotalTokens } = useTokenBalance(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    props.preTimelockAddress,
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+
   const { data: ownerAddressPretimelock } = usePreTimelockFetchOwner(
     props.preTimelockAddress,
     chainId == undefined ? desiredChain.chainId : (chainId as number),
@@ -35,7 +53,7 @@ const TokenPreTimeLock = props => {
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
 
-  const { data: incomingDepositStatusPreTimelock } = useIncomingDepositsFinalised(
+  const { data: incomingDepositStatusPreTimelock } = useIncomingDepositsFinalisedTimelock(
     props.preTimelockAddress,
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
@@ -55,14 +73,8 @@ const TokenPreTimeLock = props => {
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
 
-  const preTimelockTimestampTx = useSetTimestampPreTimelock(
-    props.preTimelockAddress,
-    timePeriodPreTimelock,
-  );
-  const transferOwnershipSeedTimelockTx = useTransferOwnershipTimelock(
-    props.preTimelockAddress,
-    newOwner,
-  );
+  const preTimelockTimestampTx = useSetTimestampPreTimelock(props.preTimelockAddress, timePeriodPreTimelock);
+  const transferOwnershipSeedTimelockTx = useTransferOwnershipTimelock(props.preTimelockAddress, newOwner);
   const transferLockedTokensSeedTimelockTx = useTransferAccidentallyLockedTokens(
     props.preTimelockAddress,
     tokenAddress,
@@ -161,6 +173,12 @@ const TokenPreTimeLock = props => {
             timestampStatusTimelock == true &&
             moment.unix(timePeriodValuePreTimelock).format("MMMM DD, YYYY hh:mm:ss a")) ||
             "-"}
+        </li>
+        <li className="list-group-item">
+          Total tokens locked :{" "}
+          {tokenDecimals && preTimelockTotalTokens != undefined
+            ? `${(preTimelockTotalTokens as TokenAmount).toSignificant(4, { groupSeparator: "," })} ${tokenSymbol}`
+            : "-"}
         </li>
         {!props.isIDO && (
           <>

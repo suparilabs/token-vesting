@@ -77,7 +77,7 @@ const Claim = props => {
               type="button"
               className="btn btn-warning"
               onClick={claim}
-              disabled={!BigNumber.from(releasableAmount).gt(0)}
+              disabled={!BigNumber.from(releasableAmount).gt(0) || !timeStampSet}
             >
               Claim
             </button>

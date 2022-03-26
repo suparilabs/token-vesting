@@ -26,6 +26,7 @@ export function usePreTimelockFetchOwner(
     getOwner(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -41,6 +42,7 @@ export function usePreTimelockToken(contractAddress: string, chainId: number, su
     getToken(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -56,6 +58,7 @@ export function useTimestampStatus(contractAddress: string, chainId: number, sus
     getTimestampStatus(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -75,6 +78,7 @@ export function useTimestampInitialStatus(
     getTimestampInitialStatus(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -90,6 +94,7 @@ export function useTimeperiodValue(contractAddress: string, chainId: number, sus
     getTimeperiod(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 
@@ -205,6 +210,26 @@ export function useTimeperiod(timelock: string, suspense = false): SWRResponse<B
     {
       suspense,
     },
+  );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
+  return result;
+}
+
+//all incoming deposits finalised or not?
+function getIncomingDepositStatus(contract: TokenPreTimelock): (address: string) => Promise<boolean> {
+  return async (): Promise<boolean> => contract.allIncomingDepositsFinalised().then((result: boolean) => result);
+}
+
+export function useIncomingDepositsFinalisedTimelock(
+  contractAddress: string,
+  chainId: number,
+  suspense = false,
+): SWRResponse<any, any> {
+  const contract = <TokenPreTimelock>useContract(contractAddress, TokenPreTimelock__factory.abi);
+  const result: any = useSWR(
+    contract ? [chainId, "allIncomingDepositsFinalizedStatus", contractAddress, DataType.Address] : null,
+    getIncomingDepositStatus(contract),
+    { suspense },
   );
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;

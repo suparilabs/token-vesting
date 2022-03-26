@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import moment from "moment";
 import { addresses, desiredChain } from "../constants";
 import {
-  useIncomingDepositsFinalised,
+  useIncomingDepositsFinalisedPreVesting,
   usePreVestingFetchOwner,
   usePreVestingToken,
   useRevoke,
@@ -73,15 +73,27 @@ const TokenPreVesting = props => {
     props.tokenPreVestingAddress,
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
-  const { data: incomingDepositStatusPreVesting } = useIncomingDepositsFinalised(
+  const { data: incomingDepositStatusPreVesting } = useIncomingDepositsFinalisedPreVesting(
     props.tokenPreVestingAddress,
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
 
-  const preVestingTimestampTx = useSetTimestampPreVesting(props.tokenPreVestingAddress, timePeriodPreVesting);
-  const transferOwnershipVestingTx = useTransferOwnershipVesting(props.tokenPreVestingAddress, newOwner);
-  const vestingWithdrawTx = useVestingWithdraw(props.tokenPreVestingAddress, withdrawAmount);
-  const revokeParamsTx = useRevoke(props.tokenPreVestingAddress, scheduleID);
+  const preVestingTimestampTx = useSetTimestampPreVesting(
+    props.tokenPreVestingAddress,
+    timePeriodPreVesting,
+  );
+  const transferOwnershipVestingTx = useTransferOwnershipVesting(
+    props.tokenPreVestingAddress,
+    newOwner,
+  );
+  const vestingWithdrawTx = useVestingWithdraw(
+    props.tokenPreVestingAddress,
+    withdrawAmount,
+  );
+  const revokeParamsTx = useRevoke(
+    props.tokenPreVestingAddress,
+    withdrawAmount,
+  );
 
   const handleWithdrawFromVesting = async e => {
     e.preventDefault();
