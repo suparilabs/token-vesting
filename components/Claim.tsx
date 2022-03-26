@@ -10,6 +10,7 @@ import {
   useRelease,
   useVestingScheduleByAddressAndIndex,
   useSetTimeStamp,
+  useStart,
 } from "../hooks/useTokenPreVesting";
 import { secondsToDhms } from "../utils";
 
@@ -28,32 +29,36 @@ const Claim = props => {
     props.vestingScheduleIndex,
   );
   const { data: releasableAmount } = useComputeReleasableAmount(props.vestingContractAddress, vestingScheduleId);
-  const unlocked =
+  const { data: startTimeInSeconds } = useStart(props.vestingContractAddress);
+  const toBeUnlockedAmount =
     vestingSchedule !== undefined && releasableAmount
-      ? parseFloat(
-          formatEther(BigNumber.from(vestingSchedule[6]).sub(BigNumber.from(vestingSchedule[7])).sub(releasableAmount)),
-        ).toFixed(4)
-      : "0";
+      ? BigNumber.from(vestingSchedule[6]).sub(BigNumber.from(vestingSchedule[7])).sub(releasableAmount)
+      : BigNumber.from("0");
+  const toBeUnlocked =
+    vestingSchedule !== undefined && releasableAmount ? parseFloat(formatEther(toBeUnlockedAmount)).toFixed(4) : "0";
   const claimable = releasableAmount ? parseFloat(formatEther(BigNumber.from(releasableAmount))).toFixed(4) : "0";
   const claim = useRelease(props.vestingContractAddress, vestingScheduleId, releasableAmount);
-
-  const timeStampSet = useSetTimeStamp(props.vestingContractAddress);
+  const { data: timeStampSet } = useSetTimeStamp(props.vestingContractAddress);
   const claimingDate =
-    timeStampSet && timeStampSet.data && vestingSchedule != undefined
-      ? moment.unix(vestingSchedule[2] * 1000).format("DD MMM YYYY")
+    timeStampSet && vestingSchedule != undefined && startTimeInSeconds && startTimeInSeconds != undefined
+      ? moment
+          .unix(parseInt(vestingSchedule[2]) + parseInt(startTimeInSeconds.toString()))
+          .format("DD MMM YYYY, hh:mm:ss a")
       : "-";
   const unlockingDate =
-    timeStampSet && timeStampSet.data && vestingSchedule != undefined
-      ? moment.unix(parseInt(vestingSchedule[4]) + parseInt(vestingSchedule[3]) * 1000).format("DD MMM YYYY")
+    timeStampSet && vestingSchedule != undefined && startTimeInSeconds != undefined
+      ? moment
+          .unix(parseInt(vestingSchedule[3]) + parseInt(startTimeInSeconds.toString()))
+          .format("DD MMM YYYY, hh:mm:ss a")
       : "-";
   const splMessage = `Vesting Schedule: ${
     vestingSchedule && vestingSchedule[9] ? new BN(vestingSchedule[9]).div("100") : "-"
   }% TGE then daily linear for ${
-    vestingSchedule && (vestingSchedule[4] as number) > 0 ? secondsToDhms(vestingSchedule[4] as number) : "-"
+    vestingSchedule && (vestingSchedule[3] as number) > 0 ? secondsToDhms(vestingSchedule[3] as number) : "-"
   }`;
   return (
     <div>
-      {account && (
+      {account && releasableAmount && (BigNumber.from(releasableAmount).gt("0") || toBeUnlockedAmount.gt("0")) && (
         <div>
           <div className="d-flex justify-content-between">
             <div className="d-flex flex-row align-items-center">
@@ -63,12 +68,17 @@ const Claim = props => {
               </div>
             </div>
             <div className="badge">
-              <span> {unlocked} </span>
+              <span> {toBeUnlocked} </span>
               <span className="Claimable"> {claimable} </span>
             </div>
           </div>
           <div className="div-claim_btn">
-            <button type="button" className="btn btn-warning" onClick={claim} disabled={props.claimButtonDisable}>
+            <button
+              type="button"
+              className="btn btn-warning"
+              onClick={claim}
+              disabled={!BigNumber.from(releasableAmount).gt(0)}
+            >
               Claim
             </button>
           </div>
