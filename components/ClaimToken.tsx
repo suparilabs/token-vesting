@@ -25,16 +25,20 @@ const ClaimToken = props => {
   const { data: vestingContractAddress } = useVestingContractAddress(
     chainId == undefined ? desiredChain.chainId : chainId,
   );
+
   const vestingSchedule = useVestingScheduleByAddressAndIndex(
     account as string,
     vestingContractAddress,
     props.vestingScheduleIndex,
   );
+
   const { data: vestingScheduleId } = useComputeVestingScheduleIdForAddressAndIndex(
     account as string,
     vestingContractAddress,
     props.vestingScheduleIndex,
   );
+
+  
   const { data: tge } = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
   const unlocked =
@@ -54,6 +58,7 @@ const ClaimToken = props => {
   const splMessage = `Vesting Schedule: ${tge ? new BN(tge).div("100") : "-"}% TGE then daily linear for ${
     vestingSchedule && (vestingSchedule[4] as number) > 0 ? secondsToDhms(vestingSchedule[4] as number) : "-"
   }`;
+
   return (
     <div>
       {claimable.toString() > "0.0000" && account && (

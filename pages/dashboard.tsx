@@ -1,15 +1,29 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Papa from "papaparse";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import BN from "bignumber.js";
-import { useStartSale, useEndSale } from "../hooks/useTokenPreSale";
+import { toast } from "react-toastify";
 import { useTokenTransfer } from "../hooks/useTokenTransfer";
 import { addresses, desiredChain } from "../constants";
-import { toast } from "react-toastify";
-import { useCreateBulkVestingSchedule } from "../hooks/useTokenPreVesting";
-import { useBulkDepositTokens } from "../hooks/useTokenPreTimelock";
+import {
+  useCreateBulkVestingSchedule,
+  useIncomingDepositsFinalisedPreVesting,
+  usePreVestingFetchOwner,
+} from "../hooks/useTokenPreVesting";
+import {
+  useBulkDepositTokens,
+  useIncomingDepositsFinalisedTimelock,
+  usePreTimelockFetchOwner,
+} from "../hooks/useTokenPreTimelock";
 import { useTokenBalance } from "../hooks/useTokenBalance";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
+import { useTokenDecimals } from "../hooks/useTokenDecimals";
+import TokenPreTimeLock from "../components/TokenPreTimeLock";
+import TokenPreVesting from "../components/TokenPreVesting";
+import TokenPreSale from "../components/TokenPreSale";
+import { useTimeLockContractAddress, useVestingContractAddress } from "../hooks/useTokenPreSale";
+import { getAddress } from "@ethersproject/address";
 
 function Dashboard(): JSX.Element {
   const { chainId, active, account } = useWeb3React();
@@ -23,6 +37,7 @@ function Dashboard(): JSX.Element {
   const [isValidDuration, setIsValidDuration] = React.useState<boolean>(true);
   const [isValidCliff, setIsValidCliff] = React.useState<boolean>(true);
   const [enoughTokenBalance, setEnoughTokenBalance] = React.useState<boolean>(false);
+  const [disableTGEButton, setDisableTGEButton] = React.useState<boolean>(false);
   const [availableTge, setAvailableTge] = React.useState<string>("0");
   const [tges, setTges] = React.useState<any>([]);
   const [duration, setDuration] = React.useState<string>("0");
@@ -32,16 +47,30 @@ function Dashboard(): JSX.Element {
   //hooks for seed round
   const [beneficiaries, setBeneficiaries] = React.useState<any>([]);
   const [totalNonVestingAmt, setTotalNonVestingAmt] = React.useState<string>("0");
-
   const [totalVestingAmt, setTotalVestingAmt] = React.useState<any>("0");
   const [nonVestingAmt, setNonVestingAmt] = React.useState<any>("0");
   const [vestingAmt, setVestingAmt] = React.useState<any>([]);
   const [durations, setDurations] = React.useState<any>([]);
   const [revocables, setRevocables] = React.useState<any>([]);
   const [slice, setSlice] = React.useState<any>([]);
-  //start and end sale
-  const handleStartSale = useStartSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const handleEndSale = useEndSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
+
+  const { data: tokenAddressIDOPreVesting } = useVestingContractAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressIDOPretimelock } = useTimeLockContractAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  // token
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+  const { data: tokenDecimals } = useTokenDecimals(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+
   //FOR SEED ROUND
   const sendTokenToPreTimeLockForSeed = useTokenTransfer(
     chainId != undefined
@@ -110,6 +139,56 @@ function Dashboard(): JSX.Element {
     beneficiaries,
     nonVestingAmt,
   );
+  //contract addresses
+  const seedPreTimelockAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].SEED_PRE_TIME_LOCK;
+  const seedTokenPreVesting = addresses[chainId != undefined ? chainId : desiredChain.chainId].SEED_PRE_VESTING;
+  const privatePreTimelockAddress =
+    addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_TIME_LOCK;
+  const privateTokenPreVesting =
+    addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_VESTING;
+  const idoTokenPreSaleAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].IDO_TOKEN_PRE_SALE;
+
+  const { data: ownerAddressPretimelockSeed } = usePreTimelockFetchOwner(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPreVestingSeed } = usePreVestingFetchOwner(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPretimelockPrivate } = usePreTimelockFetchOwner(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPreVestingPrivate } = usePreVestingFetchOwner(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  // ============================================
+
+  const { data: incomingDepositFinalizedTimelockSeed } = useIncomingDepositsFinalisedTimelock(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedVestingSeed } = useIncomingDepositsFinalisedPreVesting(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedTimelockPrivate } = useIncomingDepositsFinalisedTimelock(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedVestingPrivate } = useIncomingDepositsFinalisedPreVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
   //web3
   const handleSendTGETokensNow = async e => {
@@ -127,9 +206,9 @@ function Dashboard(): JSX.Element {
 
   const notifyTransfer = async (promiseObj, recipientContractName) => {
     await toast.promise(promiseObj, {
-      pending: `Sending $SERA -> ${recipientContractName}`,
-      success: `Sent $SERA -> ${recipientContractName}👌`,
-      error: `Failed sending $SERA -> ${recipientContractName} 🤯"`,
+      pending: `Sending ${tokenSymbol} -> ${recipientContractName}`,
+      success: `Sent ${tokenSymbol} -> ${recipientContractName}👌`,
+      error: `Failed sending ${tokenSymbol} -> ${recipientContractName} 🤯"`,
     });
   };
 
@@ -150,7 +229,11 @@ function Dashboard(): JSX.Element {
   };
 
   const handleSeedRound = async () => {
-    if (BigNumber.from(totalNonVestingAmt).gt("0")) {
+    if (
+      BigNumber.from(totalNonVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPretimelockSeed) &&
+      !incomingDepositFinalizedTimelockSeed
+    ) {
       // transfer tokens to pre time lock
       const sendTokenToPreTimeLockForSeedTx = await sendTokenToPreTimeLockForSeed();
       await notifyTransfer(sendTokenToPreTimeLockForSeedTx.wait(1), "Seed TokenPreTimeLock");
@@ -160,7 +243,11 @@ function Dashboard(): JSX.Element {
       await notifyBulkDepositTokens(bulkDepositForSeedTx.wait(1), "Seed");
     }
 
-    if (BigNumber.from(totalVestingAmt).gt("0")) {
+    if (
+      BigNumber.from(totalVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPreVestingSeed) &&
+      !incomingDepositFinalizedVestingSeed
+    ) {
       // transfer tokens to pre vesting
       const sendTokenToPreVestingForSeedTX = await sendTokenToPreVestingForSeed();
       await notifyTransfer(sendTokenToPreVestingForSeedTX.wait(1), "Seed TokenPreVesting");
@@ -172,7 +259,11 @@ function Dashboard(): JSX.Element {
   };
 
   const handlePrivateRound = async () => {
-    if (BigNumber.from(totalNonVestingAmt).gt("0")) {
+    if (
+      BigNumber.from(totalNonVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPretimelockPrivate) &&
+      !incomingDepositFinalizedTimelockPrivate
+    ) {
       // transfer tokens to pre time lock
       const sendTokenToPreTimeLockForPrivateSaleTx = await sendTokenToPreTimeLockForPrivateSale();
       await notifyTransfer(sendTokenToPreTimeLockForPrivateSaleTx.wait(1), "PrivateSale TokenPreTimeLock");
@@ -182,7 +273,11 @@ function Dashboard(): JSX.Element {
       await notifyBulkDepositTokens(bulkDepositForPrivateSaleTx.wait(1), "PrivateSale");
     }
 
-    if (BigNumber.from(totalVestingAmt).gt("0")) {
+    if (
+      BigNumber.from(totalVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPreVestingPrivate) &&
+      !incomingDepositFinalizedVestingPrivate
+    ) {
       // transfer tokens to pre vesting
       const sendTokenToPreVestingForPrivateSaleTX = await sendTokenToPreVestingForPrivateSale();
       await notifyTransfer(sendTokenToPreVestingForPrivateSaleTX.wait(1), "PrivateSale TokenPreVesting");
@@ -197,8 +292,44 @@ function Dashboard(): JSX.Element {
     setRound(e.target.value);
   };
 
+  useEffect(() => {
+    setDisableTGEButton(
+      !active ||
+        !enoughTokenBalance ||
+        !isValidCliff ||
+        !isValidDuration ||
+        !isValidTGE ||
+        getAddress(account as string) != getAddress(ownerAddressPretimelockSeed) ||
+        getAddress(account as string) != getAddress(ownerAddressPreVestingSeed) ||
+        getAddress(account as string) != getAddress(ownerAddressPretimelockPrivate) ||
+        getAddress(account as string) != getAddress(ownerAddressPreVestingPrivate) ||
+        incomingDepositFinalizedTimelockSeed ||
+        incomingDepositFinalizedVestingSeed ||
+        incomingDepositFinalizedTimelockPrivate ||
+        incomingDepositFinalizedVestingPrivate,
+    );
+  }, [
+    round,
+    active,
+    enoughTokenBalance,
+    isValidCliff,
+    isValidDuration,
+    isValidTGE,
+    account,
+    ownerAddressPretimelockSeed,
+    ownerAddressPreVestingSeed,
+    ownerAddressPretimelockPrivate,
+    ownerAddressPreVestingPrivate,
+    incomingDepositFinalizedTimelockSeed,
+    incomingDepositFinalizedVestingSeed,
+    incomingDepositFinalizedTimelockPrivate,
+    incomingDepositFinalizedVestingPrivate,
+  ]);
+
   const parseCSV = (data: any) => {
-    const amountsArr = Object.values(data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow("18"))));
+    const amountsArr = Object.values(
+      data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow(tokenDecimals as BigNumberish))),
+    );
     let totalAmount = BigNumber.from("0");
     for (let i = 0; i < amountsArr.length; i++) {
       totalAmount = totalAmount.add(BigNumber.from(amountsArr[i]));
@@ -291,7 +422,7 @@ function Dashboard(): JSX.Element {
                       <h3 className="font-weight-bold ml-md-0 mx-auto text-center text-sm-left"> PreSale Dashboard</h3>
                       <p className="font-weight-bold ml-md-0 mx-auto text-center text-sm-left">
                         {" "}
-                        Send Sera PreSale Setting.
+                        {`Send ${tokenSymbol} PreSale Setting.`}
                       </p>
                     </div>
                   </div>
@@ -307,8 +438,8 @@ function Dashboard(): JSX.Element {
                       >
                         <div className="card shadow-lg card-1">
                           {/* <div className="row justify-content-end mb-5"> */}
-                            {/* <div className="col-lg-12 col-auto "> */}
-                              {/* <button
+                          {/* <div className="col-lg-12 col-auto "> */}
+                          {/* <button
                                 type="button"
                                 className="btn btn-primary btn-block"
                                 disabled={!active}
@@ -316,7 +447,7 @@ function Dashboard(): JSX.Element {
                               >
                                 <small className="font-weight-bold">Start</small>
                               </button> */}
-                              {/* <button
+                          {/* <button
                                 type="button"
                                 className="btn btn-danger btn-block"
                                 onClick={handleEndSale}
@@ -324,13 +455,13 @@ function Dashboard(): JSX.Element {
                               >
                                 <small className="font-weight-bold">Stop</small>
                               </button> */}
-                              {/* <button type="button" className="btn btn-success btn-block">
+                          {/* <button type="button" className="btn btn-success btn-block">
                                 <small className="font-weight-bold">Transfer Ownership</small>
                               </button>
                               <button type="button" className="btn btn-primary btn-block" onClick={dispCsvData}>
                                 <small className="font-weight-bold">Display CSV data</small>
                               </button> */}
-                            {/* </div> */}
+                          {/* </div> */}
                           {/* </div> */}
                           <div className="card-body inner-card border">
                             <div className="row justify-content-between text-left">
@@ -449,11 +580,12 @@ function Dashboard(): JSX.Element {
                                       className="btn btn-primary btn-block"
                                       onClick={e => handleSendTGETokensNow(e)}
                                       disabled={
-                                        !active ||
-                                        !enoughTokenBalance ||
-                                        !isValidCliff ||
-                                        !isValidDuration ||
-                                        !isValidTGE
+                                        // !active ||
+                                        // !enoughTokenBalance ||
+                                        // !isValidCliff ||
+                                        // !isValidDuration ||
+                                        // !isValidTGE
+                                        disableTGEButton
                                       }
                                     >
                                       <small className="font-weight-bold">Send tge tokens now</small>
@@ -463,576 +595,44 @@ function Dashboard(): JSX.Element {
                               </div>
                             </div>
                           </div>
-                          <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">SeedRoundTokenPreTimeLock</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
-                            </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">timeperiod : 1 month</li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="timestamp in seconds"
-                                  aria-label="timestamp in seconds"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    set Time Stamp
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="new owner"
-                                  aria-label="new owner"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    transfer Ownership
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    transfer Accidentally Locked Tokens
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
-                          </div>
 
-                          <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">SeedRoundTokenPreVesting</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
-                            </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">start : March 1 , 1970</li>
-                            <li className="list-group-item">vestingschedulestotalamount : 1234 SERA</li>
-                            <li className="list-group-item">vesting schedule count : 12</li>
-                            <li className="list-group-item">withdrawable amount : 1200 SERA</li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="timestamp in seconds"
-                                  aria-label="timestamp in seconds"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    set Time Stamp
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="new owner"
-                                  aria-label="new owner"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    transfer Ownership
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    Withdraw
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="vesting schedule id"
-                                  aria-label="vesting schedule id"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    REVOKE
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
-                          </div>
+                          <TokenPreTimeLock
+                            title="SeedRoundTokenPreTimeLock"
+                            preTimelockAddress={seedPreTimelockAddress}
+                            isIDO={false}
+                          />
 
-                          <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">PrivateRoundTokenPreTimeLock</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
-                            </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">timeperiod : 1 month</li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="timestamp in seconds"
-                                  aria-label="timestamp in seconds"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    set Time Stamp
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="new owner"
-                                  aria-label="new owner"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    transfer Ownership
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    transfer Accidentally Locked Tokens
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
-                          </div>
+                          <TokenPreVesting
+                            title="SeedRoundTokenPreVesting"
+                            tokenPreVestingAddress={seedTokenPreVesting}
+                            isIDO={false}
+                          />
 
-                          <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">PrivateRoundTokenPreVesting</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
-                            </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">start : March 1 , 1970</li>
-                            <li className="list-group-item">vestingschedulestotalamount : 1234 SERA</li>
-                            <li className="list-group-item">vesting schedule count : 12</li>
-                            <li className="list-group-item">withdrawable amount : 1200 SERA</li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="timestamp in seconds"
-                                  aria-label="timestamp in seconds"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    set Time Stamp
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="new owner"
-                                  aria-label="new owner"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    transfer Ownership
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    Withdraw
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="vesting schedule id"
-                                  aria-label="vesting schedule id"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    REVOKE
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
-                          </div>
+                          <TokenPreTimeLock
+                            title="PrivateRoundTokenPreTimeLock"
+                            preTimelockAddress={privatePreTimelockAddress}
+                            isIDO={false}
+                          />
 
+                          <TokenPreVesting
+                            title="PrivateRoundTokenPreVesting"
+                            tokenPreVestingAddress={privateTokenPreVesting}
+                            isIDO={false}
+                          />
 
-                          <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreSale</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                              SaleStatus : <span style={{ color: "green" }}>LIVE</span>
-                            </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">Vesting : 0x</li>
-                            <li className="list-group-item">TimeLock : 0x</li>
-                            <li className="list-group-item">USDT : 0x</li>
-                            <li className="list-group-item">BUSD : 0x</li>
-                            <li className="list-group-item">coinsSold : 1234</li>
-                            <li className="list-group-item">exchangePriceUSDT : 120000000000000000</li>
-                            <li className="list-group-item">exchangePriceBUSD : 120000000000000000</li>
-                            <li className="list-group-item">duration : 3 months</li>
-                            <li className="list-group-item">cliff : 3 months</li>
-                            <li className="list-group-item">minBuyAmountUSDT : 1 USDT</li>
-                            <li className="list-group-item">maxBuyAmountUSDT : 1000 USDT</li>
-                            <li className="list-group-item">minBuyAmountBUSD : 1 BUSD</li>
-                            <li className="list-group-item">maxBuyAmountBUSD : 1000 BUSD</li>
-                            <li className="list-group-item">availableAtTGE : 2%</li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="usdt exchange price"
-                                  aria-label="usdt exchange price"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    SET EXCHANGE PRICE USDT
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="busd exchange price"
-                                  aria-label="busd exchange price"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    set Exchange Price BUSD
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="duration in seconds"
-                                  aria-label="duration in seconds"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    SET DURATION
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="cliff in seconds"
-                                  aria-label="cliff in seconds"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    SET CLIFF
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="time period in seconds"
-                                  aria-label="time period in seconds"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    SET time stamp
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="start or pause"
-                                  aria-label="start or pause"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    SET SALE STATUS
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="pct available at TGE"
-                                  aria-label="pct available at TGE"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    SET AVAILABLE AT TGE
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    transfer Accidentally Locked Tokens In TimeLock
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="min busd"
-                                  aria-label="min busd"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="max busd"
-                                  aria-label="max busd"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    set Buy Amount Range BUSD
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="min usdt"
-                                  aria-label="min usdt"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="max usdt"
-                                  aria-label="max usdt"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    set Buy Amount Range USDT
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block me-5" type="button">
-                                    withdraw busd
-                                  </button>
-                                  <button className="btn btn-primary btn-block me-5" type="button">
-                                    withdraw usdt
-                                  </button>
-                                  <button className="btn btn-primary btn-block me-5" type="button">
-                                    end sale
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="token amount"
-                                  aria-label="token amount"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    withdraw From Vesting
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                            <li className="list-group-item">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="vesting schedule id"
-                                  aria-label="vesting schedule id"
-                                  aria-describedby="basic-addon2"
-                                />
-                                <div className="input-group-append">
-                                  <button className="btn btn-primary btn-block" type="button">
-                                    REVOKE
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
-                          </div>
+                          <TokenPreSale title="IDOTokenPreSale" tokenPreSaleAddress={idoTokenPreSaleAddress} />
 
-                          <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreTimeLock</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
-                            </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">timeperiod : 1 month</li>
-                          </ul>
-                          </div>
+                          <TokenPreTimeLock
+                            title="IDOTokenPreTimeLock"
+                            preTimelockAddress={tokenAddressIDOPretimelock}
+                            isIDO={true}
+                          />
 
-                          <div className="mt-5 border">
-                          <div className="mt-4 font-weight-bold mx-auto text-center">IDOTokenPreVesting</div>
-                          <ul className="list-group list-group-flush">
-                            <li className="list-group-item">
-                              Incoming Deposits Allowed : <span style={{ color: "green" }}>LIVE</span>
-                            </li>
-                            <li className="list-group-item">Contract Address : 0x</li>
-                            <li className="list-group-item">owner : 0x</li>
-                            <li className="list-group-item">token : 0x</li>
-                            <li className="list-group-item">timestampset : false</li>
-                            <li className="list-group-item">initialtimestamp : March 1 , 1970</li>
-                            <li className="list-group-item">start : March 1 , 1970</li>
-                            <li className="list-group-item">vestingschedulestotalamount : 1234 SERA</li>
-                            <li className="list-group-item">vesting schedule count : 12</li>
-                            <li className="list-group-item">withdrawable amount : 1200 SERA</li>
-                          </ul>
-                          </div>
+                          <TokenPreVesting
+                            title="IDOTokenPreVesting"
+                            tokenPreVestingAddress={tokenAddressIDOPreVesting}
+                            isIDO={true}
+                          />
                         </div>
                       </form>
                     </div>

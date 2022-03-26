@@ -1,5 +1,6 @@
 import React from "react";
 import { useWeb3React } from "@web3-react/core";
+import { toast } from "react-toastify";
 import {
   useAlreadyWithdrawn,
   useBalances,
@@ -11,10 +12,16 @@ import {
 import { formatEther } from "@ethersproject/units";
 import { BigNumber } from "ethers";
 import moment from "moment";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
+import { addresses, desiredChain } from "../constants";
 
 const ClaimTGE = props => {
   // WEB3 Connection
-  const { account } = useWeb3React();
+  const { account, chainId } = useWeb3React();
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
   const { data: timestampsetForTimelockSeedRound } = useTimestampSet(props.timelockContractAddress);
   const { data: balances } = useBalances(props.timelockContractAddress, account as string);
   const { data: alreadyWithdrawn } = useAlreadyWithdrawn(props.timelockContractAddress, account as string);
@@ -41,7 +48,16 @@ const ClaimTGE = props => {
 
   const handleClaimTGE = async e => {
     e.preventDefault();
-    await transferTGE();
+    const transferTGEtx = await transferTGE();
+    await notifyTransfer(transferTGEtx.wait(1));
+  };
+
+  const notifyTransfer = async promiseObj => {
+    await toast.promise(promiseObj, {
+      pending: `Claiming ${balancesTobeWithdrawn} ${tokenSymbol}`,
+      success: `Claimed ${balancesTobeWithdrawn} ${tokenSymbol}👌`,
+      error: `Failed to claim ${balancesTobeWithdrawn} ${tokenSymbol} 🤯"`,
+    });
   };
   return (
     <div>
@@ -50,8 +66,8 @@ const ClaimTGE = props => {
           <div className="d-flex justify-content-between">
             <div className="d-flex flex-row align-items-center">
               <div className="ms-2 c-details">
-                <h6 className="mb-0">Sera to be withdrawn: </h6>
-                <h6 className="mb-0">Sera already withdrawn : </h6>
+                <h6 className="mb-0">{tokenSymbol} to be withdrawn: </h6>
+                <h6 className="mb-0">{tokenSymbol} already withdrawn : </h6>
               </div>
             </div>
             <div className="badge">
