@@ -112,12 +112,7 @@ export function useTransferOwnershipTimelock(contractAddress: string, newOwnerAd
 }
 
 //transfer accidentally locked tokens
-export function useTransferAccidentallyLockedTokens(
-  contractAddress: string,
-  token: string,
-  amount: number,
-  chainId: number,
-): any {
+export function useTransferAccidentallyLockedTokens(contractAddress: string, token: string, amount: number): any {
   const contract = <TokenPreTimelock>useContract(contractAddress, TokenPreTimelock__factory.abi, true);
   return async () => {
     return (contract as Contract).transferAccidentallyLockedTokens(token, amount);

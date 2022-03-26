@@ -246,7 +246,6 @@ export function useVestingScheduleTotalAmt(
     getVestingSchedulesTotalAmt(contract),
     { suspense },
   );
-  console.log("useVestingScheduleTotalAmt...", result.data, contractAddress);
   return result;
 }
 

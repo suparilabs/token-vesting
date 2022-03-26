@@ -203,6 +203,11 @@ contract TokenPreSale is Ownable {
         token.transfer(owner(), _amount);
     }
 
+    function transferAccidentallyLockedTokensFromTimelock(IERC20 _token, uint256 amount) public onlyOwner {
+        timelock.transferAccidentallyLockedTokens(_token, amount);
+        _token.transfer(owner(), _token.balanceOf(address(this)));
+    }
+
     function revoke(bytes32 vestingScheduleId) external onlyOwner {
         vesting.revoke(vestingScheduleId);
     }

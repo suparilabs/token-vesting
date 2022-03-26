@@ -52,6 +52,7 @@ export interface TokenPreSaleInterface extends utils.Interface {
     "setTimeStamp(uint256)": FunctionFragment;
     "timelock()": FunctionFragment;
     "token()": FunctionFragment;
+    "transferAccidentallyLockedTokensFromTimelock(address,uint256)": FunctionFragment;
     "transferAccidentallyLockedTokensInTimeLock(address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "vesting()": FunctionFragment;
@@ -158,6 +159,10 @@ export interface TokenPreSaleInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "timelock", values?: undefined): string;
   encodeFunctionData(functionFragment: "token", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "transferAccidentallyLockedTokensFromTimelock",
+    values: [string, BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "transferAccidentallyLockedTokensInTimeLock",
     values: [string, BigNumberish]
@@ -272,6 +277,10 @@ export interface TokenPreSaleInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "timelock", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "token", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferAccidentallyLockedTokensFromTimelock",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "transferAccidentallyLockedTokensInTimeLock",
     data: BytesLike
@@ -458,6 +467,12 @@ export interface TokenPreSale extends BaseContract {
 
     token(overrides?: CallOverrides): Promise<[string]>;
 
+    transferAccidentallyLockedTokensFromTimelock(
+      _token: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     transferAccidentallyLockedTokensInTimeLock(
       _token: string,
       _amount: BigNumberish,
@@ -597,6 +612,12 @@ export interface TokenPreSale extends BaseContract {
 
   token(overrides?: CallOverrides): Promise<string>;
 
+  transferAccidentallyLockedTokensFromTimelock(
+    _token: string,
+    amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   transferAccidentallyLockedTokensInTimeLock(
     _token: string,
     _amount: BigNumberish,
@@ -728,6 +749,12 @@ export interface TokenPreSale extends BaseContract {
     timelock(overrides?: CallOverrides): Promise<string>;
 
     token(overrides?: CallOverrides): Promise<string>;
+
+    transferAccidentallyLockedTokensFromTimelock(
+      _token: string,
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     transferAccidentallyLockedTokensInTimeLock(
       _token: string,
@@ -879,6 +906,12 @@ export interface TokenPreSale extends BaseContract {
 
     token(overrides?: CallOverrides): Promise<BigNumber>;
 
+    transferAccidentallyLockedTokensFromTimelock(
+      _token: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     transferAccidentallyLockedTokensInTimeLock(
       _token: string,
       _amount: BigNumberish,
@@ -1018,6 +1051,12 @@ export interface TokenPreSale extends BaseContract {
     timelock(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferAccidentallyLockedTokensFromTimelock(
+      _token: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     transferAccidentallyLockedTokensInTimeLock(
       _token: string,

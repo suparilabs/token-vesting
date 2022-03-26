@@ -281,6 +281,24 @@ export function useDuration(chainId: number, suspense = false): SWRResponse<any,
 function getDuration(contract: TokenPreSale): (address: string) => Promise<any> {
   return async (): Promise<any> => contract.duration().then((result: any) => BigNumber.from(result).toNumber());
 }
+
+//get sale status
+export function useGetSaleStatus(chainId: number, suspense = false): SWRResponse<any, any> {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi)
+  );
+  const result: any = useSWR(
+    contract ? [chainId, "tokensalestatus", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address] : null,
+    getSaleStatus(contract),
+    { suspense },
+  );
+  return result;
+}
+
+function getSaleStatus(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.saleStatus().then((result: number) => result.toString());
+}
+
 //get cliff
 export function useCliff(chainId: number, suspense = false): SWRResponse<any, any> {
   const contract = <TokenPreSale>(
@@ -444,5 +462,24 @@ export function useRevokePreSale(vestingScheduleId: number, chainId: number): an
   );
   return async () => {
     return (contract as Contract).revoke(vestingScheduleId).then((result: any) => result);
+  };
+}
+
+//transfer accidentally locked tokens
+export function useTransferAccidentallyLockedTokensFromTimelock(
+  contractAddress: string,
+  token: string,
+  amount: number,
+): any {
+  const contract = <TokenPreSale>useContract(contractAddress, TokenPreSale__factory.abi, true);
+  return async () => {
+    return contract.transferAccidentallyLockedTokensInTimeLock(token, amount);
+  };
+}
+
+export function useSetTimestampTokenPresale(contractAddress: string, chainId: number, timePeriod: number): any {
+  const contract = <TokenPreSale>useContract(contractAddress, TokenPreSale__factory.abi, true);
+  return async () => {
+    return (contract as Contract).setTimestamp(timePeriod);
   };
 }
