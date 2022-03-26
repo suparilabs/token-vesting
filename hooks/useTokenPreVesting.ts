@@ -292,7 +292,7 @@ function getWithdrawAmt(contract: TokenPreVesting): (address: string) => Promise
 
 //WRITE CALLS
 //setting timeperiod value in setTimestamp function
-export function useSetTimestampPreVesting(contractAddress: string, chainId: number, timePeriod: number): any {
+export function useSetTimestampPreVesting(contractAddress: string, timePeriod: number): any {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
   return async () => {
     return (contract as Contract).setTimestamp(timePeriod);
@@ -300,7 +300,7 @@ export function useSetTimestampPreVesting(contractAddress: string, chainId: numb
 }
 
 //transfer ownership
-export function useTransferOwnershipVesting(contractAddress: string, newOwnerAddress: string, chainId: number): any {
+export function useTransferOwnershipVesting(contractAddress: string, newOwnerAddress: string): any {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
   return async () => {
     return (contract as Contract).transferOwnership(newOwnerAddress);
@@ -308,7 +308,7 @@ export function useTransferOwnershipVesting(contractAddress: string, newOwnerAdd
 }
 
 //withdraw
-export function useVestingWithdraw(contractAddress: string, amount: number, chainId: number): any {
+export function useVestingWithdraw(contractAddress: string, amount: number): any {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
   return async () => {
     return (contract as Contract).withdraw(amount);
@@ -316,7 +316,7 @@ export function useVestingWithdraw(contractAddress: string, amount: number, chai
 }
 
 //revoke
-export function useRevoke(contractAddress: string, vestingScheduleId: string, chainId: number): any {
+export function useRevoke(contractAddress: string, vestingScheduleId: string): any {
   const contract = <TokenPreVesting>useContract(contractAddress, TokenPreVesting__factory.abi, true);
   return async () => {
     return (contract as Contract).revoke(vestingScheduleId);
@@ -339,5 +339,19 @@ export function useIncomingDepositsFinalised(
     getIncomingDepositStatus(contract),
     { suspense },
   );
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
+  return result;
+}
+
+function getStart(contract: TokenPreVesting): () => Promise<string> {
+  return async (): Promise<string> => contract.start().then((result: BigNumber) => result.toString());
+}
+
+export function useStart(vesting: string, suspense = false): SWRResponse<string, any> {
+  const contract = <TokenPreVesting>useContract(vesting, TokenPreVesting__factory.abi, true);
+  const result: any = useSWR(contract ? [vesting, "start", Boolean] : null, getStart(contract), {
+    suspense,
+  });
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }

@@ -1,103 +1,46 @@
 /* eslint-disable @next/next/no-img-element */
-// import Image, { ImageLoader } from "next/image";
-import React /*useState*/ from "react";
-import { /*useTimeLockContractAddress,*/ useVestingContractAddress } from "../hooks/useTokenPreSale";
+import React from "react";
+import { useTimeLockContractAddress, useVestingContractAddress } from "../hooks/useTokenPreSale";
 import { useWeb3React } from "@web3-react/core";
-import {
-  // useComputeReleasableAmount,
-  // useComputeVestingScheduleIdForAddressAndIndex,
-  // useRelease,
-  useVestingScheduleCountBeneficiary,
-} from "../hooks/useTokenPreVesting";
+import { useVestingScheduleCountBeneficiary } from "../hooks/useTokenPreVesting";
 import { addresses, desiredChain } from "../constants";
 import Claim from "../components/Claim";
+import ClaimTGE from "../components/ClaimTGE";
 
 function Vesting(): JSX.Element {
-  // const [claimButtonDisableIDO, setClaimButtonDisableIDO] = useState<boolean>(false);
-  // const [claimButtonDisableSeedRound, setClaimButtonDisableSeedRound] = useState<boolean>(false);
-  // const [claimButtonDisablePrivateRound, setClaimButtonDisablePrivateRound] = useState<boolean>(false);
   const { account, chainId } = useWeb3React();
   // IDO
   const { data: vestingContractAddressForIDO } = useVestingContractAddress(
     chainId == undefined ? desiredChain.chainId : chainId,
   );
-  // const { data: timelockContractAddressForIDO } = useTimeLockContractAddress(
-  //   chainId == undefined ? desiredChain.chainId : chainId,
-  // );
+  const { data: timelockContractAddressForIDO } = useTimeLockContractAddress(
+    chainId == undefined ? desiredChain.chainId : chainId,
+  );
   const { data: vestingScheduleCountForIDO } = useVestingScheduleCountBeneficiary(
     vestingContractAddressForIDO,
     account as string,
   );
-  // const { data: releasableAmountForIDO } = useComputeReleasableAmount(
-  //   vestingContractAddressForIDO,
-  //   vestingScheduleIdForIDO,
-  // );
-  // const claimIDO = useRelease(vestingContractAddressForIDO, vestingScheduleIdForIDO, releasableAmountForIDO);
-
-  // const handleClaimIDO = async e => {
-  // e.preventDefault();
-  // setClaimButtonDisableIDO(true);
-  // const tx = await claimIDO();
-  // await tx.wait();
-  // setClaimButtonDisableIDO(false);
-  // };
 
   // Seed
   const vestingContractAddressForSeedRound =
     addresses[chainId == undefined ? desiredChain.chainId : chainId].SEED_PRE_VESTING;
-  // const timelockAddressForSeedRound =
-  //   addresses[chainId == undefined ? desiredChain.chainId : chainId].SEED_PRE_TIME_LOCK;
+  const timelockAddressForSeedRound =
+    addresses[chainId == undefined ? desiredChain.chainId : chainId].SEED_PRE_TIME_LOCK;
   const { data: vestingScheduleCountForSeedRound } = useVestingScheduleCountBeneficiary(
     vestingContractAddressForSeedRound,
     account as string,
   );
 
-  // const { data: releasableAmountForSeedRound } = useComputeReleasableAmount(
-  //   vestingContractAddressForSeedRound,
-  //   vestingScheduleIdForSeedRound,
-  // );
-  // const claimSeedRound = useRelease(
-  //   vestingContractAddressForSeedRound,
-  //   vestingScheduleIdForSeedRound,
-  //   releasableAmountForSeedRound,
-  // );
-
-  // const handleClaimSeedRound = async e => {
-    // e.preventDefault();
-    // setClaimButtonDisableSeedRound(true);
-    // const tx = await claimSeedRound();
-    // await tx.wait();
-    // setClaimButtonDisableSeedRound(false);
-  // };
-
   // Private
   const vestingContractAddressForPrivateRound =
     addresses[chainId == undefined ? desiredChain.chainId : chainId].PRIVATE_SALE_PRE_VESTING;
-  // const timelockAddressForPrivateRound =
-  //   addresses[chainId == undefined ? desiredChain.chainId : chainId].PRIVATE_SALE_PRE_TIME_LOCK;
+  const timelockAddressForPrivateRound =
+    addresses[chainId == undefined ? desiredChain.chainId : chainId].PRIVATE_SALE_PRE_TIME_LOCK;
 
   const { data: vestingScheduleCountForPrivateRound } = useVestingScheduleCountBeneficiary(
     vestingContractAddressForPrivateRound,
     account as string,
   );
-
-  // const { data: releasableAmountForPrivateRound } = useComputeReleasableAmount(
-  //   vestingContractAddressForPrivateRound,
-  //   vestingScheduleIdForPrivateRound,
-  // );
-  // const claimPrivateRound = useRelease(
-  //   vestingContractAddressForPrivateRound,
-  //   vestingScheduleIdForPrivateRound,
-  //   releasableAmountForPrivateRound,
-  // );
-
-  // const handleClaimPrivateRound = async e => {
-    // e.preventDefault();
-    // setClaimButtonDisablePrivateRound(true);
-    // const tx = await claimPrivateRound();
-    // await tx.wait();
-    // setClaimButtonDisablePrivateRound(false);
-  // };
 
   return (
     <div className="light">
@@ -145,6 +88,10 @@ function Vesting(): JSX.Element {
                         <h2 className="title">Seed Round Tokens</h2>
                       </div>
                       <div>
+                      <ClaimTGE
+                          timelockContractAddress={timelockAddressForSeedRound}
+                          token={addresses[chainId == undefined ? desiredChain.chainId : chainId].ERC20_TOKEN_ADDRESS}
+                        />
                         {vestingScheduleCountForSeedRound &&
                           vestingScheduleCountForSeedRound > 0 &&
                           Array.from({ length: vestingScheduleCountForSeedRound }, (_, index) => index).map(
@@ -152,7 +99,6 @@ function Vesting(): JSX.Element {
                               <Claim
                                 vestingContractAddress={vestingContractAddressForSeedRound}
                                 key={_vestingScheduleIndex}
-                                // claim={e => handleClaimSeedRound(e)}
                                 vestingScheduleIndex={_vestingScheduleIndex}
                               />
                             ),
@@ -167,18 +113,19 @@ function Vesting(): JSX.Element {
                         <h2 className="title">IDO ROUND</h2>
                       </div>
                       <div>
+                      <ClaimTGE
+                          timelockContractAddress={timelockContractAddressForIDO}
+                          token={addresses[chainId == undefined ? desiredChain.chainId : chainId].ERC20_TOKEN_ADDRESS}
+                        />
                         {vestingScheduleCountForIDO &&
                           vestingScheduleCountForIDO > 0 &&
-                          Array.from({ length: vestingScheduleCountForIDO }, (_, index) => index).map(
-                            _vestingScheduleIndex => (
-                              <Claim
-                                vestingContractAddress={vestingContractAddressForIDO}
-                                key={_vestingScheduleIndex}
-                                // claim={e => handleClaimPrivateRound(e)}
-                                vestingScheduleIndex={_vestingScheduleIndex}
-                              />
-                            ),
-                          )}
+                          (Array.from({ length: vestingScheduleCountForIDO }, (_, index) => index).map(_vestingScheduleIndex => (
+                            <Claim
+                              vestingContractAddress={vestingContractAddressForIDO}
+                              key={_vestingScheduleIndex}
+                              vestingScheduleIndex={_vestingScheduleIndex}
+                            />
+                          )))}
                       </div>
                     </div>
                   </div>
@@ -188,6 +135,10 @@ function Vesting(): JSX.Element {
                         <h2 className="title">Private Round tokens</h2>
                       </div>
                       <div>
+                      <ClaimTGE
+                          timelockContractAddress={timelockAddressForPrivateRound}
+                          token={addresses[chainId == undefined ? desiredChain.chainId : chainId].ERC20_TOKEN_ADDRESS}
+                        />
                         {vestingScheduleCountForPrivateRound &&
                           vestingScheduleCountForPrivateRound > 0 &&
                           Array.from({ length: vestingScheduleCountForPrivateRound }, (_, index) => index).map(
@@ -195,7 +146,6 @@ function Vesting(): JSX.Element {
                               <Claim
                                 vestingContractAddress={vestingContractAddressForPrivateRound}
                                 key={_vestingScheduleIndex}
-                                // claim={e => handleClaimPrivateRound(e)}
                                 vestingScheduleIndex={_vestingScheduleIndex}
                               />
                             ),
