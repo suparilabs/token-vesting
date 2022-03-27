@@ -6,9 +6,16 @@ import { useVestingScheduleCountBeneficiary } from "../hooks/useTokenPreVesting"
 import { addresses, desiredChain } from "../constants";
 import Claim from "../components/Claim";
 import ClaimTGE from "../components/ClaimTGE";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
 
 function Vesting(): JSX.Element {
   const { account, chainId } = useWeb3React();
+
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+
   // IDO
   const { data: vestingContractAddressForIDO } = useVestingContractAddress(
     chainId == undefined ? desiredChain.chainId : chainId,
@@ -61,7 +68,7 @@ function Vesting(): JSX.Element {
                 <p>
                   {" "}
                   <h2 className="titlenew2">
-                    SERA :{" "}
+                    {tokenSymbol} :{" "}
                     {addresses[chainId !== undefined ? (chainId as number) : desiredChain.chainId].ERC20_TOKEN_ADDRESS}
                   </h2>
                 </p>
@@ -88,7 +95,7 @@ function Vesting(): JSX.Element {
                         <h2 className="title">Seed Round Tokens</h2>
                       </div>
                       <div>
-                      <ClaimTGE
+                        <ClaimTGE
                           timelockContractAddress={timelockAddressForSeedRound}
                           token={addresses[chainId == undefined ? desiredChain.chainId : chainId].ERC20_TOKEN_ADDRESS}
                         />
@@ -106,26 +113,28 @@ function Vesting(): JSX.Element {
                       </div>
                     </div>
                   </div>
-                  {/* SECTION FOR DISPLAYING SERA TOKEN VESTING INFORMATION */}
+                  {/* SECTION FOR DISPLAYING TOKEN VESTING INFORMATION */}
                   <div className="col-md-4">
                     <div className="card p-3 mb-2">
                       <div className="heading newhead">
                         <h2 className="title">IDO ROUND</h2>
                       </div>
                       <div>
-                      <ClaimTGE
+                        <ClaimTGE
                           timelockContractAddress={timelockContractAddressForIDO}
                           token={addresses[chainId == undefined ? desiredChain.chainId : chainId].ERC20_TOKEN_ADDRESS}
                         />
                         {vestingScheduleCountForIDO &&
                           vestingScheduleCountForIDO > 0 &&
-                          (Array.from({ length: vestingScheduleCountForIDO }, (_, index) => index).map(_vestingScheduleIndex => (
-                            <Claim
-                              vestingContractAddress={vestingContractAddressForIDO}
-                              key={_vestingScheduleIndex}
-                              vestingScheduleIndex={_vestingScheduleIndex}
-                            />
-                          )))}
+                          Array.from({ length: vestingScheduleCountForIDO }, (_, index) => index).map(
+                            _vestingScheduleIndex => (
+                              <Claim
+                                vestingContractAddress={vestingContractAddressForIDO}
+                                key={_vestingScheduleIndex}
+                                vestingScheduleIndex={_vestingScheduleIndex}
+                              />
+                            ),
+                          )}
                       </div>
                     </div>
                   </div>
@@ -135,7 +144,7 @@ function Vesting(): JSX.Element {
                         <h2 className="title">Private Round tokens</h2>
                       </div>
                       <div>
-                      <ClaimTGE
+                        <ClaimTGE
                           timelockContractAddress={timelockAddressForPrivateRound}
                           token={addresses[chainId == undefined ? desiredChain.chainId : chainId].ERC20_TOKEN_ADDRESS}
                         />

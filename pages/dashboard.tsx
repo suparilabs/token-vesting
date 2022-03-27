@@ -1,19 +1,43 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Papa from "papaparse";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import BN from "bignumber.js";
-import { useStartSale, useEndSale } from "../hooks/useTokenPreSale";
+import { toast } from "react-toastify";
 import { useTokenTransfer } from "../hooks/useTokenTransfer";
 import { addresses, desiredChain } from "../constants";
-import { toast } from "react-toastify";
-import { useCreateBulkVestingSchedule } from "../hooks/useTokenPreVesting";
-import { useBulkDepositTokens } from "../hooks/useTokenPreTimelock";
+import {
+  useCreateBulkVestingSchedule,
+  useIncomingDepositsFinalisedPreVesting,
+  usePreVestingFetchOwner,
+} from "../hooks/useTokenPreVesting";
+import {
+  useBulkDepositTokens,
+  useIncomingDepositsFinalisedTimelock,
+  usePreTimelockFetchOwner,
+} from "../hooks/useTokenPreTimelock";
+import { useTokenBalance } from "../hooks/useTokenBalance";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
+import { useTokenDecimals } from "../hooks/useTokenDecimals";
+import TokenPreTimeLock from "../components/TokenPreTimeLock";
+import TokenPreVesting from "../components/TokenPreVesting";
+import TokenPreSale from "../components/TokenPreSale";
+import { useTimeLockContractAddress, useVestingContractAddress } from "../hooks/useTokenPreSale";
+import { getAddress } from "@ethersproject/address";
 
 function Dashboard(): JSX.Element {
-  const { chainId, active } = useWeb3React();
-  const [uploading, setUploading] = useState(false);
+  const { chainId, active, account } = useWeb3React();
   const inputRef = useRef<any>();
+  const { data: tokenBalance } = useTokenBalance(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+    account,
+    addresses[chainId == undefined ? desiredChain.chainId : (chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+  const [isValidTGE, setIsValidTGE] = React.useState<boolean>(true);
+  const [isValidDuration, setIsValidDuration] = React.useState<boolean>(true);
+  const [isValidCliff, setIsValidCliff] = React.useState<boolean>(true);
+  const [enoughTokenBalance, setEnoughTokenBalance] = React.useState<boolean>(false);
+  const [disableTGEButton, setDisableTGEButton] = React.useState<boolean>(false);
   const [availableTge, setAvailableTge] = React.useState<string>("0");
   const [tges, setTges] = React.useState<any>([]);
   const [duration, setDuration] = React.useState<string>("0");
@@ -22,17 +46,31 @@ function Dashboard(): JSX.Element {
   const [round, setRound] = React.useState<string>();
   //hooks for seed round
   const [beneficiaries, setBeneficiaries] = React.useState<any>([]);
-  const [totalNonVestingAmt, setTotalNonVestingAmt] = React.useState<string>("");
-
-  const [totalVestingAmt, setTotalVestingAmt] = React.useState<any>("");
-  const [nonVestingAmt, setNonVestingAmt] = React.useState<any>();
+  const [totalNonVestingAmt, setTotalNonVestingAmt] = React.useState<string>("0");
+  const [totalVestingAmt, setTotalVestingAmt] = React.useState<any>("0");
+  const [nonVestingAmt, setNonVestingAmt] = React.useState<any>("0");
   const [vestingAmt, setVestingAmt] = React.useState<any>([]);
   const [durations, setDurations] = React.useState<any>([]);
   const [revocables, setRevocables] = React.useState<any>([]);
   const [slice, setSlice] = React.useState<any>([]);
-  //start and end sale
-  const handleStartSale = useStartSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const handleEndSale = useEndSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
+
+  const { data: tokenAddressIDOPreVesting } = useVestingContractAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressIDOPretimelock } = useTimeLockContractAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  // token
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+  const { data: tokenDecimals } = useTokenDecimals(
+    chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
+    addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
+  );
+
   //FOR SEED ROUND
   const sendTokenToPreTimeLockForSeed = useTokenTransfer(
     chainId != undefined
@@ -101,6 +139,56 @@ function Dashboard(): JSX.Element {
     beneficiaries,
     nonVestingAmt,
   );
+  //contract addresses
+  const seedPreTimelockAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].SEED_PRE_TIME_LOCK;
+  const seedTokenPreVesting = addresses[chainId != undefined ? chainId : desiredChain.chainId].SEED_PRE_VESTING;
+  const privatePreTimelockAddress =
+    addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_TIME_LOCK;
+  const privateTokenPreVesting =
+    addresses[chainId != undefined ? chainId : desiredChain.chainId].PRIVATE_SALE_PRE_VESTING;
+  const idoTokenPreSaleAddress = addresses[chainId != undefined ? chainId : desiredChain.chainId].IDO_TOKEN_PRE_SALE;
+
+  const { data: ownerAddressPretimelockSeed } = usePreTimelockFetchOwner(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPreVestingSeed } = usePreVestingFetchOwner(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPretimelockPrivate } = usePreTimelockFetchOwner(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: ownerAddressPreVestingPrivate } = usePreVestingFetchOwner(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  // ============================================
+
+  const { data: incomingDepositFinalizedTimelockSeed } = useIncomingDepositsFinalisedTimelock(
+    seedPreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedVestingSeed } = useIncomingDepositsFinalisedPreVesting(
+    seedTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedTimelockPrivate } = useIncomingDepositsFinalisedTimelock(
+    privatePreTimelockAddress,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedVestingPrivate } = useIncomingDepositsFinalisedPreVesting(
+    privateTokenPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
   //web3
   const handleSendTGETokensNow = async e => {
@@ -118,9 +206,9 @@ function Dashboard(): JSX.Element {
 
   const notifyTransfer = async (promiseObj, recipientContractName) => {
     await toast.promise(promiseObj, {
-      pending: `Sending $SERA -> ${recipientContractName}`,
-      success: `Sent $SERA -> ${recipientContractName}👌`,
-      error: `Failed sending $SERA -> ${recipientContractName} 🤯"`,
+      pending: `Sending ${tokenSymbol} -> ${recipientContractName}`,
+      success: `Sent ${tokenSymbol} -> ${recipientContractName}👌`,
+      error: `Failed sending ${tokenSymbol} -> ${recipientContractName} 🤯"`,
     });
   };
 
@@ -141,53 +229,121 @@ function Dashboard(): JSX.Element {
   };
 
   const handleSeedRound = async () => {
-    // transfer tokens to pre time lock
-    const sendTokenToPreTimeLockForSeedTx = await sendTokenToPreTimeLockForSeed();
-    await notifyTransfer(sendTokenToPreTimeLockForSeedTx.wait(1), "Seed TokenPreTimeLock");
+    if (
+      BigNumber.from(totalNonVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPretimelockSeed) &&
+      !incomingDepositFinalizedTimelockSeed
+    ) {
+      // transfer tokens to pre time lock
+      const sendTokenToPreTimeLockForSeedTx = await sendTokenToPreTimeLockForSeed();
+      await notifyTransfer(sendTokenToPreTimeLockForSeedTx.wait(1), "Seed TokenPreTimeLock");
 
-    // create bulk deposit transaction
-    const bulkDepositForSeedTx = await createBulkDepositForSeed();
-    await notifyBulkDepositTokens(bulkDepositForSeedTx.wait(1), "Seed");
+      // create bulk deposit transaction
+      const bulkDepositForSeedTx = await createBulkDepositForSeed();
+      await notifyBulkDepositTokens(bulkDepositForSeedTx.wait(1), "Seed");
+    }
 
-    // transfer tokens to pre vesting
-    const sendTokenToPreVestingForSeedTX = await sendTokenToPreVestingForSeed();
-    await notifyTransfer(sendTokenToPreVestingForSeedTX.wait(1), "Seed TokenPreVesting");
+    if (
+      BigNumber.from(totalVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPreVestingSeed) &&
+      !incomingDepositFinalizedVestingSeed
+    ) {
+      // transfer tokens to pre vesting
+      const sendTokenToPreVestingForSeedTX = await sendTokenToPreVestingForSeed();
+      await notifyTransfer(sendTokenToPreVestingForSeedTX.wait(1), "Seed TokenPreVesting");
 
-    // create bulk vesting schedule
-    const vestingScheduleForSeedTx = await createBulkVestingScheduleForSeed();
-    await notifyBulkVestingSchedule(vestingScheduleForSeedTx.wait(1), "Seed");
+      // create bulk vesting schedule
+      const vestingScheduleForSeedTx = await createBulkVestingScheduleForSeed();
+      await notifyBulkVestingSchedule(vestingScheduleForSeedTx.wait(1), "Seed");
+    }
   };
 
   const handlePrivateRound = async () => {
-    // transfer tokens to pre time lock
-    const sendTokenToPreTimeLockForPrivateSaleTx = await sendTokenToPreTimeLockForPrivateSale();
-    await notifyTransfer(sendTokenToPreTimeLockForPrivateSaleTx.wait(1), "PrivateSale TokenPreTimeLock");
+    if (
+      BigNumber.from(totalNonVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPretimelockPrivate) &&
+      !incomingDepositFinalizedTimelockPrivate
+    ) {
+      // transfer tokens to pre time lock
+      const sendTokenToPreTimeLockForPrivateSaleTx = await sendTokenToPreTimeLockForPrivateSale();
+      await notifyTransfer(sendTokenToPreTimeLockForPrivateSaleTx.wait(1), "PrivateSale TokenPreTimeLock");
 
-    // create bulk deposit transaction
-    const bulkDepositForPrivateSaleTx = await createBulkDepositForPrivateSale();
-    await notifyBulkDepositTokens(bulkDepositForPrivateSaleTx.wait(1), "PrivateSale");
+      // create bulk deposit transaction
+      const bulkDepositForPrivateSaleTx = await createBulkDepositForPrivateSale();
+      await notifyBulkDepositTokens(bulkDepositForPrivateSaleTx.wait(1), "PrivateSale");
+    }
 
-    // transfer tokens to pre vesting
-    const sendTokenToPreVestingForPrivateSaleTX = await sendTokenToPreVestingForPrivateSale();
-    await notifyTransfer(sendTokenToPreVestingForPrivateSaleTX.wait(1), "PrivateSale TokenPreVesting");
+    if (
+      BigNumber.from(totalVestingAmt).gt("0") &&
+      getAddress(account as string) == getAddress(ownerAddressPreVestingPrivate) &&
+      !incomingDepositFinalizedVestingPrivate
+    ) {
+      // transfer tokens to pre vesting
+      const sendTokenToPreVestingForPrivateSaleTX = await sendTokenToPreVestingForPrivateSale();
+      await notifyTransfer(sendTokenToPreVestingForPrivateSaleTX.wait(1), "PrivateSale TokenPreVesting");
 
-    // create bulk vesting schedule
-    const vestingScheduleForPrivateSaleTx = await createBulkVestingScheduleForPrivateSale();
-    await notifyBulkVestingSchedule(vestingScheduleForPrivateSaleTx.wait(1), "PrivateSale");
+      // create bulk vesting schedule
+      const vestingScheduleForPrivateSaleTx = await createBulkVestingScheduleForPrivateSale();
+      await notifyBulkVestingSchedule(vestingScheduleForPrivateSaleTx.wait(1), "PrivateSale");
+    }
   };
 
   const handleChange = e => {
     setRound(e.target.value);
   };
 
+  useEffect(() => {
+    setDisableTGEButton(
+      !active ||
+        !enoughTokenBalance ||
+        !isValidCliff ||
+        !isValidDuration ||
+        !isValidTGE ||
+        getAddress(account as string) != getAddress(ownerAddressPretimelockSeed) ||
+        getAddress(account as string) != getAddress(ownerAddressPreVestingSeed) ||
+        getAddress(account as string) != getAddress(ownerAddressPretimelockPrivate) ||
+        getAddress(account as string) != getAddress(ownerAddressPreVestingPrivate) ||
+        incomingDepositFinalizedTimelockSeed ||
+        incomingDepositFinalizedVestingSeed ||
+        incomingDepositFinalizedTimelockPrivate ||
+        incomingDepositFinalizedVestingPrivate,
+    );
+  }, [
+    round,
+    active,
+    enoughTokenBalance,
+    isValidCliff,
+    isValidDuration,
+    isValidTGE,
+    account,
+    ownerAddressPretimelockSeed,
+    ownerAddressPreVestingSeed,
+    ownerAddressPretimelockPrivate,
+    ownerAddressPreVestingPrivate,
+    incomingDepositFinalizedTimelockSeed,
+    incomingDepositFinalizedVestingSeed,
+    incomingDepositFinalizedTimelockPrivate,
+    incomingDepositFinalizedVestingPrivate,
+  ]);
+
   const parseCSV = (data: any) => {
+    const amountsArr = Object.values(
+      data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow(tokenDecimals as BigNumberish))),
+    );
+    let totalAmount = BigNumber.from("0");
+    for (let i = 0; i < amountsArr.length; i++) {
+      totalAmount = totalAmount.add(BigNumber.from(amountsArr[i]));
+    }
+    setEnoughTokenBalance(BigNumber.from(tokenBalance?.raw.toString()).gte(totalAmount));
     const beneficiariesArr = data.map(d => d.beneficiary);
     setBeneficiaries(beneficiariesArr);
     const cliffsArr = new Array(beneficiariesArr.length).fill(cliff);
     setCliffs(cliffsArr);
-    const tges = new Array(beneficiariesArr.length).fill(BigNumber.from(new BN(availableTge).multipliedBy("100").toString()),0);
+    const tges = new Array(beneficiariesArr.length).fill(
+      BigNumber.from(new BN(availableTge).multipliedBy("100").toString()),
+      0,
+    );
     setTges(tges);
-    const amountsArr = Object.values(data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow("18"))));
     const nonVestingAmountsArr = Object.values(
       amountsArr.map(x =>
         BigNumber.from(x)
@@ -215,12 +371,10 @@ function Dashboard(): JSX.Element {
   };
 
   const onFileUpload = () => {
-    setUploading(true);
     const input = inputRef ? inputRef.current : 0;
     const reader = new FileReader();
     const [file]: any = input && input.files;
     reader.onloadend = ({ target }) => {
-      setUploading(false);
       const csv = Papa.parse(target?.result, { header: true });
       if (chainId !== undefined) {
         console.log(csv?.data);
@@ -234,6 +388,24 @@ function Dashboard(): JSX.Element {
       }
     };
     reader.readAsText(file);
+  };
+
+  const onChangeCliff = e => {
+    e.preventDefault();
+    setCliff(e.target.value);
+    setIsValidCliff(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
+  };
+
+  const onChangeDuration = e => {
+    e.preventDefault();
+    setDuration(e.target.value);
+    setIsValidDuration(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
+  };
+
+  const onChangeTGE = e => {
+    e.preventDefault();
+    setAvailableTge(e.target.value);
+    setIsValidTGE(typeof parseInt(e.target.value) == "number" && parseInt(e.target.value) >= 0);
   };
 
   return (
@@ -250,7 +422,7 @@ function Dashboard(): JSX.Element {
                       <h3 className="font-weight-bold ml-md-0 mx-auto text-center text-sm-left"> PreSale Dashboard</h3>
                       <p className="font-weight-bold ml-md-0 mx-auto text-center text-sm-left">
                         {" "}
-                        Send Sera PreSale Setting.
+                        {`Send ${tokenSymbol} PreSale Setting.`}
                       </p>
                     </div>
                   </div>
@@ -265,33 +437,33 @@ function Dashboard(): JSX.Element {
                         data-wow-duration="2s"
                       >
                         <div className="card shadow-lg card-1">
-                          <div className="row justify-content-end mb-5">
-                            <div className="col-lg-12 col-auto ">
-                              <button
+                          {/* <div className="row justify-content-end mb-5"> */}
+                          {/* <div className="col-lg-12 col-auto "> */}
+                          {/* <button
                                 type="button"
                                 className="btn btn-primary btn-block"
                                 disabled={!active}
                                 onClick={handleStartSale}
                               >
                                 <small className="font-weight-bold">Start</small>
-                              </button>
-                              <button
+                              </button> */}
+                          {/* <button
                                 type="button"
                                 className="btn btn-danger btn-block"
                                 onClick={handleEndSale}
                                 disabled={!active}
                               >
                                 <small className="font-weight-bold">Stop</small>
-                              </button>
-                              {/* <button type="button" className="btn btn-success btn-block">
+                              </button> */}
+                          {/* <button type="button" className="btn btn-success btn-block">
                                 <small className="font-weight-bold">Transfer Ownership</small>
                               </button>
                               <button type="button" className="btn btn-primary btn-block" onClick={dispCsvData}>
                                 <small className="font-weight-bold">Display CSV data</small>
                               </button> */}
-                            </div>
-                          </div>
-                          <div className="card-body inner-card ">
+                          {/* </div> */}
+                          {/* </div> */}
+                          <div className="card-body inner-card border">
                             <div className="row justify-content-between text-left">
                               <div className="form-group col-sm-6 flex-column d-flex">
                                 {" "}
@@ -305,7 +477,7 @@ function Dashboard(): JSX.Element {
                                   name="availableontge"
                                   placeholder="Available on tge"
                                   value={availableTge}
-                                  onChange={e => setAvailableTge(e.target.value)}
+                                  onChange={e => onChangeTGE(e)}
                                 />{" "}
                               </div>
                               <div className="form-group col-sm-6 flex-column d-flex">
@@ -319,7 +491,9 @@ function Dashboard(): JSX.Element {
                                   name="Duration"
                                   placeholder="Duration"
                                   value={duration}
-                                  onChange={e => setDuration(e.target.value)}
+                                  min={0}
+                                  step={1}
+                                  onChange={e => onChangeDuration(e) /*setDuration(e.target.value)*/}
                                 />{" "}
                               </div>
                               {/* <div className="form-group col-sm-6 flex-column d-flex">
@@ -349,7 +523,9 @@ function Dashboard(): JSX.Element {
                                   name="cliff"
                                   placeholder="cliff"
                                   value={cliff}
-                                  onChange={e => setCliff(e.target.value)}
+                                  min={0}
+                                  step={1}
+                                  onChange={e => onChangeCliff(e) /*setCliff(e.target.value)*/}
                                 />{" "}
                               </div>
                             </div>
@@ -360,8 +536,8 @@ function Dashboard(): JSX.Element {
                                   <div>
                                     <input
                                       ref={inputRef}
-                                      disabled={uploading}
                                       type="file"
+                                      disabled={!isValidTGE || !isValidDuration || !isValidCliff}
                                       className="form-control"
                                       onChange={() => onFileUpload()}
                                     />
@@ -403,7 +579,14 @@ function Dashboard(): JSX.Element {
                                       type="button"
                                       className="btn btn-primary btn-block"
                                       onClick={e => handleSendTGETokensNow(e)}
-                                      disabled={!active || uploading}
+                                      disabled={
+                                        // !active ||
+                                        // !enoughTokenBalance ||
+                                        // !isValidCliff ||
+                                        // !isValidDuration ||
+                                        // !isValidTGE
+                                        disableTGEButton
+                                      }
                                     >
                                       <small className="font-weight-bold">Send tge tokens now</small>
                                     </button>{" "}
@@ -412,6 +595,44 @@ function Dashboard(): JSX.Element {
                               </div>
                             </div>
                           </div>
+
+                          <TokenPreTimeLock
+                            title="SeedRoundTokenPreTimeLock"
+                            preTimelockAddress={seedPreTimelockAddress}
+                            isIDO={false}
+                          />
+
+                          <TokenPreVesting
+                            title="SeedRoundTokenPreVesting"
+                            tokenPreVestingAddress={seedTokenPreVesting}
+                            isIDO={false}
+                          />
+
+                          <TokenPreTimeLock
+                            title="PrivateRoundTokenPreTimeLock"
+                            preTimelockAddress={privatePreTimelockAddress}
+                            isIDO={false}
+                          />
+
+                          <TokenPreVesting
+                            title="PrivateRoundTokenPreVesting"
+                            tokenPreVestingAddress={privateTokenPreVesting}
+                            isIDO={false}
+                          />
+
+                          <TokenPreSale title="IDOTokenPreSale" tokenPreSaleAddress={idoTokenPreSaleAddress} />
+
+                          <TokenPreTimeLock
+                            title="IDOTokenPreTimeLock"
+                            preTimelockAddress={tokenAddressIDOPretimelock}
+                            isIDO={true}
+                          />
+
+                          <TokenPreVesting
+                            title="IDOTokenPreVesting"
+                            tokenPreVestingAddress={tokenAddressIDOPreVesting}
+                            isIDO={true}
+                          />
                         </div>
                       </form>
                     </div>

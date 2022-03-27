@@ -137,7 +137,6 @@ contract TokenPreSale is Ownable {
             token.transferFrom(owner(), address(vesting), _vestedTokenAmount),
             "TokenPreSale: token -> tokenprevesting"
         );
-
         vesting.createVestingSchedule(msg.sender, cliff, duration, 1, false, _vestedTokenAmount, availableAtTGE);
     }
 
@@ -202,6 +201,11 @@ contract TokenPreSale is Ownable {
     function withdrawFromVesting(uint256 _amount) public onlyOwner {
         vesting.withdraw(_amount);
         token.transfer(owner(), _amount);
+    }
+
+    function transferAccidentallyLockedTokensFromTimelock(IERC20 _token, uint256 amount) public onlyOwner {
+        timelock.transferAccidentallyLockedTokens(_token, amount);
+        _token.transfer(owner(), _token.balanceOf(address(this)));
     }
 
     function revoke(bytes32 vestingScheduleId) external onlyOwner {

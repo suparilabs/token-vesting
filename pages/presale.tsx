@@ -12,9 +12,18 @@ import {
   useBUSD,
   useUSDT,
 } from "../hooks/useTokenSale";
-import { useTokenBalance } from "../hooks/useTokenBalance";
+import { useTokenBalanceSimple } from "../hooks/useTokenBalance";
 import { useETHBalance } from "../hooks/useETHBalance";
 import { desiredChain } from "../constants";
+import { toast } from "react-toastify";
+import {
+  useGetSaleStatus,
+  useMaxBuyAmountBusd,
+  useMaxBuyAmountUSDT,
+  useMinBuyAmountBusd,
+  useMinBuyAmountUSDT,
+} from "../hooks/useTokenPreSale";
+import { formatEther, parseUnits } from "@ethersproject/units";
 
 const options: Highcharts.Options = {
   chart: {
@@ -110,77 +119,130 @@ const options: Highcharts.Options = {
 };
 
 function PresaleModal(props) {
+  const { chainId } = useWeb3React();
   const [checked] = React.useState<boolean>(false);
   const [checkoutShow] = React.useState<boolean>(false);
   const [mining, setMining] = React.useState<boolean>(false);
   const [txStatusMessage, setTxStatusMessage] = React.useState<string>("");
   const [busdAmount, setBusdAmount] = React.useState<string>("");
   const [usdtAmount, setUsdtAmount] = React.useState<string>("");
+
   const { data: busdAllowance } = useTokenAllowance(props.account as string, props.busd); //check allowance
   const { data: usdtAllowance } = useTokenAllowance(props.account as string, props.usdt); //check allowance
 
+  const { data: minUsdt } = useMinBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: maxUsdt } = useMaxBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: minBusd } = useMinBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: maxBusd } = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
+
   const approveBusdToken = useTxApprove(
     props.busd,
-    busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")),
+    busdAmount == "" ? BigNumber.from("0") : parseUnits(busdAmount, "18"),
     props.chainId,
   ); // send amount from user
   const approveUsdtToken = useTxApprove(
     props.usdt,
-    usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")),
+    usdtAmount == "" ? BigNumber.from("0") : parseUnits(usdtAmount, "18"),
     props.chainId,
   ); // send amount from user
   const buyTokensWithBusd = useBuyTokensWithBusd(
-    busdAmount == "" ? BigNumber.from("0") : BigNumber.from(busdAmount).mul(BigNumber.from("10").pow("18")),
+    busdAmount == "" ? BigNumber.from("0") : parseUnits(busdAmount, "18"),
     props.chainId !== undefined ? props.chainId : desiredChain.chainId,
   );
   const buyTokensWithUsdt = useBuyTokensWithUsdt(
-    usdtAmount == "" ? BigNumber.from("0") : BigNumber.from(usdtAmount).mul(BigNumber.from("10").pow("18")),
+    usdtAmount == "" ? BigNumber.from("0") : parseUnits(usdtAmount, "18"),
     props.chainId !== undefined ? props.chainId : desiredChain.chainId,
   );
   const handleBuyTokenUsingBusd = async amount => {
-    try {
-      if (BigNumber.from(busdAllowance).gte(BigNumber.from(amount).mul(BigNumber.from("10").pow("18")))) {
-        setMining(true);
-        setTxStatusMessage("Transaction is being processed...");
-        await buyTokensWithBusd();
-        setMining(false);
-        setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
+    const _amountInDecimals = parseUnits(amount, "18");
+    if (BigNumber.from(props.busdBalance).gte(_amountInDecimals)) {
+      if (_amountInDecimals.gte(minBusd) && _amountInDecimals.lte(maxBusd)) {
+        try {
+          if (BigNumber.from(busdAllowance).gte(_amountInDecimals)) {
+            setMining(true);
+            setTxStatusMessage("Transaction is being processed...");
+            const buyTokensWithBusdtx = await buyTokensWithBusd();
+            await notifyBuy(buyTokensWithBusdtx.wait(1));
+            setMining(false);
+            setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
+          } else {
+            setMining(true);
+            setTxStatusMessage("Transaction is being processed...");
+            const approveBusdTokentx = await approveBusdToken();
+            await notifyApprove(approveBusdTokentx.wait(1));
+            const buyTokensWithBusdtx = await buyTokensWithBusd();
+            await notifyBuy(buyTokensWithBusdtx.wait(1));
+            setMining(false);
+            setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
+          }
+        } catch (e: any) {
+          setTxStatusMessage(e?.message as string);
+          setMining(false);
+        }
       } else {
-        setMining(true);
-        setTxStatusMessage("Transaction is being processed...");
-        const tx = await approveBusdToken();
-        await tx.wait(1);
-        await buyTokensWithBusd();
-        setMining(false);
-        setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
+        toast.warn(
+          `You can buy token for minimum ${parseFloat(formatEther(minBusd)).toFixed(4)} or maximum ${parseFloat(
+            formatEther(maxBusd),
+          ).toFixed(4)} BUSD`,
+        );
       }
-    } catch (e: any) {
-      setTxStatusMessage(e?.message as string);
-      setMining(false);
+    } else {
+      toast.warn(`You do not have enough balance to buy token`);
     }
   };
 
   const handleBuyTokensUsingUsdt = async amount => {
-    try {
-      if (BigNumber.from(usdtAllowance).gte(BigNumber.from(amount).mul(BigNumber.from("10").pow("18")))) {
-        setTxStatusMessage("Transaction is being processed...");
-        setMining(true);
-        await buyTokensWithUsdt();
-        setMining(false);
-        setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
+    const _amountInDecimals = parseUnits(amount, "18");
+    if (BigNumber.from(props.usdtBalance).gte(_amountInDecimals)) {
+      if (_amountInDecimals.gte(minUsdt) && _amountInDecimals.lte(maxUsdt)) {
+        try {
+          if (BigNumber.from(usdtAllowance).gte(_amountInDecimals)) {
+            setTxStatusMessage("Transaction is being processed...");
+            setMining(true);
+            const buyTokensWithUsdttx = await buyTokensWithUsdt();
+            await notifyBuy(buyTokensWithUsdttx.wait(1));
+            setMining(false);
+            setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
+          } else {
+            setTxStatusMessage("Transaction is being processed...");
+            setMining(true);
+            const tx = await approveUsdtToken();
+            await notifyApprove(tx.wait(1));
+            const buyTokensWithUsdttx = await buyTokensWithUsdt();
+            await notifyBuy(buyTokensWithUsdttx.wait(1));
+            setMining(false);
+            setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
+          }
+        } catch (e: any) {
+          setTxStatusMessage(e?.message);
+          setMining(false);
+        }
       } else {
-        setTxStatusMessage("Transaction is being processed...");
-        setMining(true);
-        const tx = await approveUsdtToken();
-        await tx.wait(1);
-        await buyTokensWithUsdt();
-        setMining(false);
-        setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
+        toast.warn(
+          `You can buy token for minimum ${parseFloat(formatEther(minUsdt)).toFixed(4)} or maximum ${parseFloat(
+            formatEther(maxUsdt),
+          ).toFixed(4)} USDT`,
+        );
       }
-    } catch (e: any) {
-      setTxStatusMessage(e?.message);
-      setMining(false);
+    } else {
+      toast.warn(`You do not have enough balance to buy token`);
     }
+  };
+
+  const notifyApprove = async promiseObj => {
+    await toast.promise(promiseObj, {
+      pending: `Approving token...`,
+      success: `Tokens has been approved👌`,
+      error: `Failed to approve tokens 🤯"`,
+    });
+  };
+
+  const notifyBuy = async promiseObj => {
+    await toast.promise(promiseObj, {
+      pending: `Buying Tokens...`,
+      success: `Tokens has been bought👌`,
+      error: `Failed to buy tokens 🤯"`,
+    });
   };
 
   return (
@@ -212,7 +274,8 @@ function PresaleModal(props) {
                   Buy Tokens with BUSD
                 </Button>
                 <span className="buylink">
-                  Available Balance: {props && props.busdBalance && props.busdBalance.toFixed(2)} BUSD
+                  Available Balance:{" "}
+                  {props && props.busdBalance && parseFloat(formatEther(props.busdBalance)).toFixed(2)} BUSD
                 </span>
               </Form.Group>
               <Form.Group controlId="form_two">
@@ -233,7 +296,8 @@ function PresaleModal(props) {
                   Buy Tokens with USDT
                 </Button>
                 <span className="buylink">
-                  Available Balance: {props && props.usdtBalance && props.usdtBalance.toFixed(2)} USDT
+                  Available Balance:{" "}
+                  {props && props.usdtBalance && parseFloat(formatEther(props.usdtBalance)).toFixed(2)} USDT
                 </span>
               </Form.Group>
             </Form>
@@ -252,17 +316,25 @@ function PresaleModal(props) {
 
 function Presale(): JSX.Element {
   const [checked, setChecked] = React.useState<boolean>(false);
-  const [checkoutShow, setCheckoutShow] = React.useState<boolean>(false);
+  // const [checkoutShow, setCheckoutShow] = React.useState<boolean>(false);
   const [modalShow, setModalShow] = React.useState(false);
-  const { account, chainId } = useWeb3React();
+  const { account, active, chainId } = useWeb3React();
+
+  const { data: minUsdt } = useMinBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: maxUsdt } = useMaxBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: minBusd } = useMinBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: maxBusd } = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
+  const { data: currentSaleStatus } = useGetSaleStatus(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
   const { data: busd } = useBUSD(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: usdt } = useUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
-  const { data: busdBalance } = useTokenBalance(
+  const { data: busdBalance } = useTokenBalanceSimple(
     chainId == undefined ? desiredChain.chainId : (chainId as number),
     account,
     busd as string,
   );
-  const { data: usdtBalance } = useTokenBalance(
+  const { data: usdtBalance } = useTokenBalanceSimple(
     chainId == undefined ? desiredChain.chainId : (chainId as number),
     account,
     usdt as string,
@@ -275,23 +347,24 @@ function Presale(): JSX.Element {
 
   useEffect(() => {
     handleTimer();
-    busdBalance !== undefined && setEnoughBusd(busdBalance.equalTo("1000") || busdBalance.greaterThan("1000"));
-    usdtBalance !== undefined && setEnoughUsdt(usdtBalance.equalTo("1000") || usdtBalance.greaterThan("1000"));
+    busdBalance !== undefined &&
+      setEnoughBusd(BigNumber.from(busdBalance).gte(minBusd) && BigNumber.from(busdBalance).lte(maxBusd));
+    usdtBalance !== undefined &&
+      setEnoughUsdt(BigNumber.from(usdtBalance).gte(minUsdt) && BigNumber.from(usdtBalance).lte(maxUsdt));
     ethBalance !== undefined && setEnoughEth(ethBalance.greaterThan("0"));
-  }, [busdBalance, usdtBalance, ethBalance, account]);
+  }, [busdBalance, usdtBalance, ethBalance, account, minBusd, maxBusd, minUsdt, maxUsdt]);
 
   function handleClick(e) {
     e.preventDefault();
     setModalShow(true);
-    console.log(checkoutShow);
-    if (checked) {
-      setCheckoutShow(true);
-    }
+    // if (checked) {
+    //   setCheckoutShow(true);
+    // }
   }
 
   function handleTimer() {
     const countDownTimer = () => {
-      const difference = +new Date("2022-03-11") - +new Date();
+      const difference = +new Date("2022-03-28") - +new Date();
       let remaining = "Time's up!";
       if (difference > 0) {
         const parts = {
@@ -361,7 +434,13 @@ function Presale(): JSX.Element {
                       id="trem_check"
                       className="btn btn-light trem_check"
                       onClick={e => handleClick(e)}
-                      disabled={!checked || !enoughEth || !(enoughBusd || enoughUsdt)}
+                      disabled={
+                        !active ||
+                        !checked ||
+                        !enoughEth ||
+                        !(enoughBusd || enoughUsdt) ||
+                        (currentSaleStatus != undefined ? currentSaleStatus != "1" : true)
+                      }
                     >
                       {" "}
                       Buy SERA Now{" "}

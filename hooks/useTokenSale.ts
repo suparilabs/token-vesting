@@ -2,7 +2,7 @@ import { useWeb3React } from "@web3-react/core";
 import { BigNumber, Contract } from "ethers";
 import useSWR, { SWRResponse } from "swr";
 import { addresses } from "../constants";
-import { TokenSale__factory, ERC20__factory, TokenSale } from "../src/types";
+import { TokenSale__factory, ERC20__factory, TokenSale, ERC20 } from "../src/types";
 import { DataType } from "../utils";
 import { useContract } from "./useContract";
 
@@ -125,10 +125,8 @@ export function useAvailableAtTGE(chainId: number, suspense = false): SWRRespons
 }
 
 export function useTxApprove(token: string, amount: BigNumber, chainId: number): any {
-  const contract = useContract(token, ERC20__factory.abi, true);
+  const contract = <ERC20>useContract(token, ERC20__factory.abi, true);
   return async () => {
-    return (contract as Contract)
-      .approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE, amount)
-      .then((result: boolean) => result);
+    return contract.approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE, amount).then((result: any) => result);
   };
 }
