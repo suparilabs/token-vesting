@@ -14,7 +14,8 @@ import { formatEther } from "@ethersproject/units";
 import { BigNumber } from "ethers";
 import { secondsToDhms } from "../utils";
 import BN from "bignumber.js";
-import { desiredChain } from "../constants";
+import { addresses, desiredChain } from "../constants";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
 
 const ClaimToken = props => {
   // WEB3 Connection
@@ -36,6 +37,13 @@ const ClaimToken = props => {
     account as string,
     vestingContractAddress,
     props.vestingScheduleIndex,
+  );
+
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId !== undefined ? (chainId as number) : desiredChain.chainId,
+    chainId !== undefined
+      ? addresses[chainId as number].ERC20_TOKEN_ADDRESS
+      : addresses[desiredChain.chainId as number].ERC20_TOKEN_ADDRESS,
   );
 
   
@@ -66,8 +74,8 @@ const ClaimToken = props => {
           <div className="d-flex justify-content-between">
             <div className="d-flex flex-row align-items-center">
               <div className="ms-2 c-details">
-                <h6 className="mb-0">Sera to be unlocked: </h6>
-                <h6 className="mb-0">Sera Claimable: </h6>
+                <h6 className="mb-0">{tokenSymbol} to be unlocked: </h6>
+                <h6 className="mb-0">{tokenSymbol} Claimable: </h6>
               </div>
             </div>
             <div className="badge">
@@ -97,8 +105,8 @@ const ClaimToken = props => {
           <div className="d-flex justify-content-between">
             <div className="d-flex flex-row align-items-center">
               <div className="ms-2 c-details">
-                <h6 className="mb-0">Sera to be unlocked: </h6>
-                <h6 className="mb-0">Sera Claimable: </h6>
+                <h6 className="mb-0">{tokenSymbol} to be unlocked: </h6>
+                <h6 className="mb-0">{tokenSymbol} Claimable: </h6>
               </div>
             </div>
             <div className="badge">

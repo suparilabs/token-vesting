@@ -517,3 +517,23 @@ export function useTransferOwnershipPreSale(contractAddress: string, newOwnerAdd
     return contract.transferOwnership(newOwnerAddress);
   };
 }
+
+//compute token for busd
+export function useComputeTokensForBUSD(amount: BigNumber, chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return contract.computeTokensForBUSD(amount);
+  };
+}
+
+//compute token for usdt
+export function useComputeTokensForUSDT(amount: BigNumber, chainId: number): any {
+  const contract = <TokenPreSale>(
+    useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenPreSale__factory.abi, true)
+  );
+  return async () => {
+    return contract.computeTokensForUSDT(amount);
+  };
+}

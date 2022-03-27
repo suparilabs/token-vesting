@@ -5,6 +5,7 @@ import { addresses } from "../constants";
 import { TokenSale__factory, ERC20__factory, TokenSale, ERC20 } from "../src/types";
 import { DataType } from "../utils";
 import { useContract } from "./useContract";
+import { useKeepSWRDATALiveAsBlocksArrive } from "./useKeepSWRDATALiveAsBlocksArrive";
 
 export function useBuyTokensWithBusd(amount: any, chainId: number): any {
   const contract = useContract(addresses[chainId as number].IDO_TOKEN_PRE_SALE, TokenSale__factory.abi, true);
@@ -61,19 +62,18 @@ function getTokenAllowance(account: string, contract: Contract, chainId: number)
   return async (): Promise<string> =>
     contract
       .allowance(account, addresses[chainId as number].IDO_TOKEN_PRE_SALE)
-      .then((result: string) => result.toString());
+      .then((result: BigNumber) => result.toString());
 }
 
 export function useTokenAllowance(account: string, token: string, suspense = false): SWRResponse<any, any> {
   const { chainId } = useWeb3React();
   const contract = useContract(token, ERC20__factory.abi, true);
   const result: any = useSWR(
-    contract ? [chainId, token, DataType.Address] : null,
+    contract ? [chainId, token, "allowance", DataType.ETHBalance] : null,
     getTokenAllowance(account as string, contract as Contract, chainId as number),
     { suspense },
   );
-  // useKeepSWRDATALiveAsBlocksArrive(result.mutate);
-  //let res: any = BigNumber.from(result.data).toNumber();
+  useKeepSWRDATALiveAsBlocksArrive(result.mutate);
   return result;
 }
 

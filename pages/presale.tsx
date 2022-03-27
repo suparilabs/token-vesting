@@ -12,9 +12,14 @@ import {
   useBUSD,
   useUSDT,
 } from "../hooks/useTokenSale";
+import {
+  useComputeTokensForBUSD,
+  useComputeTokensForUSDT,
+  usePreSaleFetchOwner,
+} from "../hooks/useTokenPreSale";
 import { useTokenBalanceSimple } from "../hooks/useTokenBalance";
 import { useETHBalance } from "../hooks/useETHBalance";
-import { desiredChain } from "../constants";
+import { addresses, desiredChain } from "../constants";
 import { toast } from "react-toastify";
 import {
   useGetSaleStatus,
@@ -24,6 +29,7 @@ import {
   useMinBuyAmountUSDT,
 } from "../hooks/useTokenPreSale";
 import { formatEther, parseUnits } from "@ethersproject/units";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
 
 const options: Highcharts.Options = {
   chart: {
@@ -129,11 +135,30 @@ function PresaleModal(props) {
 
   const { data: busdAllowance } = useTokenAllowance(props.account as string, props.busd); //check allowance
   const { data: usdtAllowance } = useTokenAllowance(props.account as string, props.usdt); //check allowance
+  const { data: ownerAddressIDOPreSale } = usePreSaleFetchOwner(
+    chainId != undefined
+      ? addresses[chainId as number].IDO_TOKEN_PRE_SALE
+      : addresses[desiredChain.chainId].IDO_TOKEN_PRE_SALE,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: ownerPreSaleContractAllowance } = useTokenAllowance(
+    ownerAddressIDOPreSale,
+    chainId != undefined
+      ? addresses[chainId as number].ERC20_TOKEN_ADDRESS
+      : addresses[desiredChain.chainId].ERC20_TOKEN_ADDRESS,
+  );
 
   const { data: minUsdt } = useMinBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: maxUsdt } = useMaxBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: minBusd } = useMinBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: maxBusd } = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
+
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId !== undefined ? (chainId as number) : desiredChain.chainId,
+    chainId !== undefined
+      ? addresses[chainId as number].ERC20_TOKEN_ADDRESS
+      : addresses[desiredChain.chainId as number].ERC20_TOKEN_ADDRESS,
+  );
 
   const approveBusdToken = useTxApprove(
     props.busd,
@@ -153,79 +178,99 @@ function PresaleModal(props) {
     usdtAmount == "" ? BigNumber.from("0") : parseUnits(usdtAmount, "18"),
     props.chainId !== undefined ? props.chainId : desiredChain.chainId,
   );
+
+  const tokenForBusd = useComputeTokensForBUSD(
+    busdAmount == "" ? BigNumber.from("0") : parseUnits(busdAmount, "18"),
+    props.chainId !== undefined ? props.chainId : desiredChain.chainId,
+  );
+  const tokenForUsdt = useComputeTokensForUSDT(
+    usdtAmount == "" ? BigNumber.from("0") : parseUnits(usdtAmount, "18"),
+    props.chainId !== undefined ? props.chainId : desiredChain.chainId,
+  );
+
   const handleBuyTokenUsingBusd = async amount => {
     const _amountInDecimals = parseUnits(amount, "18");
-    if (BigNumber.from(props.busdBalance).gte(_amountInDecimals)) {
-      if (_amountInDecimals.gte(minBusd) && _amountInDecimals.lte(maxBusd)) {
-        try {
-          if (BigNumber.from(busdAllowance).gte(_amountInDecimals)) {
-            setMining(true);
-            setTxStatusMessage("Transaction is being processed...");
-            const buyTokensWithBusdtx = await buyTokensWithBusd();
-            await notifyBuy(buyTokensWithBusdtx.wait(1));
+    const _tokenForBusd = await tokenForBusd();
+    if (BigNumber.from(ownerPreSaleContractAllowance).gte(_tokenForBusd)) {
+      if (BigNumber.from(props.busdBalance).gte(_amountInDecimals)) {
+        if (_amountInDecimals.gte(minBusd) && _amountInDecimals.lte(maxBusd)) {
+          try {
+            if (BigNumber.from(busdAllowance).gte(_amountInDecimals)) {
+              setMining(true);
+              setTxStatusMessage("Transaction is being processed...");
+              const buyTokensWithBusdtx = await buyTokensWithBusd();
+              await notifyBuy(buyTokensWithBusdtx.wait(1));
+              setMining(false);
+              setTxStatusMessage(`You got 2% ${tokenSymbol} at TGE and rest vested.`);
+            } else {
+              setMining(true);
+              setTxStatusMessage("Transaction is being processed...");
+              const approveBusdTokentx = await approveBusdToken();
+              await notifyApprove(approveBusdTokentx.wait(1));
+              const buyTokensWithBusdtx = await buyTokensWithBusd();
+              await notifyBuy(buyTokensWithBusdtx.wait(1));
+              setMining(false);
+              setTxStatusMessage(`You got 2% ${tokenSymbol} at TGE and rest vested.`);
+            }
+          } catch (e: any) {
+            setTxStatusMessage(e?.message as string);
             setMining(false);
-            setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
-          } else {
-            setMining(true);
-            setTxStatusMessage("Transaction is being processed...");
-            const approveBusdTokentx = await approveBusdToken();
-            await notifyApprove(approveBusdTokentx.wait(1));
-            const buyTokensWithBusdtx = await buyTokensWithBusd();
-            await notifyBuy(buyTokensWithBusdtx.wait(1));
-            setMining(false);
-            setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
           }
-        } catch (e: any) {
-          setTxStatusMessage(e?.message as string);
-          setMining(false);
+        } else {
+          toast.warn(
+            `You can buy token for minimum ${parseFloat(formatEther(minBusd)).toFixed(4)} or maximum ${parseFloat(
+              formatEther(maxBusd),
+            ).toFixed(4)} BUSD`,
+          );
         }
       } else {
-        toast.warn(
-          `You can buy token for minimum ${parseFloat(formatEther(minBusd)).toFixed(4)} or maximum ${parseFloat(
-            formatEther(maxBusd),
-          ).toFixed(4)} BUSD`,
-        );
+        toast.warn(`You do not have enough balance to buy token`);
       }
     } else {
-      toast.warn(`You do not have enough balance to buy token`);
+      toast.info(`Insufficient token to sale`);
     }
   };
 
   const handleBuyTokensUsingUsdt = async amount => {
     const _amountInDecimals = parseUnits(amount, "18");
-    if (BigNumber.from(props.usdtBalance).gte(_amountInDecimals)) {
-      if (_amountInDecimals.gte(minUsdt) && _amountInDecimals.lte(maxUsdt)) {
-        try {
-          if (BigNumber.from(usdtAllowance).gte(_amountInDecimals)) {
-            setTxStatusMessage("Transaction is being processed...");
-            setMining(true);
-            const buyTokensWithUsdttx = await buyTokensWithUsdt();
-            await notifyBuy(buyTokensWithUsdttx.wait(1));
+    const _tokenForUsdt = await tokenForUsdt();
+    if (BigNumber.from(ownerPreSaleContractAllowance).gte(_tokenForUsdt)) {
+      if (BigNumber.from(props.usdtBalance).gte(_amountInDecimals)) {
+        if (_amountInDecimals.gte(minUsdt) && _amountInDecimals.lte(maxUsdt)) {
+          try {
+            if (BigNumber.from(usdtAllowance).gte(_amountInDecimals)) {
+              setTxStatusMessage("Transaction is being processed...");
+              setMining(true);
+              const buyTokensWithUsdttx = await buyTokensWithUsdt();
+              await notifyBuy(buyTokensWithUsdttx.wait(1));
+              setMining(false);
+              setTxStatusMessage(`You got 2% ${tokenSymbol} at TGE and rest vested."`);
+            } else {
+              setTxStatusMessage("Transaction is being processed...");
+              setMining(true);
+              const tx = await approveUsdtToken();
+              await notifyApprove(tx.wait(1));
+              const buyTokensWithUsdttx = await buyTokensWithUsdt();
+              await notifyBuy(buyTokensWithUsdttx.wait(1));
+              setMining(false);
+              setTxStatusMessage(`You got 2% ${tokenSymbol} at TGE and rest vested.`);
+            }
+          } catch (e: any) {
+            setTxStatusMessage(e?.message);
             setMining(false);
-            setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
-          } else {
-            setTxStatusMessage("Transaction is being processed...");
-            setMining(true);
-            const tx = await approveUsdtToken();
-            await notifyApprove(tx.wait(1));
-            const buyTokensWithUsdttx = await buyTokensWithUsdt();
-            await notifyBuy(buyTokensWithUsdttx.wait(1));
-            setMining(false);
-            setTxStatusMessage("You got 2% SERA at TGE and rest vested.");
           }
-        } catch (e: any) {
-          setTxStatusMessage(e?.message);
-          setMining(false);
+        } else {
+          toast.warn(
+            `You can buy token for minimum ${parseFloat(formatEther(minUsdt)).toFixed(4)} or maximum ${parseFloat(
+              formatEther(maxUsdt),
+            ).toFixed(4)} USDT`,
+          );
         }
       } else {
-        toast.warn(
-          `You can buy token for minimum ${parseFloat(formatEther(minUsdt)).toFixed(4)} or maximum ${parseFloat(
-            formatEther(maxUsdt),
-          ).toFixed(4)} USDT`,
-        );
+        toast.warn(`You do not have enough balance to buy token`);
       }
     } else {
-      toast.warn(`You do not have enough balance to buy token`);
+      toast.info(`Insufficient token to sale`);
     }
   };
 
@@ -251,7 +296,7 @@ function PresaleModal(props) {
         <div>
           <Modal.Header closeButton>
             <Modal.Title id="contained-modal-title-vcenter">
-              <h4>Purchase SERA Token</h4>
+              <h4>Purchase {tokenSymbol} Token</h4>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -345,6 +390,13 @@ function Presale(): JSX.Element {
   const [enoughEth, setEnoughEth] = React.useState<boolean>(false);
   const [timer, setTimer] = React.useState<string>();
 
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId !== undefined ? (chainId as number) : desiredChain.chainId,
+    chainId !== undefined
+      ? addresses[chainId as number].ERC20_TOKEN_ADDRESS
+      : addresses[desiredChain.chainId as number].ERC20_TOKEN_ADDRESS,
+  );
+
   useEffect(() => {
     handleTimer();
     busdBalance !== undefined &&
@@ -421,12 +473,12 @@ function Presale(): JSX.Element {
                     />
                     <a href="presale.pdf" className="buylink" target="_blank">
                       {" "}
-                      I Agree to Sera Terms And Conditions{" "}
+                      I Agree to {tokenSymbol} Terms And Conditions{" "}
                     </a>
                   </div>
                   {/*  */}
 
-                  <p className="titlespanbuynot">You Must Agree to Sera Terms And Conditions</p>
+                  <p className="titlespanbuynot">You Must Agree to {tokenSymbol} Terms And Conditions</p>
 
                   <div className="wrap">
                     <button
@@ -443,7 +495,7 @@ function Presale(): JSX.Element {
                       }
                     >
                       {" "}
-                      Buy SERA Now{" "}
+                      Buy {tokenSymbol} Now{" "}
                     </button>
                     {/* SHOW PRESALE MODAL */}
                     <PresaleModal

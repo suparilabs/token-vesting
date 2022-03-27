@@ -1,6 +1,18 @@
+import { useWeb3React } from "@web3-react/core";
 import React from "react";
+import { addresses, desiredChain } from "../constants";
+import { useTokenSymbol } from "../hooks/useTokenSymbol";
 
 const ContainerText = props => {
+
+  const {chainId} = useWeb3React()
+
+  const { data: tokenSymbol } = useTokenSymbol(
+    chainId !== undefined ? (chainId as number) : desiredChain.chainId,
+    chainId !== undefined
+      ? addresses[chainId as number].ERC20_TOKEN_ADDRESS
+      : addresses[desiredChain.chainId as number].ERC20_TOKEN_ADDRESS,
+  );
   return (
     <div className="h-60 w-96">
       <div className="w-full bg-black h-10 opacity-100 text-white text-xl">
@@ -9,11 +21,11 @@ const ContainerText = props => {
 
       <div className="h-60 w-full bg-zinc-800 px-3 py-3 text-slate-300">
         <div className="flex flex-row flex-wrap justify-between ">
-          <div>SERA to be unlocked:</div>
+          <div>{tokenSymbol} to be unlocked:</div>
           <div className="text-yellow-300">{props.unlocked}</div>
         </div>
         <div className="flex flex-row flex-wrap justify-between">
-          <div>SERA Claimable:</div>
+          <div>{tokenSymbol} Claimable:</div>
           <div className="text-white">{props.claimable}</div>
         </div>
         <div className="flex flex-wrap justify-end">
