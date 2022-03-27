@@ -239,8 +239,8 @@ export function usePreSaleCoinsSoldInfo(
   return result;
 }
 
-function getCoinsSold(contract: TokenPreSale): (address: string) => Promise<any> {
-  return async (): Promise<any> => contract.coinsSold().then((result: any) => BigNumber.from(result).toNumber());
+function getCoinsSold(contract: TokenPreSale): (address: string) => Promise<string> {
+  return async (): Promise<string> => contract.coinsSold().then((result: BigNumber) => result.toString());
 }
 
 //Exchange Prices

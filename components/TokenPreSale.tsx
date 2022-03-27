@@ -5,7 +5,6 @@ import { useWeb3React } from "@web3-react/core";
 import { BigNumber } from "ethers";
 import React from "react";
 import { toast } from "react-toastify";
-import BN from "bignumber.js";
 import { addresses, desiredChain } from "../constants";
 import { useTokenBalance } from "../hooks/useTokenBalance";
 import { useTokenDecimals } from "../hooks/useTokenDecimals";
@@ -157,9 +156,7 @@ const TokenPreSale = props => {
   );
   const availableAtTGEValTx = useSetAvailableAtTGE(
     chainId == undefined ? desiredChain.chainId : (chainId as number),
-    tgeValue != undefined && tgeValue != ""
-      ? BigNumber.from(new BN(tgeValue).multipliedBy("100").toString())
-      : BigNumber.from("0"),
+    tgeValue != undefined && tgeValue != "" ? parseUnits(tgeValue, "2") : BigNumber.from("0"),
   );
   const startSaleTx = useStartSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const endSaleTx = useEndSale(chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -197,7 +194,9 @@ const TokenPreSale = props => {
 
   const approveToken = useTxApprove(
     IDOPreSaleTokenAddress,
-    allowance != undefined && allowance != "" && tokenDecimals != undefined ? parseUnits(allowance, tokenDecimals) : BigNumber.from("0"),
+    allowance != undefined && allowance != "" && tokenDecimals != undefined
+      ? parseUnits(allowance, tokenDecimals)
+      : BigNumber.from("0"),
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
 
@@ -480,7 +479,10 @@ const TokenPreSale = props => {
           {coinsSold != undefined && tokenDecimals != undefined
             ? parseFloat(formatUnits(coinsSold, tokenDecimals)).toFixed(4)
             : "0"}{" "}
-          {tokenSymbol} of{" "}
+          {tokenSymbol}
+        </li>
+        <li className="list-group-item">
+          token allowance left :{" "}
           {tokenAllowance != undefined && tokenDecimals != undefined
             ? parseFloat(formatUnits(tokenAllowance, tokenDecimals)).toFixed(4)
             : "0"}{" "}
@@ -676,6 +678,8 @@ const TokenPreSale = props => {
           <div className="input-group">
             <input
               type="number"
+              min={0}
+              max={100}
               className="form-control form-control-sm"
               placeholder="pct available at TGE"
               aria-label="pct available at TGE"
