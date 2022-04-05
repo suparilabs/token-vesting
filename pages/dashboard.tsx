@@ -302,11 +302,11 @@ function Dashboard(): JSX.Element {
         getAddress(account as string) != getAddress(ownerAddressPretimelockSeed) ||
         getAddress(account as string) != getAddress(ownerAddressPreVestingSeed) ||
         getAddress(account as string) != getAddress(ownerAddressPretimelockPrivate) ||
-        getAddress(account as string) != getAddress(ownerAddressPreVestingPrivate) ||
-        incomingDepositFinalizedTimelockSeed ||
-        incomingDepositFinalizedVestingSeed ||
-        incomingDepositFinalizedTimelockPrivate ||
-        incomingDepositFinalizedVestingPrivate,
+        getAddress(account as string) != getAddress(ownerAddressPreVestingPrivate) 
+        // incomingDepositFinalizedTimelockSeed ||
+        // incomingDepositFinalizedVestingSeed ||
+        // incomingDepositFinalizedTimelockPrivate ||
+        // incomingDepositFinalizedVestingPrivate,
     );
   }, [
     round,

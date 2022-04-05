@@ -39,6 +39,8 @@ const ClaimToken = props => {
     props.vestingScheduleIndex,
   );
 
+  console.log("vesting id", vestingScheduleId);
+  
   const { data: tokenSymbol } = useTokenSymbol(
     chainId !== undefined ? (chainId as number) : desiredChain.chainId,
     chainId !== undefined
