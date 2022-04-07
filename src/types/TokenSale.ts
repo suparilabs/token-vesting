@@ -34,16 +34,23 @@ export interface TokenSaleInterface extends utils.Interface {
     "endSale()": FunctionFragment;
     "exchangePriceBUSD()": FunctionFragment;
     "exchangePriceUSDT()": FunctionFragment;
+    "maxBuyAmountBUSD()": FunctionFragment;
+    "maxBuyAmountUSDT()": FunctionFragment;
+    "minBuyAmountBUSD()": FunctionFragment;
+    "minBuyAmountUSDT()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "revoke(bytes32)": FunctionFragment;
     "saleStatus()": FunctionFragment;
     "setAvailableAtTGE(uint256)": FunctionFragment;
+    "setBuyAmountRangeBUSD(uint256,uint256)": FunctionFragment;
+    "setBuyAmountRangeUSDT(uint256,uint256)": FunctionFragment;
     "setCliff(uint256)": FunctionFragment;
     "setDuration(uint256)": FunctionFragment;
     "setExchangePriceBUSD(uint256)": FunctionFragment;
     "setExchangePriceUSDT(uint256)": FunctionFragment;
     "setSaleStatus(uint8)": FunctionFragment;
+    "timelock()": FunctionFragment;
     "token()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "vesting()": FunctionFragment;
@@ -99,6 +106,22 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "exchangePriceUSDT",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "maxBuyAmountBUSD",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxBuyAmountUSDT",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "minBuyAmountBUSD",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "minBuyAmountUSDT",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -112,6 +135,14 @@ export interface TokenSaleInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setAvailableAtTGE",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setBuyAmountRangeBUSD",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setBuyAmountRangeUSDT",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setCliff",
@@ -133,6 +164,7 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "setSaleStatus",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "timelock", values?: undefined): string;
   encodeFunctionData(functionFragment: "token", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -190,6 +222,22 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "exchangePriceUSDT",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxBuyAmountBUSD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxBuyAmountUSDT",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "minBuyAmountBUSD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "minBuyAmountUSDT",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
@@ -199,6 +247,14 @@ export interface TokenSaleInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "saleStatus", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setAvailableAtTGE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setBuyAmountRangeBUSD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setBuyAmountRangeUSDT",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setCliff", data: BytesLike): Result;
@@ -218,6 +274,7 @@ export interface TokenSaleInterface extends utils.Interface {
     functionFragment: "setSaleStatus",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "timelock", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "token", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
@@ -338,6 +395,14 @@ export interface TokenSale extends BaseContract {
 
     exchangePriceUSDT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    maxBuyAmountBUSD(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    maxBuyAmountUSDT(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    minBuyAmountBUSD(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    minBuyAmountUSDT(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
@@ -353,6 +418,18 @@ export interface TokenSale extends BaseContract {
 
     setAvailableAtTGE(
       _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setBuyAmountRangeBUSD(
+      _min: BigNumberish,
+      _max: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setBuyAmountRangeUSDT(
+      _min: BigNumberish,
+      _max: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -380,6 +457,8 @@ export interface TokenSale extends BaseContract {
       _saleStatus: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    timelock(overrides?: CallOverrides): Promise<[string]>;
 
     token(overrides?: CallOverrides): Promise<[string]>;
 
@@ -456,6 +535,14 @@ export interface TokenSale extends BaseContract {
 
   exchangePriceUSDT(overrides?: CallOverrides): Promise<BigNumber>;
 
+  maxBuyAmountBUSD(overrides?: CallOverrides): Promise<BigNumber>;
+
+  maxBuyAmountUSDT(overrides?: CallOverrides): Promise<BigNumber>;
+
+  minBuyAmountBUSD(overrides?: CallOverrides): Promise<BigNumber>;
+
+  minBuyAmountUSDT(overrides?: CallOverrides): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
@@ -471,6 +558,18 @@ export interface TokenSale extends BaseContract {
 
   setAvailableAtTGE(
     _availableAtTGE: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setBuyAmountRangeBUSD(
+    _min: BigNumberish,
+    _max: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setBuyAmountRangeUSDT(
+    _min: BigNumberish,
+    _max: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -498,6 +597,8 @@ export interface TokenSale extends BaseContract {
     _saleStatus: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  timelock(overrides?: CallOverrides): Promise<string>;
 
   token(overrides?: CallOverrides): Promise<string>;
 
@@ -572,6 +673,14 @@ export interface TokenSale extends BaseContract {
 
     exchangePriceUSDT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    maxBuyAmountBUSD(overrides?: CallOverrides): Promise<BigNumber>;
+
+    maxBuyAmountUSDT(overrides?: CallOverrides): Promise<BigNumber>;
+
+    minBuyAmountBUSD(overrides?: CallOverrides): Promise<BigNumber>;
+
+    minBuyAmountUSDT(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
@@ -585,6 +694,18 @@ export interface TokenSale extends BaseContract {
 
     setAvailableAtTGE(
       _availableAtTGE: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setBuyAmountRangeBUSD(
+      _min: BigNumberish,
+      _max: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setBuyAmountRangeUSDT(
+      _min: BigNumberish,
+      _max: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -609,6 +730,8 @@ export interface TokenSale extends BaseContract {
       _saleStatus: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    timelock(overrides?: CallOverrides): Promise<string>;
 
     token(overrides?: CallOverrides): Promise<string>;
 
@@ -693,6 +816,14 @@ export interface TokenSale extends BaseContract {
 
     exchangePriceUSDT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    maxBuyAmountBUSD(overrides?: CallOverrides): Promise<BigNumber>;
+
+    maxBuyAmountUSDT(overrides?: CallOverrides): Promise<BigNumber>;
+
+    minBuyAmountBUSD(overrides?: CallOverrides): Promise<BigNumber>;
+
+    minBuyAmountUSDT(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
@@ -708,6 +839,18 @@ export interface TokenSale extends BaseContract {
 
     setAvailableAtTGE(
       _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setBuyAmountRangeBUSD(
+      _min: BigNumberish,
+      _max: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setBuyAmountRangeUSDT(
+      _min: BigNumberish,
+      _max: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -735,6 +878,8 @@ export interface TokenSale extends BaseContract {
       _saleStatus: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    timelock(overrides?: CallOverrides): Promise<BigNumber>;
 
     token(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -812,6 +957,14 @@ export interface TokenSale extends BaseContract {
 
     exchangePriceUSDT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    maxBuyAmountBUSD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    maxBuyAmountUSDT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    minBuyAmountBUSD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    minBuyAmountUSDT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
@@ -827,6 +980,18 @@ export interface TokenSale extends BaseContract {
 
     setAvailableAtTGE(
       _availableAtTGE: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setBuyAmountRangeBUSD(
+      _min: BigNumberish,
+      _max: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setBuyAmountRangeUSDT(
+      _min: BigNumberish,
+      _max: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -854,6 +1019,8 @@ export interface TokenSale extends BaseContract {
       _saleStatus: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    timelock(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
