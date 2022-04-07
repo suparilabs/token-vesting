@@ -80,8 +80,6 @@ const TokenPreVesting = props => {
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
   
-  console.log('hey',preVestingWithdrawableAmount);
-
   const preVestingTimestampTx = useSetTimestampPreVesting(props.tokenPreVestingAddress, timePeriodPreVesting);
   const transferOwnershipVestingTx = useTransferOwnershipVesting(props.tokenPreVestingAddress, newOwner);
   const vestingWithdrawTx = useVestingWithdraw(
