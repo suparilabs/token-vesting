@@ -6,7 +6,6 @@ import moment from "moment";
 import { isAddress } from "@ethersproject/address";
 import { BigNumber } from "ethers";
 import { addresses, desiredChain } from "../constants";
-import { ethers } from "ethers";
 import {
   useIncomingDepositsFinalisedPreVesting,
   usePreVestingFetchOwner,
