@@ -44,12 +44,8 @@ const ClaimToken = props => {
       ? addresses[chainId as number].ERC20_TOKEN_ADDRESS
       : addresses[desiredChain.chainId as number].ERC20_TOKEN_ADDRESS,
   );
-
-  
   const { data: tge } = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
-  
-
   const unlocked =
     vestingSchedule !== undefined && releasableAmount
       ? parseFloat(
