@@ -1,4 +1,5 @@
 import { useWeb3React } from "@web3-react/core";
+import { BigNumber } from "ethers";
 import moment from "moment";
 import React from "react";
 import { toast } from "react-toastify";
@@ -27,7 +28,7 @@ const TokenPreTimeLock = props => {
   const [timePeriodPreTimelock, setTimePeriodPreTimelock] = React.useState<any>();
   const [newOwner, setNewOwner] = React.useState<any>();
   const [tokenAddress, setTokenAddress] = React.useState<any>();
-  const [tokenAmount, setTokenAmount] = React.useState<any>();
+  const [tokenAmount, setTokenAmount] = React.useState<string>();
 
   const { data: tokenSymbol } = useTokenSymbol(
     chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
@@ -79,7 +80,7 @@ const TokenPreTimeLock = props => {
   const transferLockedTokensSeedTimelockTx = useTransferAccidentallyLockedTokens(
     props.preTimelockAddress,
     tokenAddress,
-    tokenAmount,
+    tokenAmount as any
   );
 
   const handleTransferOwnershipTimelock = async e => {
@@ -98,7 +99,7 @@ const TokenPreTimeLock = props => {
       const txRelease = await transferLockedTokensSeedTimelockTx();
       await notifyAccidentalTokenReleased(txRelease.wait(1));
     } else {
-      setTokenAmount(0);
+      setTokenAmount("0");
       setTokenAddress("0x");
     }
   };
@@ -128,6 +129,11 @@ const TokenPreTimeLock = props => {
       error: `Failed to release tokens 🤯"`,
     });
   };
+
+  const handleSetTokenAmt = async (e) => {
+    const newTokenAmt = e ? BigNumber.from(e) : "0";
+    setTokenAmount(newTokenAmt as any);
+  }
 
   const notifySetTimestamp = async promiseObj => {
     await toast.promise(promiseObj, {
@@ -253,7 +259,7 @@ const TokenPreTimeLock = props => {
                   aria-label="token amount"
                   aria-describedby="basic-addon2"
                   value={tokenAmount}
-                  onChange={e => setTokenAmount(e.target.value)}
+                  onChange={e => handleSetTokenAmt(e.target.value)}
                 />
                 <div className="input-group-append">
                   <button

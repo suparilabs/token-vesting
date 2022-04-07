@@ -27,7 +27,6 @@ import { useTokenDecimals } from "../hooks/useTokenDecimals";
 
 const TokenPreVesting = props => {
   const { active, account, chainId } = useWeb3React();
-
   const [newOwner, setNewOwner] = React.useState<any>();
   const [withdrawAmount, setWithdrawAmount] = React.useState<any>();
   const [tokenAmountWithdraw, setTokenAmountWithdraw] = React.useState<any>();
@@ -75,11 +74,12 @@ const TokenPreVesting = props => {
     props.tokenPreVestingAddress,
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
+
   const { data: incomingDepositStatusPreVesting } = useIncomingDepositsFinalisedPreVesting(
     props.tokenPreVestingAddress,
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
-
+  
   const preVestingTimestampTx = useSetTimestampPreVesting(props.tokenPreVestingAddress, timePeriodPreVesting);
   const transferOwnershipVestingTx = useTransferOwnershipVesting(props.tokenPreVestingAddress, newOwner);
   const vestingWithdrawTx = useVestingWithdraw(
@@ -103,8 +103,14 @@ const TokenPreVesting = props => {
   const handleRevoke = async e => {
     e.preventDefault();
     if (scheduleID != undefined || scheduleID != "") {
-      const txRevoke = await revokeParamsTx();
-      await notifyRevoke(txRevoke.wait(1));
+      try {
+        const txRevoke = await revokeParamsTx();
+        await notifyRevoke(txRevoke.wait(1));
+      } catch(e) {
+        await notifyRevokeFail();
+      }
+      
+      
     } else {
       setScheduleID(0);
     }
@@ -141,9 +147,13 @@ const TokenPreVesting = props => {
   const notifyRevoke = async promiseObj => {
     await toast.promise(promiseObj, {
       pending: `Revoking vesting schedule...`,
-      success: `Vesting schedule is not revoked👌`,
+      success: `Vesting schedule cannot be revoked`,
       error: `Failed to revoke vesting schedule 🤯"`,
     });
+  };
+
+  const notifyRevokeFail = async() => {
+    await toast.info(`Failed to revoke vesting schedule 🤯 vesting is not revocable as revocable amount is 0`);
   };
 
   const notifyTransferOwnership = async promiseObj => {

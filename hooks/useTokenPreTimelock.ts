@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import useSWR, { SWRResponse } from "swr";
 import { useContract } from "./useContract";
 import { TokenPreTimelock__factory, TokenPreTimelock } from "../src/types";
@@ -114,7 +114,7 @@ export function useTransferOwnershipTimelock(contractAddress: string, newOwnerAd
 }
 
 //transfer accidentally locked tokens
-export function useTransferAccidentallyLockedTokens(contractAddress: string, token: string, amount: number): any {
+export function useTransferAccidentallyLockedTokens(contractAddress: string, token: string, amount: BigNumberish): any {
   const contract = <TokenPreTimelock>useContract(contractAddress, TokenPreTimelock__factory.abi, true);
   return async () => {
     return contract.transferAccidentallyLockedTokens(token, amount);

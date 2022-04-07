@@ -26,7 +26,6 @@ const ClaimToken = props => {
   const { data: vestingContractAddress } = useVestingContractAddress(
     chainId == undefined ? desiredChain.chainId : chainId,
   );
-
   const vestingSchedule = useVestingScheduleByAddressAndIndex(
     account as string,
     vestingContractAddress,
@@ -45,8 +44,6 @@ const ClaimToken = props => {
       ? addresses[chainId as number].ERC20_TOKEN_ADDRESS
       : addresses[desiredChain.chainId as number].ERC20_TOKEN_ADDRESS,
   );
-
-  
   const { data: tge } = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
   const unlocked =

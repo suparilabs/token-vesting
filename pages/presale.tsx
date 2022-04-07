@@ -403,6 +403,8 @@ function Presale(): JSX.Element {
       setEnoughBusd(BigNumber.from(busdBalance).gte(minBusd) && BigNumber.from(busdBalance).lte(maxBusd));
     usdtBalance !== undefined &&
       setEnoughUsdt(BigNumber.from(usdtBalance).gte(minUsdt) && BigNumber.from(usdtBalance).lte(maxUsdt));
+      console.log("bal", usdtBalance);
+      console.log("min", minUsdt);
     ethBalance !== undefined && setEnoughEth(ethBalance.greaterThan("0"));
   }, [busdBalance, usdtBalance, ethBalance, account, minBusd, maxBusd, minUsdt, maxUsdt]);
 
@@ -416,7 +418,7 @@ function Presale(): JSX.Element {
 
   function handleTimer() {
     const countDownTimer = () => {
-      const difference = +new Date("2022-03-28") - +new Date();
+      const difference = +new Date("2022-04-06") - +new Date();
       let remaining = "Time's up!";
       if (difference > 0) {
         const parts = {
