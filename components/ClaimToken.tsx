@@ -26,7 +26,6 @@ const ClaimToken = props => {
   const { data: vestingContractAddress } = useVestingContractAddress(
     chainId == undefined ? desiredChain.chainId : chainId,
   );
-
   const vestingSchedule = useVestingScheduleByAddressAndIndex(
     account as string,
     vestingContractAddress,
@@ -39,8 +38,6 @@ const ClaimToken = props => {
     props.vestingScheduleIndex,
   );
 
-  console.log("vesting id", vestingScheduleId);
-  
   const { data: tokenSymbol } = useTokenSymbol(
     chainId !== undefined ? (chainId as number) : desiredChain.chainId,
     chainId !== undefined
@@ -51,6 +48,8 @@ const ClaimToken = props => {
   
   const { data: tge } = useAvailableAtTGE(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: releasableAmount } = useComputeReleasableAmount(vestingContractAddress, vestingScheduleId);
+  
+
   const unlocked =
     vestingSchedule !== undefined && releasableAmount
       ? parseFloat(

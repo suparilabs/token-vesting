@@ -49,6 +49,7 @@ function Vesting(): JSX.Element {
     account as string,
   );
 
+  
   return (
     <div className="light">
       {/* SECTION  */}
