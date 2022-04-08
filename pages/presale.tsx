@@ -16,7 +16,7 @@ import {
   useComputeTokensForBUSD,
   useComputeTokensForUSDT,
   usePreSaleFetchOwner,
-  useExchangePriceBusd,
+  // useExchangePriceBusd,
   useExchangePriceUsdt,
 } from "../hooks/useTokenPreSale";
 import { useTokenBalanceSimple } from "../hooks/useTokenBalance";
@@ -400,9 +400,9 @@ function Presale(): JSX.Element {
   const { data: valueExchangePriceUsdt } = useExchangePriceUsdt(
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
-  const { data: valueExchangePriceBusd } = useExchangePriceBusd(
-    chainId == undefined ? desiredChain.chainId : (chainId as number),
-  );
+  // const { data: valueExchangePriceBusd } = useExchangePriceBusd(
+  //   chainId == undefined ? desiredChain.chainId : (chainId as number),
+  // );
 
   useEffect(() => {
     handleTimer();
@@ -458,14 +458,7 @@ function Presale(): JSX.Element {
                 <div className="heading heading2">
                   <h2 className="title">Private Sale Round One</h2>
 
-                  <div className="about-image Privatepage">Private Sale Price:</div>
-                  <div className="about-image Privatepage">
-                    {valueExchangePriceUsdt !== undefined ? `${formatEther(valueExchangePriceUsdt)} $USDT/$SERA` : `-`}
-                  </div>
-                  <div className="about-image Privatepage">
-                    {valueExchangePriceBusd !== undefined ? `${formatEther(valueExchangePriceBusd)} $BUSD/$SERA` : `-`}
-                  </div>
-
+                  <div className="about-image Privatepage">Private Sale Price : {valueExchangePriceUsdt !== undefined ? `$${formatEther(valueExchangePriceUsdt)} USD` : `-`}</div>
                   <h2 className="title">Just One simple step to buy!</h2>
                 </div>
               </div>
