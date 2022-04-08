@@ -250,7 +250,7 @@ export function useExchangePriceUsdt(chainId: number, suspense = false): SWRResp
   );
   const result: any = useSWR(
     contract
-      ? [chainId, "tokenPreSaleExchangePriceUsdt", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      ? [chainId, "tokenPreSaleExchangePriceUsdt", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.ETHBalance]
       : null,
     getExhangePriceUSDT(contract),
     { suspense },
@@ -269,7 +269,7 @@ export function useExchangePriceBusd(chainId: number, suspense = false): SWRResp
   );
   const result: any = useSWR(
     contract
-      ? [chainId, "tokenPreSaleExchangePriceBusd", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.Address]
+      ? [chainId, "tokenPreSaleExchangePriceBusd", addresses[chainId as number].IDO_TOKEN_PRE_SALE, DataType.ETHBalance]
       : null,
     getExhangePriceBUSD(contract),
     { suspense },

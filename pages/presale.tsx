@@ -16,6 +16,8 @@ import {
   useComputeTokensForBUSD,
   useComputeTokensForUSDT,
   usePreSaleFetchOwner,
+  useExchangePriceBusd,
+  useExchangePriceUsdt,
 } from "../hooks/useTokenPreSale";
 import { useTokenBalanceSimple } from "../hooks/useTokenBalance";
 import { useETHBalance } from "../hooks/useETHBalance";
@@ -152,7 +154,6 @@ function PresaleModal(props) {
   const { data: maxUsdt } = useMaxBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: minBusd } = useMinBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
   const { data: maxBusd } = useMaxBuyAmountBusd(chainId == undefined ? desiredChain.chainId : (chainId as number));
-
   const { data: tokenSymbol } = useTokenSymbol(
     chainId !== undefined ? (chainId as number) : desiredChain.chainId,
     chainId !== undefined
@@ -396,15 +397,23 @@ function Presale(): JSX.Element {
       ? addresses[chainId as number].ERC20_TOKEN_ADDRESS
       : addresses[desiredChain.chainId as number].ERC20_TOKEN_ADDRESS,
   );
+  const { data: valueExchangePriceUsdt } = useExchangePriceUsdt(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: valueExchangePriceBusd } = useExchangePriceBusd(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
   useEffect(() => {
     handleTimer();
     busdBalance !== undefined &&
+      minBusd !== undefined &&
+      maxBusd !== undefined &&
       setEnoughBusd(BigNumber.from(busdBalance).gte(minBusd) && BigNumber.from(busdBalance).lte(maxBusd));
     usdtBalance !== undefined &&
+      minUsdt !== undefined &&
+      maxUsdt !== undefined &&
       setEnoughUsdt(BigNumber.from(usdtBalance).gte(minUsdt) && BigNumber.from(usdtBalance).lte(maxUsdt));
-      console.log("bal", usdtBalance);
-      console.log("min", minUsdt);
     ethBalance !== undefined && setEnoughEth(ethBalance.greaterThan("0"));
   }, [busdBalance, usdtBalance, ethBalance, account, minBusd, maxBusd, minUsdt, maxUsdt]);
 
@@ -448,7 +457,14 @@ function Presale(): JSX.Element {
               <div className="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div className="heading heading2">
                   <h2 className="title">Private Sale Round One</h2>
-                  <div className="about-image Privatepage">Private Sale Price: $0.12</div>
+
+                  <div className="about-image Privatepage">Private Sale Price:</div>
+                  <div className="about-image Privatepage">
+                    {valueExchangePriceUsdt !== undefined ? `${formatEther(valueExchangePriceUsdt)} $USDT/$SERA` : `-`}
+                  </div>
+                  <div className="about-image Privatepage">
+                    {valueExchangePriceBusd !== undefined ? `${formatEther(valueExchangePriceBusd)} $BUSD/$SERA` : `-`}
+                  </div>
 
                   <h2 className="title">Just One simple step to buy!</h2>
                 </div>

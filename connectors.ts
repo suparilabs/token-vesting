@@ -4,7 +4,7 @@ import { InjectedConnector } from "@web3-react/injected-connector";
 import { INFURA_PREFIXES } from "./utils";
 import { desiredChain } from "./constants";
 
-export function getNetwork(defaultChainId = 1): NetworkConnector {
+export function getNetwork(defaultChainId = desiredChain.chainId): NetworkConnector {
   return new NetworkConnector({
     urls: [1, 3, 4, 5, 42, 31337, 1337, 97, 56].reduce((urls, chainId) => {
       return Object.assign(urls, {
