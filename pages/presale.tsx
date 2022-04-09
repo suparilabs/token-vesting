@@ -409,11 +409,11 @@ function Presale(): JSX.Element {
     busdBalance !== undefined &&
       minBusd !== undefined &&
       maxBusd !== undefined &&
-      setEnoughBusd(BigNumber.from(busdBalance).gte(minBusd) && BigNumber.from(busdBalance).lte(maxBusd));
+      setEnoughBusd(BigNumber.from(busdBalance).gte(minBusd));
     usdtBalance !== undefined &&
       minUsdt !== undefined &&
       maxUsdt !== undefined &&
-      setEnoughUsdt(BigNumber.from(usdtBalance).gte(minUsdt) && BigNumber.from(usdtBalance).lte(maxUsdt));
+      setEnoughUsdt(BigNumber.from(usdtBalance).gte(minUsdt));
     ethBalance !== undefined && setEnoughEth(ethBalance.greaterThan("0"));
   }, [busdBalance, usdtBalance, ethBalance, account, minBusd, maxBusd, minUsdt, maxUsdt]);
 
