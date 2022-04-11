@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { toast } from "react-toastify";
+import { formatEther } from "@ethersproject/units";
+import { BigNumber } from "ethers";
+import moment from "moment";
 import {
   useAlreadyWithdrawn,
   useBalances,
@@ -9,15 +12,16 @@ import {
   useTimestampSet,
   useTransferTimeLockedTokensAfterTimePeriod,
 } from "../hooks/useTokenPreTimelock";
-import { formatEther } from "@ethersproject/units";
-import { BigNumber } from "ethers";
-import moment from "moment";
 import { useTokenSymbol } from "../hooks/useTokenSymbol";
 import { addresses, desiredChain } from "../constants";
+import { useBlockTimestamp } from "../hooks/useBlockTimestamp";
 
 const ClaimTGE = props => {
   // WEB3 Connection
   const { account, chainId } = useWeb3React();
+  const [disableClaimTGE, setDisableClaimTGE] = useState<boolean>(false);
+
+  const { data: currentBlockTimestamp } = useBlockTimestamp();
   const { data: tokenSymbol } = useTokenSymbol(
     chainId != undefined ? (chainId as number) : (desiredChain.chainId as number),
     addresses[chainId != undefined ? (chainId as number) : (desiredChain.chainId as number)].ERC20_TOKEN_ADDRESS,
@@ -45,6 +49,21 @@ const ClaimTGE = props => {
     account as string,
     balances as BigNumber,
   );
+
+  useEffect(() => {
+    if (
+      timestampsetForTimelockSeedRound !== undefined &&
+      timestampsetForTimelockSeedRound !== null &&
+      balances !== undefined &&
+      balances !== null &&
+      currentBlockTimestamp !== undefined &&
+      currentBlockTimestamp !== null &&
+      timePeriod !== undefined &&
+      timePeriod !== null
+    ) {
+      setDisableClaimTGE(!timestampsetForTimelockSeedRound || balances?.eq("0") || currentBlockTimestamp < timePeriod);
+    }
+  }, [balances, timestampsetForTimelockSeedRound, currentBlockTimestamp, timePeriod]);
 
   const handleClaimTGE = async e => {
     e.preventDefault();
@@ -80,7 +99,7 @@ const ClaimTGE = props => {
               type="button"
               className="btn btn-warning"
               onClick={e => handleClaimTGE(e)}
-              disabled={!timestampsetForTimelockSeedRound || balances?.eq("0")}
+              disabled={disableClaimTGE}
             >
               Claim TGE
             </button>

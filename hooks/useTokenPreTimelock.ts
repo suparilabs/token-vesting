@@ -197,11 +197,11 @@ export function useInitialTimestamp(timelock: string, suspense = false): SWRResp
   return result;
 }
 
-function getTimeperiod(contract: TokenPreTimelock): () => Promise<string> {
-  return async (): Promise<string> => contract.timePeriod().then((result: BigNumber) => result.toString());
+function getTimeperiod(contract: TokenPreTimelock): () => Promise<number> {
+  return async (): Promise<number> => contract.timePeriod().then((result: BigNumber) => result.toNumber());
 }
 
-export function useTimeperiod(timelock: string, suspense = false): SWRResponse<BigNumber, any> {
+export function useTimeperiod(timelock: string, suspense = false): SWRResponse<number, any> {
   const contract = <TokenPreTimelock>useContract(timelock, TokenPreTimelock__factory.abi, true);
   const result: any = useSWR(
     contract ? [timelock, "timeperiod", DataType.TokenBalance] : null,
