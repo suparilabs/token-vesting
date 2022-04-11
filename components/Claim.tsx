@@ -58,7 +58,7 @@ const Claim = props => {
   const unlockingDate =
     timeStampSet && vestingSchedule != undefined && startTimeInSeconds != undefined
       ? moment
-          .unix(parseInt(vestingSchedule[3]) + parseInt(startTimeInSeconds.toString()))
+          .unix(parseInt(vestingSchedule[3]) + parseInt(startTimeInSeconds.toString()) + parseInt(vestingSchedule[2]))
           .format("DD MMM YYYY, hh:mm:ss a")
       : "-";
   const splMessage = `Vesting Schedule: ${
@@ -107,13 +107,17 @@ const Claim = props => {
               Claim
             </button>
           </div>
-          <div className="mt-5">
-            <div className="mt-3">
-              {" "}
-              <span className="text1">{splMessage}</span>
-              <br></br>
-              <span className="text2">Claiming date：{claimingDate}</span> <br></br>
-              <span className="text2">Unlocking date：{unlockingDate}</span>
+          <div className="mt-3">
+            <div className="text1 ms-2 mb-1">{splMessage}</div>
+            <div className="d-flex justify-content-between">
+              <div className="ms-2">
+                <div className="text2">Claiming date: </div>
+                <div className="text2">Unlocking date: </div>
+              </div>
+              <div>
+                <div className="text2"> {claimingDate} </div>
+                <div className="text2"> {unlockingDate} </div>
+              </div>
             </div>
           </div>
           <hr></hr>

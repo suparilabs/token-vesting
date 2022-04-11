@@ -85,9 +85,17 @@ const ClaimTGE = props => {
               Claim TGE
             </button>
           </div>
-          <div className="mt-2">
-            <span className="text2">Lock start：{lockStartDate}</span> <br></br>
-            <span className="text2">Lock end ：{lockEndDate}</span>
+          <div className="mt-3">
+            <div className="d-flex justify-content-between">
+              <div className="ms-2">
+                <div className="text2">Lock start： </div>
+                <div className="text2">Lock end： </div>
+              </div>
+              <div>
+                <div className="text2"> {lockStartDate} </div>
+                <div className="text2"> {lockEndDate} </div>
+              </div>
+            </div>
           </div>
           <hr></hr>
         </div>
