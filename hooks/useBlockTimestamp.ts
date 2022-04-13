@@ -11,9 +11,9 @@ function getBlockTimestamp(library: Web3Provider): () => Promise<number> {
 }
 
 export function useBlockTimestamp(suspense: boolean = false): SWRResponse<number, any> {
-  const { library } = useWeb3React();
+  const { library, chainId } = useWeb3React();
   const shouldFetch = !!library;
-  const result = useSWR(shouldFetch ? [DataType.BlockNumber] : null, getBlockTimestamp(library), {
+  const result = useSWR(shouldFetch ? [chainId, DataType.BlockNumber] : null, getBlockTimestamp(library), {
     suspense,
   });
   useKeepSWRDATALiveAsBlocksArrive(result.mutate);

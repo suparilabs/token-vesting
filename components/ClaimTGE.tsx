@@ -19,7 +19,7 @@ import { useBlockTimestamp } from "../hooks/useBlockTimestamp";
 const ClaimTGE = props => {
   // WEB3 Connection
   const { account, chainId } = useWeb3React();
-  const [disableClaimTGE, setDisableClaimTGE] = useState<boolean>(false);
+  const [disableClaimTGE, setDisableClaimTGE] = useState<boolean>(true);
 
   const { data: currentBlockTimestamp } = useBlockTimestamp();
   const { data: tokenSymbol } = useTokenSymbol(
