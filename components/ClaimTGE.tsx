@@ -107,8 +107,8 @@ const ClaimTGE = props => {
           <div className="mt-3">
             <div className="d-flex justify-content-between">
               <div className="ms-2">
-                <div className="text2">Lock start： </div>
-                <div className="text2">Lock end： </div>
+                <div className="text2">Claiming starts： </div>
+                <div className="text2">Claiming ends： </div>
               </div>
               <div>
                 <div className="text2"> {lockStartDate} </div>

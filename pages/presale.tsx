@@ -4,6 +4,8 @@ import HighchartsReact from "highcharts-react-official";
 import { Modal, Button, Form } from "react-bootstrap";
 import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
+import { toast } from "react-toastify";
+import { formatEther, parseUnits } from "@ethersproject/units";
 import {
   useTokenAllowance,
   useBuyTokensWithBusd,
@@ -22,7 +24,6 @@ import {
 import { useTokenBalanceSimple } from "../hooks/useTokenBalance";
 import { useETHBalance } from "../hooks/useETHBalance";
 import { addresses, desiredChain } from "../constants";
-import { toast } from "react-toastify";
 import {
   useGetSaleStatus,
   useMaxBuyAmountBusd,
@@ -30,7 +31,6 @@ import {
   useMinBuyAmountBusd,
   useMinBuyAmountUSDT,
 } from "../hooks/useTokenPreSale";
-import { formatEther, parseUnits } from "@ethersproject/units";
 import { useTokenSymbol } from "../hooks/useTokenSymbol";
 
 const options: Highcharts.Options = {

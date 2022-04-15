@@ -111,8 +111,8 @@ const Claim = props => {
             <div className="text1 ms-2 mb-1">{splMessage}</div>
             <div className="d-flex justify-content-between">
               <div className="ms-2">
-                <div className="text2">Claiming date: </div>
-                <div className="text2">Unlocking date: </div>
+                <div className="text2">Claiming starts: </div>
+                <div className="text2">Claiming ends: </div>
               </div>
               <div>
                 <div className="text2"> {claimingDate} </div>

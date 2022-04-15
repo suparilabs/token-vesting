@@ -119,8 +119,8 @@ const ClaimToken = props => {
               {" "}
               <span className="text1">Vesting Schedule</span>
               <br></br>
-              <span className="text2">Claiming date：Connect Metamask to Reveal</span> <br></br>
-              <span className="text2">Unlocking date：Connect Metamask to Reveal</span>
+              <span className="text2">Claiming starts：Connect Metamask to Reveal</span> <br></br>
+              <span className="text2">Unlocking ends：Connect Metamask to Reveal</span>
             </div>
           </div>
           <hr></hr>

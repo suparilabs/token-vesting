@@ -3,7 +3,7 @@ import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
 import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
+// import Link from "next/link";
 import { useEagerConnect } from "../hooks/useEagerConnect";
 import Account from "./Account";
 
@@ -38,7 +38,7 @@ export default function Layout({ children, title = "This is the default title" }
                   alt="Logo"
                 ></Image>
               </a>
-              <ul className="navbar-nav custom d-none d-sm-none d-md-none d-lg-block d-xl-block d-xxl-block">
+              {/* <ul className="navbar-nav custom d-none d-sm-none d-md-none d-lg-block d-xl-block d-xxl-block">
                 <li className="nav-item">
                   <Link href="/vesting">
                     <a className="nav-link">Claim</a>
@@ -50,7 +50,7 @@ export default function Layout({ children, title = "This is the default title" }
                     <a className="nav-link">Dashboard</a>
                   </Link>
                 </li>
-              </ul>
+              </ul> */}
               <div>
                 {(
                   <Account triedToEagerConnect={triedToEagerConnect} />
