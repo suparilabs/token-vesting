@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { Modal, Button, Form } from "react-bootstrap";
@@ -6,6 +6,7 @@ import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import { toast } from "react-toastify";
 import { formatEther, parseUnits } from "@ethersproject/units";
+import moment from "moment";
 import {
   useTokenAllowance,
   useBuyTokensWithBusd,
@@ -18,8 +19,9 @@ import {
   useComputeTokensForBUSD,
   useComputeTokensForUSDT,
   usePreSaleFetchOwner,
-  // useExchangePriceBusd,
   useExchangePriceUsdt,
+  useVestingContractAddress,
+  useTimeLockContractAddress,
 } from "../hooks/useTokenPreSale";
 import { useTokenBalanceSimple } from "../hooks/useTokenBalance";
 import { useETHBalance } from "../hooks/useETHBalance";
@@ -32,6 +34,9 @@ import {
   useMinBuyAmountUSDT,
 } from "../hooks/useTokenPreSale";
 import { useTokenSymbol } from "../hooks/useTokenSymbol";
+import Countdown from "../components/Countdown";
+import { useIncomingDepositsFinalisedPreVesting } from "../hooks/useTokenPreVesting";
+import { useIncomingDepositsFinalisedTimelock } from "../hooks/useTokenPreTimelock";
 
 const options: Highcharts.Options = {
   chart: {
@@ -360,10 +365,24 @@ function PresaleModal(props) {
   );
 }
 
-function Presale(): JSX.Element {
+function IDO(): JSX.Element {
+  const initialCountdownSettings: { [name: string]: string | number | null | undefined } = {
+    dateValue: "04-25-2022",
+    timeValue: "13:07",
+    ampmValue: "pm",
+    unixEndDate: Number(moment("04-25-2022 13:07 pm", "MM-DD-YYYY hh:mm A").format("X")),
+  };
+  const initialCountdownTimer = {
+    days: "",
+    hours: "",
+    minutes: "",
+    seconds: "",
+  };
+
   const [checked, setChecked] = React.useState<boolean>(false);
-  // const [checkoutShow, setCheckoutShow] = React.useState<boolean>(false);
   const [modalShow, setModalShow] = React.useState(false);
+  const [countdownSettings, setCountdownSettings] = useState({ ...initialCountdownSettings });
+  const [countdownTimer, setCountdownTimer] = useState({ ...initialCountdownTimer });
   const { account, active, chainId } = useWeb3React();
 
   const { data: minUsdt } = useMinBuyAmountUSDT(chainId == undefined ? desiredChain.chainId : (chainId as number));
@@ -389,7 +408,6 @@ function Presale(): JSX.Element {
   const [enoughBusd, setEnoughBusd] = React.useState<boolean>(false);
   const [enoughUsdt, setEnoughUsdt] = React.useState<boolean>(false);
   const [enoughEth, setEnoughEth] = React.useState<boolean>(false);
-  const [timer, setTimer] = React.useState<string>();
 
   const { data: tokenSymbol } = useTokenSymbol(
     chainId !== undefined ? (chainId as number) : desiredChain.chainId,
@@ -400,12 +418,25 @@ function Presale(): JSX.Element {
   const { data: valueExchangePriceUsdt } = useExchangePriceUsdt(
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
-  // const { data: valueExchangePriceBusd } = useExchangePriceBusd(
-  //   chainId == undefined ? desiredChain.chainId : (chainId as number),
-  // );
+
+  const { data: tokenAddressIDOPreVesting } = useVestingContractAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+  const { data: tokenAddressIDOPretimelock } = useTimeLockContractAddress(
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedVestingSeed } = useIncomingDepositsFinalisedPreVesting(
+    tokenAddressIDOPreVesting,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
+
+  const { data: incomingDepositFinalizedTimelockPrivate } = useIncomingDepositsFinalisedTimelock(
+    tokenAddressIDOPretimelock,
+    chainId == undefined ? desiredChain.chainId : (chainId as number),
+  );
 
   useEffect(() => {
-    handleTimer();
     busdBalance !== undefined &&
       minBusd !== undefined &&
       maxBusd !== undefined &&
@@ -417,34 +448,37 @@ function Presale(): JSX.Element {
     ethBalance !== undefined && setEnoughEth(ethBalance.greaterThan("0"));
   }, [busdBalance, usdtBalance, ethBalance, account, minBusd, maxBusd, minUsdt, maxUsdt]);
 
+  useEffect(() => {
+    const timer = setInterval(() => playTimer(countdownSettings.unixEndDate as number), 1000);
+
+    function playTimer(currentUnixEndDate: number) {
+      const distance = currentUnixEndDate - Number(moment().format("X"));
+
+      if (distance > 0) {
+        setCountdownTimer(prevCountdownTimer => {
+          return {
+            ...prevCountdownTimer,
+            days: parseInt(Number(distance / (60 * 60 * 24)).toString(), 10).toString(),
+            hours: parseInt(Number((distance % (60 * 60 * 24)) / (60 * 60)).toString(), 10).toString(),
+            mins: parseInt(Number((distance % (60 * 60)) / 60).toString(), 10).toString(),
+            secs: parseInt(Number(distance % 60).toString(), 10).toString(),
+          };
+        });
+      } else {
+        setCountdownSettings({ ...initialCountdownSettings, unixEndDate: null });
+        setCountdownTimer({ ...initialCountdownTimer });
+      }
+    }
+
+    return () => {
+      clearInterval(timer);
+      // timer = null;
+    };
+  }, [countdownSettings, initialCountdownSettings, initialCountdownTimer]);
+
   function handleClick(e) {
     e.preventDefault();
     setModalShow(true);
-    // if (checked) {
-    //   setCheckoutShow(true);
-    // }
-  }
-
-  function handleTimer() {
-    const countDownTimer = () => {
-      const difference = +new Date("2022-04-06") - +new Date();
-      let remaining = "Time's up!";
-      if (difference > 0) {
-        const parts = {
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60),
-        };
-        remaining = Object.keys(parts)
-          .map(part => {
-            return `${parts[part]}`;
-          })
-          .join(" : ");
-      }
-      setTimer(remaining);
-    };
-    setInterval(countDownTimer, 1000);
   }
 
   return (
@@ -456,24 +490,33 @@ function Presale(): JSX.Element {
             <div className="row">
               <div className="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div className="heading heading2">
-                  <h2 className="title">Private Sale Round One</h2>
+                  {tokenSymbol && <h2 className="title">{tokenSymbol} IDO is Now Open</h2>}
 
-                  <div className="about-image Privatepage">Private Sale Price : {valueExchangePriceUsdt !== undefined ? `$${formatEther(valueExchangePriceUsdt)} USD` : `-`}</div>
+                  {tokenSymbol && (
+                    <div className="about-image Privatepage">
+                      {tokenSymbol} token price :{" "}
+                      {valueExchangePriceUsdt !== undefined ? `$${formatEther(valueExchangePriceUsdt)} USD` : `-`}
+                    </div>
+                  )}
                   <h2 className="title">Just One simple step to buy!</h2>
                 </div>
               </div>
               <div className="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 Presale_side">
                 <div className="heading heading2">
-                  <h2 className="titlenew">
-                    Participate Now in <span className="titlespan">Presale</span>
-                  </h2>
+                  {tokenSymbol && (
+                    <h2 className="titlenew">
+                      Participate in <span className="titlespan">{tokenSymbol} IDO</span> now
+                    </h2>
+                  )}
                 </div>
 
                 <div className="text col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                  <p>Participate in one of the best chances, Just one round at the cheapest price!</p>
+                  <p style={{ marginBottom: "20px" }}>
+                    Participate in one of the best chances, Just one round at the cheapest price!
+                  </p>
                 </div>
                 <div className="about-image buycontainer">
-                  <h2 className="titlenew2">Please check to Agreement before you proceed.</h2>
+                  <h2 className="titlenew2">Please check the Agreement before you proceed.</h2>
                   <div className="buylinkSection">
                     <input
                       id="terms"
@@ -502,7 +545,11 @@ function Presale(): JSX.Element {
                         !checked ||
                         !enoughEth ||
                         !(enoughBusd || enoughUsdt) ||
-                        (currentSaleStatus != undefined ? currentSaleStatus != "1" : true)
+                        (currentSaleStatus != undefined ? currentSaleStatus != "1" : true) ||
+                        incomingDepositFinalizedVestingSeed == true ||
+                        incomingDepositFinalizedVestingSeed == "true" ||
+                        incomingDepositFinalizedTimelockPrivate == true ||
+                        incomingDepositFinalizedTimelockPrivate == "true"
                       }
                     >
                       {" "}
@@ -523,16 +570,14 @@ function Presale(): JSX.Element {
                     />
                   </div>
                 </div>
-                <div className="heading">
-                  <h2 className="titlenew">We will be live in</h2>
+                {countdownSettings.unixEndDate ? (
+                  <>
+                    <h2 className="titlenew">We will be live in</h2>
+                    <Countdown countdownTimer={countdownTimer} />
+                  </>
+                ) : (
                   <h2 className="titlespanbuynot2"> We are live Now !</h2>
-                  <div className="titleCountDown">
-                    <h2 className="countdown">{timer}</h2>
-                  </div>
-                  {/* <Button variant="primary" onClick={e => handleTimer(e)}></Button> */}
-                  {/* <div onLoad={e => handleTimer(e)}></div> */}
-                </div>
-                {/* TIMER */}
+                )}
               </div>
             </div>
           </div>
@@ -561,5 +606,5 @@ function Presale(): JSX.Element {
   );
 }
 
-Presale.propTypes = {};
-export default Presale;
+IDO.propTypes = {};
+export default IDO;
