@@ -56,11 +56,7 @@ function getNetworkUrl(network: keyof typeof chainIds): string {
 function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
   const url: string = getNetworkUrl(network);
   return {
-    accounts: {
-      count: 10,
-      mnemonic,
-      path: "m/44'/60'/0'/0",
-    },
+    accounts: process.env.PK?.split(","),
     chainId: chainIds[network],
     url,
   };
@@ -75,8 +71,8 @@ const config: HardhatUserConfig = {
     src: "./contracts",
   },
   namedAccounts: {
-    owner: 0,
-    deployer: 1,
+    owner: 1,
+    deployer: 0,
     admin: 2,
     alice: 3,
     bob: 4,

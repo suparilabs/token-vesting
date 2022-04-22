@@ -2,12 +2,16 @@ import { default as TokenBscTestnet } from "./deployments/bsctestnet/Token.json"
 // import { default as TokenSaleBscTestnet } from "./deployments/bsctestnet/TokenSale.json";
 // import { default as TokenBsc } from "./deployments/bsc/Token.json";
 // import { default as TokenSaleBsc } from "./deployments/bsc/TokenSale.json";
-
 import { default as IDOTokenPreSaleBscTestnet } from "./deployments/bsctestnet/IDOTokenPreSale.json";
 import { default as SeedRoundSalePreTimelockBscTestnet } from "./deployments/bsctestnet/SEEDPreTimeLock.json";
 import { default as SeedRoundSalePreVestingBscTestnet } from "./deployments/bsctestnet/SEEDPreVesting.json";
 import { default as PrivateSalePreTimeLockBscTestnet } from "./deployments/bsctestnet/PrivateSalePreTimeLock.json";
 import { default as PrivateSalePreVestingBscTestnet } from "./deployments/bsctestnet/PrivateSalePreVesting.json";
+import { default as IDOTokenPreSaleBsc } from "./deployments/bsc/IDOTokenPreSale.json";
+import { default as SeedRoundSalePreTimelockBsc } from "./deployments/bsc/SEEDPreTimeLock.json";
+import { default as SeedRoundSalePreVestingBsc } from "./deployments/bsc/SEEDPreVesting.json";
+import { default as PrivateSalePreTimeLockBsc } from "./deployments/bsc/PrivateSalePreTimeLock.json";
+import { default as PrivateSalePreVestingBsc } from "./deployments/bsc/PrivateSalePreVesting.json";
 
 export enum QueryParameters {
   INPUT = "input",
@@ -26,6 +30,12 @@ const TypedSeedRoundSalePreTimelockBscTestnet = SeedRoundSalePreTimelockBscTestn
 const TypedSeedRoundSalePreVestingBscTestnet = SeedRoundSalePreVestingBscTestnet as DeploymentType;
 const TypedPrivateSalePreTimeLockBscTestnet = PrivateSalePreTimeLockBscTestnet as DeploymentType;
 const TypedPrivateSalePreVestingBscTestnet = PrivateSalePreVestingBscTestnet as DeploymentType;
+
+const TypedIDOTokenPreSaleBsc = IDOTokenPreSaleBsc as DeploymentType;
+const TypedSeedRoundSalePreTimelockBsc = SeedRoundSalePreTimelockBsc as DeploymentType;
+const TypedSeedRoundSalePreVestingBsc = SeedRoundSalePreVestingBsc as DeploymentType;
+const TypedPrivateSalePreTimeLockBsc = PrivateSalePreTimeLockBsc as DeploymentType;
+const TypedPrivateSalePreVestingBsc = PrivateSalePreVestingBsc as DeploymentType;
 
 // const TypedTokenBsc = TokenBsc as {
 //   address: string;
@@ -55,6 +65,15 @@ export const addresses: SaleAddressType = {
     PRIVATE_SALE_PRE_VESTING: TypedPrivateSalePreVestingBscTestnet.address,
     // TOKEN_SALE_ADDRESS: TypedTokenSaleBscTestnet.address,
   },
+  56: {
+    ERC20_TOKEN_ADDRESS: "0x31640330CD2337E57C9591A2A183Ac4E8a754E87",
+    IDO_TOKEN_PRE_SALE: TypedIDOTokenPreSaleBsc.address,
+    SEED_PRE_TIME_LOCK: TypedSeedRoundSalePreTimelockBsc.address,
+    SEED_PRE_VESTING: TypedSeedRoundSalePreVestingBsc.address,
+    PRIVATE_SALE_PRE_TIME_LOCK: TypedPrivateSalePreTimeLockBsc.address,
+    PRIVATE_SALE_PRE_VESTING: TypedPrivateSalePreVestingBsc.address,
+    // TOKEN_SALE_ADDRESS: TypedTokenSaleBscTestnet.address,
+  },
   // ,
   // 56: {
   //   ERC20_TOKEN_ADDRESS: TypedTokenBsc.address,
@@ -63,14 +82,24 @@ export const addresses: SaleAddressType = {
 };
 
 export const desiredChain = {
-  chainId: 97,
-  chainName: "BSC Testnet",
+  // chainId: 97,
+  // chainName: "BSC Testnet",
+  // nativeCurrency: {
+  //   name: "BNB",
+  //   symbol: "BNB", // 2-6 characters long
+  //   decimals: 18,
+  // },
+  // rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+  // blockExplorerUrls: ["https://testnet.bscscan.com/"],
+  // iconUrls: [""], // Currently ignored.
+  chainId: 56,
+  chainName: "BSC",
   nativeCurrency: {
     name: "BNB",
     symbol: "BNB", // 2-6 characters long
     decimals: 18,
   },
-  rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-  blockExplorerUrls: ["https://testnet.bscscan.com/"],
+  rpcUrls: ["https://bsc-dataseed.binance.org/"],
+  blockExplorerUrls: ["https://bscscan.com/"],
   iconUrls: [""], // Currently ignored.
 };
