@@ -12,6 +12,9 @@ import { default as SeedRoundSalePreTimelockBsc } from "./deployments/bsc/SEEDPr
 import { default as SeedRoundSalePreVestingBsc } from "./deployments/bsc/SEEDPreVesting.json";
 import { default as PrivateSalePreTimeLockBsc } from "./deployments/bsc/PrivateSalePreTimeLock.json";
 import { default as PrivateSalePreVestingBsc } from "./deployments/bsc/PrivateSalePreVesting.json";
+import { chains } from "./chain";
+
+const desiredChainId = 56;
 
 export enum QueryParameters {
   INPUT = "input",
@@ -81,25 +84,4 @@ export const addresses: SaleAddressType = {
   // },
 };
 
-export const desiredChain = {
-  // chainId: 97,
-  // chainName: "BSC Testnet",
-  // nativeCurrency: {
-  //   name: "BNB",
-  //   symbol: "BNB", // 2-6 characters long
-  //   decimals: 18,
-  // },
-  // rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-  // blockExplorerUrls: ["https://testnet.bscscan.com/"],
-  // iconUrls: [""], // Currently ignored.
-  chainId: 56,
-  chainName: "BSC",
-  nativeCurrency: {
-    name: "BNB",
-    symbol: "BNB", // 2-6 characters long
-    decimals: 18,
-  },
-  rpcUrls: ["https://bsc-dataseed.binance.org/"],
-  blockExplorerUrls: ["https://bscscan.com/"],
-  iconUrls: [""], // Currently ignored.
-};
+export const desiredChain = chains[desiredChainId];
