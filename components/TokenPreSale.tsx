@@ -825,7 +825,7 @@ const TokenPreSale = props => {
                 className="btn btn-primary btn-block me-5"
                 type="button"
                 onClick={setWithdrawBUSDHandler}
-                disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}
+                disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false) || !busdBalance?.greaterThan("0")}
               >
                 withdraw busd
               </button>
@@ -833,7 +833,7 @@ const TokenPreSale = props => {
                 className="btn btn-primary btn-block me-5"
                 type="button"
                 onClick={setWithdrawUSDTHandler}
-                disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false)}
+                disabled={!active || (ownerAddressIDOPreSale != undefined ? ownerAddressIDOPreSale != account : false) || !usdtBalance?.greaterThan("0") }
               >
                 withdraw usdt
               </button>
