@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import Papa from "papaparse";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import BN from "bignumber.js";
 import { toast } from "react-toastify";
@@ -24,6 +24,7 @@ import TokenPreVesting from "../components/TokenPreVesting";
 import TokenPreSale from "../components/TokenPreSale";
 import { useTimeLockContractAddress, useVestingContractAddress } from "../hooks/useTokenPreSale";
 import { getAddress } from "@ethersproject/address";
+import { parseUnits } from "@ethersproject/units";
 
 function Dashboard(): JSX.Element {
   const { chainId, active, account } = useWeb3React();
@@ -327,15 +328,15 @@ function Dashboard(): JSX.Element {
   ]);
 
   const parseCSV = (data: any) => {
-    const amountsArr = Object.values(
-      data.map(d => BigNumber.from(d.amount).mul(BigNumber.from("10").pow(tokenDecimals as BigNumberish))),
-    );
+    const amountsArr = Object.values(data.map(d => parseUnits(d.amount, tokenDecimals)));
+    console.log(amountsArr)
     let totalAmount = BigNumber.from("0");
     for (let i = 0; i < amountsArr.length; i++) {
       totalAmount = totalAmount.add(BigNumber.from(amountsArr[i]));
     }
     setEnoughTokenBalance(BigNumber.from(tokenBalance?.raw.toString()).gte(totalAmount));
     const beneficiariesArr = data.map(d => d.beneficiary);
+    console.log(beneficiariesArr)
     setBeneficiaries(beneficiariesArr);
     const cliffsArr = new Array(beneficiariesArr.length).fill(cliff);
     setCliffs(cliffsArr);
@@ -377,7 +378,6 @@ function Dashboard(): JSX.Element {
     reader.onloadend = ({ target }) => {
       const csv = Papa.parse(target?.result, { header: true });
       if (chainId !== undefined) {
-        console.log(csv?.data);
         if (chainId !== undefined) {
           if (csv && csv.data) {
             parseCSV(csv.data);
