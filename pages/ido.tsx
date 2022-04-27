@@ -525,7 +525,7 @@ function IDO(): JSX.Element {
                       value="on"
                       onChange={e => setChecked(!!e.target.checked)}
                     />
-                    <a href="presale.pdf" className="buylink" target="_blank">
+                    <a href="https://seraproject.org/terms.PDF" rel="noreferrer" className="buylink" target="_blank">
                       {" "}
                       I Agree to {tokenSymbol} Terms And Conditions{" "}
                     </a>
