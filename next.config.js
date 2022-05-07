@@ -4,15 +4,15 @@ const nextConfig = {
   images: {
     domains: ["vesting-bsc.galaxywar.io", "seraproject.org", "upload.wikimedia.org"],
   },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/presale",
-        permanent: true,
-      },
-    ];
-  },
+  // async redirects() {
+  //   return [
+  //     {
+  //       source: "/",
+  //       destination: "/presale",
+  //       permanent: true,
+  //     },
+  //   ];
+  // },
 };
 
 module.exports = nextConfig;
