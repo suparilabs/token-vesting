@@ -127,6 +127,8 @@ export function useAvailableAtTGE(chainId: number, suspense = false): SWRRespons
 export function useTxApprove(token: string, amount: BigNumber, chainId: number): any {
   const contract = <ERC20>useContract(token, ERC20__factory.abi, true);
   return async () => {
-    return contract.approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE, amount).then((result: any) => result);
+    return contract
+      .approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE as string, amount)
+      .then((result: any) => result);
   };
 }

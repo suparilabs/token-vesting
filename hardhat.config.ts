@@ -124,7 +124,15 @@ const config: HardhatUserConfig = {
     target: "ethers-v5",
   },
   etherscan: {
-    apiKey: process.env.BSCSCAN_API_KEY,
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_API_KEY as string,
+      ropsten: process.env.ETHERSCAN_API_KEY as string,
+      rinkeby: process.env.ETHERSCAN_API_KEY as string,
+      bsc: process.env.BSCSCAN_API_KEY as string,
+      polygon: process.env.POLYGONSCAN_API_KEY as string,
+      opera: process.env.FTMSCAN_API_KEY as string,
+      avalanche: process.env.SNOWTRACE_API_KEY as string,
+    },
   },
 };
 

@@ -15,7 +15,7 @@ export function getNetwork(defaultChainId = desiredChain.chainId): NetworkConnec
             ? `https://data-seed-prebsc-1-s1.binance.org:8545`
             : chainId == 56
             ? `https://bsc-dataseed.binance.org/`
-            : `https://${INFURA_PREFIXES[chainId]}.infura.io/v3/79afc96778564bdf97fc989ed9310e32`,
+            : `https://${INFURA_PREFIXES[chainId]}.infura.io/v3/5c5b0365be3b4a85a22da910413b357e`,
       });
     }, {}),
     defaultChainId,

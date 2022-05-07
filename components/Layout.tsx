@@ -2,10 +2,11 @@ import React, { ReactNode } from "react";
 import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
 import Head from "next/head";
-import Image from "next/image";
+// import Image from "next/image";
 // import Link from "next/link";
 import { useEagerConnect } from "../hooks/useEagerConnect";
 import Account from "./Account";
+import Link from "next/link";
 
 type Props = {
   children?: ReactNode;
@@ -29,28 +30,28 @@ export default function Layout({ children, title = "This is the default title" }
         </Head>
         <div className="navigation">
           <nav className="navbar navbar-light fixed-top">
-            <div className="container">
-              <a className="navbar-brand" href="https://seraproject.org/">
-                <Image
+            <div className="container" style={{height:60}}>
+              {/* <a className="navbar-brand" href="https://seraproject.org/">
+                 <Image
                   src="https://seraproject.org/views/front//images/logo.png"
                   width="50px"
                   height="60px"
                   alt="Logo"
-                ></Image>
-              </a>
-              {/* <ul className="navbar-nav custom d-none d-sm-none d-md-none d-lg-block d-xl-block d-xxl-block">
+                ></Image> 
+              </a> */}
+              <ul className="navbar-nav custom d-none d-sm-none d-md-none d-lg-block d-xl-block d-xxl-block">
                 <li className="nav-item">
                   <Link href="/vesting">
                     <a className="nav-link">Claim</a>
                   </Link>
-                  <Link href="/presale">
+                  {/* <Link href="/presale">
                     <a className="nav-link">Presale</a>
-                  </Link>
+                  </Link> */}
                   <Link href="/dashboard">
                     <a className="nav-link">Dashboard</a>
                   </Link>
                 </li>
-              </ul> */}
+              </ul>
               <div>
                 {(
                   <Account triedToEagerConnect={triedToEagerConnect} />
@@ -67,42 +68,42 @@ export default function Layout({ children, title = "This is the default title" }
             <div className="row">
               <div className="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div className="heading">
-                  <h2 className="title">Join Sera Community</h2>
+                  {/* <h2 className="title">Join Sera Community</h2> */}
                 </div>
                 <div className="text">
                   <p></p>
                 </div>
                 <ul className="social2">
                   <li>
-                    <a href="https://twitter.com/Project_SERA">
+                    {/* <a href="https://twitter.com/Project_SERA">
                       <span>
                         <i className="bi bi-twitter"></i>
                       </span>
                       <span>
                         <a>Twitter</a>
                       </span>
-                    </a>
+                    </a> */}
                   </li>
 
                   <li>
-                    <a href="https://t.me/Sera_Project">
+                    {/* <a href="https://t.me/Sera_Project">
                       <span>
                         <i className="bi bi-telegram"></i>
                       </span>
                       <span>
                         <a>Telegram</a>
                       </span>
-                    </a>
+                    </a> */}
                   </li>
                   <li>
-                    <a href="https://bit.ly/SERA_Project">
+                    {/* <a href="https://bit.ly/SERA_Project">
                       <span>
                         <i className="bi bi-youtube"></i>
                       </span>
                       <span>
                         <a>Youtube</a>
                       </span>
-                    </a>
+                    </a> */}
                   </li>
                 </ul>
               </div>
@@ -122,12 +123,12 @@ export default function Layout({ children, title = "This is the default title" }
             <div className="row">
               <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-sm-12">
                 <div className="copyrights">
-                  <p>SERA Technologies Ltd. Copyright © 2021-2022. All rights reserved.</p>
+                  {/* <p>SERA Technologies Ltd. Copyright © 2021-2022. All rights reserved.</p> */}
                 </div>
               </div>
               <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-sm-12">
                 <div className="copyrights">
-                  <p>Sera is Beta group company</p>
+                  {/* <p>Sera is Beta group company</p> */}
                 </div>
               </div>
             </div>

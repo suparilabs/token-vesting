@@ -144,8 +144,8 @@ function PresaleModal(props) {
   const { data: usdtAllowance } = useTokenAllowance(props.account as string, props.usdt); //check allowance
   const { data: ownerAddressIDOPreSale } = usePreSaleFetchOwner(
     chainId != undefined
-      ? addresses[chainId as number].IDO_TOKEN_PRE_SALE
-      : addresses[desiredChain.chainId].IDO_TOKEN_PRE_SALE,
+      ? addresses[chainId as number].IDO_TOKEN_PRE_SALE as string
+      : addresses[desiredChain.chainId].IDO_TOKEN_PRE_SALE as string,
     chainId == undefined ? desiredChain.chainId : (chainId as number),
   );
   const { data: ownerPreSaleContractAllowance } = useTokenAllowance(

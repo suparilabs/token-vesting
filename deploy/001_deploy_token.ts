@@ -12,10 +12,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
   const chainId = await hre.getChainId();
   const env = process.env.ENV;
-  if (chainId == "56" && env != "prod") {
+  if (["56", "4"].includes(chainId) && env != "prod") {
     const contractTx = await deploy("Token", {
       from: deployer,
-      args: ["Test SERA", "TSERA", parseEther("500000000")],
+      args: ["opty.fi", "OPTY", parseEther("500000000")],
       log: true,
       autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
     });
@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         await hre.run("verify:verify", {
           address: token.address,
           contract: "contracts/Token.sol:Token",
-          constructorArguments: ["Test SERA", "TSERA", parseEther("500000000")],
+          constructorArguments: ["opty.fi", "OPTY", parseEther("500000000")],
         });
       }
     }

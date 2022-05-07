@@ -110,7 +110,7 @@ export function useTimeLockContractAddress(chainId: number, suspense = false): S
 function getTokenAllowance(account: string, contract: ERC20, chainId: number): (address: string) => Promise<string> {
   return async (): Promise<string> =>
     contract
-      .allowance(account, addresses[chainId as number].IDO_TOKEN_PRE_SALE)
+      .allowance(account, addresses[chainId as number].IDO_TOKEN_PRE_SALE as string)
       .then((result: BigNumber) => result.toString());
 }
 
@@ -181,7 +181,9 @@ export function useAvailableAtTGE(chainId: number, suspense = false): SWRRespons
 export function useTxApprove(token: string, amount: BigNumber, chainId: number): any {
   const contract = <ERC20>useContract(token, ERC20__factory.abi, true);
   return async () => {
-    return contract.approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE, amount).then((result: any) => result);
+    return contract
+      .approve(addresses[chainId as number].IDO_TOKEN_PRE_SALE as string, amount)
+      .then((result: any) => result);
   };
 }
 

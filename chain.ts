@@ -23,4 +23,16 @@ export const chains = {
     blockExplorerUrls: ["https://bscscan.com/"],
     iconUrls: [""], // Currently ignored.}
   },
+  4: {
+    chainId: 4,
+    chainName: "Rinkeby",
+    nativeCurrency: {
+      name: "ETH",
+      symbol: "ETH", // 2-6 characters long
+      decimals: 18,
+    },
+    rpcUrls: ["https://rinkeby.infura.io/v3/5c5b0365be3b4a85a22da910413b357e"],
+    blockExplorerUrls: ["https://rinkeby.etherscan.io/"],
+    iconUrls: [""], // Currently ignored.}
+  },
 };

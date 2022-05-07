@@ -64,11 +64,10 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
 
   const handleConnect = useCallback(async () => {
     if (window.ethereum?.isMetaMask) {
-      console.log("hello");
       try {
         await (window as any).ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexlify(desiredChain.chainId) }], // binance testnet chain id (in hexadecimal)
+          params: [{ chainId: ethers.utils.hexValue(desiredChain.chainId) }], // binance testnet chain id (in hexadecimal)
         });
         activate(injected, undefined, true).catch(error => {
           // ignore the error if it's a user rejected request

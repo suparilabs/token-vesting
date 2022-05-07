@@ -39,15 +39,15 @@ function Vesting(): JSX.Element {
   );
 
   // Private
-  const vestingContractAddressForPrivateRound =
-    addresses[chainId == undefined ? desiredChain.chainId : chainId].PRIVATE_SALE_PRE_VESTING;
-  const timelockAddressForPrivateRound =
-    addresses[chainId == undefined ? desiredChain.chainId : chainId].PRIVATE_SALE_PRE_TIME_LOCK;
+  // const vestingContractAddressForPrivateRound =
+  //   addresses[chainId == undefined ? desiredChain.chainId : chainId].PRIVATE_SALE_PRE_VESTING;
+  // const timelockAddressForPrivateRound =
+  //   addresses[chainId == undefined ? desiredChain.chainId : chainId].PRIVATE_SALE_PRE_TIME_LOCK;
 
-  const { data: vestingScheduleCountForPrivateRound } = useVestingScheduleCountBeneficiary(
-    vestingContractAddressForPrivateRound,
-    account as string,
-  );
+  // const { data: vestingScheduleCountForPrivateRound } = useVestingScheduleCountBeneficiary(
+  //   vestingContractAddressForPrivateRound,
+  //   account as string,
+  // );
 
   
   return (
@@ -144,7 +144,7 @@ function Vesting(): JSX.Element {
                       <div className="heading newhead">
                         <h2 className="title">Private Round tokens</h2>
                       </div>
-                      <div>
+                      {/* <div>
                         <ClaimTGE
                           timelockContractAddress={timelockAddressForPrivateRound}
                           token={addresses[chainId == undefined ? desiredChain.chainId : chainId].ERC20_TOKEN_ADDRESS}
@@ -160,7 +160,7 @@ function Vesting(): JSX.Element {
                               />
                             ),
                           )}
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
